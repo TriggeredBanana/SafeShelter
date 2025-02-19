@@ -1,6 +1,15 @@
-# **[Project Title]**
+# ** Gruppe 6 - Assignment 2 **
 
-An interactive map project for [insert thematic problem statement].
+# Group Members:
+# Sigurd Munk Brekke - sigurdmb@uia.no
+# Daniel Danvik Møgster - danieldm@uia.no
+# Ole Bjørk Olsen - danielbj@uia.no
+# Emil Stokken Kaasa - emilsk@uia.no
+# Sigurd Bøthun Mæland - sigurdbm@uia.no
+# Henrik Sæverud Lorentzen - henriksl@uia.no
+
+# Assignment
+"An interactive map project for researching the availability safety shelters in case a a fire or flood" 
 
 ---
 
@@ -17,35 +26,39 @@ An interactive map project for [insert thematic problem statement].
 
 ## **Overview**
 
-This project is part of a university assignment where students develop an interactive map application using Leaflet. The project integrates open data, backend APIs, and visualizations to address a specific thematic problem statement.
+This project is part of a university assignment where students develop an interactive map application using Leaflet. The project integrates open data, backend APIs, and visualizations to address a specific thematic problem statement. The group thematic problem statement is: being where and how to access safety shelters in case of an emergency fire or flood.
 
 ---
 
 ## **Problem Statement**
 
-[Explain the chosen thematic problem. Examples:
-
-- Visualizing public transport routes in urban areas
-- Mapping historical landmarks with interactive information
-- Showing flood risk areas based on meteorological data]
+- Vizualize where the emergency shelters are located, and how    to get to them and access them during a crisis.
+- Vizualize particulary exposed areas for crisises as flooding and fire, and mapping these. 
+- Showing flood and fire risk areas based on meteorological data
 
 ---
 
 ## **Technological Choices and Architecture**
 
-- **Frontend:** Leaflet.js for map visualization, HTML/CSS, and JavaScript
-- **Backend:** [Specify technology, e.g., Node.js, Supabase]
-- **Database:** [Supabase or another backend-as-a-service (BaaS) solution]
-- **Data Processing:** QGIS for geospatial data processing, Python for data transformation
-- **Data Sources:** [List data sources, e.g., GeoNorge, OpenStreetMap, Natural Earth]
+- **Frontend:** Leaflet.js for map visualization, HTML/CSS, and JavaScript.
+- **Backend:** Supabase
+- **Database:** Supabase
+- **Data Processing:** QGIS for data management and geospatial data processing, Python for data transformation
+- **Data Sources:** GeoNorge
 
 ---
 
 ## **Data Sources and Processing**
 
 - **Datasets:**
-    - [Dataset name] from [Data Source]
-    - Describe the types of data used (e.g., shapefiles, JSON files)
+    - [Brannstasjoner] from [https://kartkatalog.geonorge.no/metadata/brannstasjoner/0ccce81d-a72e-46ca-8bd9-57b362376485?search=Brannstasjoner]
+
+    - [Flomsoner] from [https://kartkatalog.geonorge.no/metadata/flomsoner/e95008fc-0945-4d66-8bc9-e50ab3f50401]
+    
+    - [TilfluktsromOffentlige] from [https://kartkatalog.geonorge.no/metadata/tilfluktsrom-offentlige/dbae9aae-10e7-4b75-8d67-7f0e8828f3d8?search=Tilfluk]
+
+    - All the files listed here are PostGIS
+
 - **Data Processing Tools:**
     - QGIS for geospatial analysis and file conversion
     - Python scripts for cleaning and transforming the dataset
@@ -55,7 +68,7 @@ This project is part of a university assignment where students develop an intera
 
 ## **Backend/API Implementation**
 
-The backend is implemented using [describe technology choice].
+The backend is implemented using supabase as the database, which allows the group/users to visualize the shcematics, as well as easy access to the tables and the data within. As this service is easy to use, it was the best choice for the group. The biggest downside is arguably that it has a limit of 500 MB, which works fine in within this project, but bigger projects may need bigger database space allocation. 
 
 ### **Key API Endpoints:**
 
@@ -68,7 +81,7 @@ The backend is implemented using [describe technology choice].
 
 ## **Frontend and Visualization**
 
-The frontend uses Leaflet.js for interactive map visualizations.
+The frontend uses Leaflet.js for interactive map visualizations and basic HTML/CSS and JavaScript for interface / GUI interactivity
 
 ### **Features:**
 
@@ -78,7 +91,7 @@ The frontend uses Leaflet.js for interactive map visualizations.
 
 ### **Instructions:**
 
-Access the frontend at `http://localhost:3000`.  
+ 
 Sample functionality includes:
 
 - **Zoom and Pan:** Standard map navigation
