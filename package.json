@@ -1,0 +1,26 @@
+{
+  "name": "gruppe6",
+  "version": "1.0.0",
+  "description": "\"An interactive map project for researching the availability safety shelters in case a a fire or flood\"",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TriggeredBanana/gruppe6.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/TriggeredBanana/gruppe6/issues"
+  },
+  "homepage": "https://github.com/TriggeredBanana/gruppe6#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "node-fetch": "^2.7.0"
+  }
+}
