@@ -6,7 +6,7 @@ body {
 
 /* Kartstil */
 #map {
-    height: 90vh;
+    height: 85vh;
     width: 90vw;
     margin: auto;
     border: 2px solid black;
