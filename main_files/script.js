@@ -1,11 +1,3 @@
-const map = L.map('map').setView([58.1599, 8.0182], 13); 
-
-// Legg til bakgrunnskart (fra OpenStreetMap)
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; OpenStreetMap contributors'
-}).addTo(map);
-
-
 //Funksjon for å hente koordinater fra geometry objekt
 function extractCoordinates(geom) {
     console.log('Geometry object:', geom);
