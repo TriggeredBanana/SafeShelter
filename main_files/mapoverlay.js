@@ -1,17 +1,57 @@
-const map = L.map('map').setView([58.1599, 8.0182], 13); 
-setTimeout(() => {
-    map.invalidateSize();
-}, 500);
+const map = L.map('map', {
+    fadeAnimation: false,
+    zoomAnimation: false
+}).setView([58.1599, 8.0182], 13);
+
+// Passer på at DOM er lastet inn før kartet vises
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(() => {
+        map.invalidateSize({animate: false});
+    }, 500);
+});
+
+// Håndterer at kartet endrer vindusstørrelse greit
+window.addEventListener('resize', function() {
+    map.invalidateSize({animate: false});
+});
 
 
 // Legg til bakgrunnskart (fra OpenStreetMap)
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+const baseLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; OpenStreetMap contributors'
 }).addTo(map);
+
+
+// Layer grupper for tilfluktsrom og brannstasjoner
+const shelterLayer = L.layerGroup();
+const fireStationLayer = L.layerGroup();
+
 
 // Oppretter en LayerGroup for søkemarkører (røde markører)
 const searchMarkers = L.layerGroup().addTo(map);
 
+
+// Toggle knapp for lag - funksjonalitet
+document.getElementById('toggle-shelters').addEventListener('click', function() {
+    this.classList.toggle('active');
+    if (map.hasLayer(shelterLayer)) {
+        map.removeLayer(shelterLayer);
+    } else {
+        map.addLayer(shelterLayer);
+    }
+});
+
+document.getElementById('toggle-firestations').addEventListener('click', function() {
+    this.classList.toggle('active');
+    if (map.hasLayer(fireStationLayer)) {
+        map.removeLayer(fireStationLayer);
+    } else {
+        map.addLayer(fireStationLayer);
+    }
+});
+
+
+// Søkefunksjonalitet
 const searchInput = document.getElementById('search-input');
 const searchSuggestions = document.getElementById('search-suggestions');
 const searchButton = document.getElementById('search-button');

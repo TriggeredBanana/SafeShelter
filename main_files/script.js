@@ -27,10 +27,14 @@ async function hentTilfluktsrom() {
             const coordinates = extractCoordinatesSimple(shelter.geom);
             if (coordinates && shelter.adresse) {
                 L.marker([coordinates.longitude, coordinates.latitude])
-                 .addTo(map)
+                 .addTo(shelterLayer)
                  .bindPopup(`<b>Adresse:</b> ${shelter.adresse}<br><b>Plasser:</b> ${shelter.plasser}`);
             }
         });
+
+        // Legg til laget på kartet
+        shelterLayer.addTo(map);
+
     } catch (error) {
         console.error('Error fetching shelters:', error);
     }
@@ -100,7 +104,7 @@ async function hentBrannstasjoner() {
             
             if (coordinates && station.sted) {
                 L.marker([coordinates.latitude, coordinates.longitude])
-                 .addTo(map)
+                 .addTo(fireStationLayer)
                  .bindPopup(`
                    <strong>${station.sted}</strong><br>
                    ${station.brannvesen || ''}<br>
@@ -113,6 +117,8 @@ async function hentBrannstasjoner() {
             }
         });
         
+        // Legg til laget på kartet
+        fireStationLayer.addTo(map);
         console.log(`Successfully added ${markersAdded} fire station markers to the map`);
         
     } catch (error) {
