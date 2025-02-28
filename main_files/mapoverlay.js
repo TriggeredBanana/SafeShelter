@@ -1,4 +1,8 @@
 const map = L.map('map').setView([58.1599, 8.0182], 13); 
+setTimeout(() => {
+    map.invalidateSize();
+}, 500);
+
 
 // Legg til bakgrunnskart (fra OpenStreetMap)
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
