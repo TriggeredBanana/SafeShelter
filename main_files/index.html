@@ -13,8 +13,14 @@
     <!-- Søkeboks -->
     <div id="search-container">
         <input type="text" id="search-input" placeholder="Søk etter adresse, by, eller land">
-        <button id="search-button"><i class="fas fa-search"></i> Søk</button>
+        <button id="search-button"><i class="fas fa-search"></i>Søk</button>
         <ul id="search-suggestions"></ul>
+    </div>
+
+    <!-- Knapper for å toggle av og på Tilfluktsrom og Brannstasjoner -->
+    <div id="layer-controls">
+        <button id="toggle-shelters" class="layer-button active">Tilfluktsrom</button>
+        <button id="toggle-firestations" class="layer-button active">Brannstasjoner</button>
     </div>
     
 
@@ -23,7 +29,7 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.8.0/proj4.js"></script>
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-    <script src="script.js"></script>
     <script src="mapoverlay.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
