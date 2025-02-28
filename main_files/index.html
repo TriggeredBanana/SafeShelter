@@ -6,7 +6,6 @@
     <title>Tilfluktsrom</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 </head>
 <body>
     <h1>Tilfluktsrom og Risikoanalyse</h1>
@@ -15,13 +14,14 @@
     <div id="search-container">
         <input type="text" id="search-input" placeholder="Søk etter adresse, by, eller land">
         <button id="search-button"><i class="fas fa-search"></i> Søk</button>
-        <ul id="search-suggestions"></ul> <!-- Her vises forslag -->
+        <ul id="search-suggestions"></ul>
     </div>
     
 
     <!-- Kart -->
     <div id="map"></div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.8.0/proj4.js"></script>
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script src="script.js"></script>
     <script src="mapoverlay.js"></script>
