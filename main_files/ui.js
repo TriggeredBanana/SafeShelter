@@ -1,10 +1,10 @@
 /**
- * SafeShelter - UI Controller Module
- * Handles all UI interactions, animations, and state management
+ * SafeShelter - UI-kontrollmodul
+ * Håndterer alle UI-interaksjoner, animasjoner og tilstandshåndtering
  */
 
 document.addEventListener('DOMContentLoaded', function() {
-    // ===== Initialize system state =====
+    // Initialiser systemtilstand
     let state = {
         sidebarVisible: true,
         darkMode: localStorage.getItem('darkMode') === 'true',
@@ -18,43 +18,42 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     };
 
-    // Tour steps content
+    // Omvisningstrinninnhold
     const tourSteps = [
         {
-            title: "Welcome to SafeShelter",
-            text: "This tool helps you locate emergency shelters and fire stations during crisis situations.",
+            title: "Velkommen til SafeShelter",
+            text: "Dette verktøyet hjelper deg med å lokalisere tilfluktsrom og brannstasjoner under krisesituasjoner.",
             highlight: null
         },
         {
-            title: "Map Navigation",
-            text: "Use the map to find shelters and fire stations in your area. Click on any marker to see details.",
+            title: "Kartnavigasjon",
+            text: "Bruk kartet for å finne tilfluktsrom og brannstasjoner i ditt område. Klikk på en markør for å se detaljer.",
             highlight: "#map"
         },
         {
-            title: "Quick Search",
-            text: "Use the search bar to find specific addresses or locations.",
+            title: "Hurtigsøk",
+            text: "Bruk søkefeltet til å finne spesifikke adresser eller steder.",
             highlight: "#search-container"
         },
         {
-            title: "Layer Controls",
-            text: "Toggle different map layers and information visibility using these controls.",
+            title: "Lagkontroller",
+            text: "Slå av og på ulike kartlag og informasjonsvisning med disse kontrollene.",
             highlight: "#map-controls"
         },
         {
-            title: "Shelter Information",
-            text: "Select any shelter or fire station on the map to view detailed information in this panel.",
+            title: "Tilfluktsrominformasjon",
+            text: "Velg et tilfluktsrom eller en brannstasjon på kartet for å se detaljert informasjon i dette panelet.",
             highlight: "#shelter-info"
         },
         {
-            title: "Emergency Actions",
-            text: "Use these buttons to quickly locate the nearest shelter or get directions in an emergency.",
+            title: "Nødhandlinger",
+            text: "Bruk disse knappene til raskt å finne nærmeste tilfluktsrom eller få veibeskrivelser i nødsituasjoner.",
             highlight: ".action-buttons"
         }
     ];
 
-    // ===== DOM Elements =====
+    // DOM-elementer
     const sidebar = document.getElementById('sidebar');
-    const sidebarToggle = document.getElementById('sidebar-toggle');
     const themeToggle = document.getElementById('theme-toggle');
     const fullscreenToggle = document.getElementById('fullscreen-toggle');
     const infoButton = document.getElementById('info-button');
@@ -69,24 +68,24 @@ document.addEventListener('DOMContentLoaded', function() {
     const tourNextBtn = document.getElementById('tour-next');
     const tourSkipBtn = document.getElementById('tour-skip');
 
-    // Stats elements
+    // Statistikkelementer
     const totalSheltersEl = document.getElementById('total-shelters');
     const totalCapacityEl = document.getElementById('total-capacity');
     const fireStationsEl = document.getElementById('fire-stations');
 
-    // Map style buttons
+    // Kartstilknapper
     const mapStyleButtons = document.querySelectorAll('.map-style');
 
-    // ===== Initialize UI state =====
+    // Initialiser UI-tilstand
     function initUI() {
-        // Apply dark mode if saved
+        // Bruk mørk modus hvis lagret
         if (state.darkMode) {
             document.body.classList.add('dark-mode');
             themeToggle.querySelector('i').classList.remove('fa-moon');
             themeToggle.querySelector('i').classList.add('fa-sun');
         }
 
-        // Hide loading overlay with animation
+        // Skjul lastings-overlegg med animasjon
         setTimeout(() => {
             loadingOverlay.style.opacity = '0';
             setTimeout(() => {
@@ -94,12 +93,12 @@ document.addEventListener('DOMContentLoaded', function() {
             }, 500);
         }, 1000);
 
-        // Start tour automatically if first visit
+        // Start omvisning automatisk hvis første besøk
         if (!localStorage.getItem('tourCompleted')) {
             startTour();
         }
 
-        // Initialize statistics with animation
+        // Initialiser statistikk med animasjon
         updateStatistics({
             totalShelters: 47,
             totalCapacity: 12500,
@@ -107,35 +106,22 @@ document.addEventListener('DOMContentLoaded', function() {
         }, true);
     }
 
-    // ===== Event Listeners =====
+    // Hendelselyttere
 
-    // Sidebar toggle
-    sidebarToggle.addEventListener('click', function() {
-        state.sidebarVisible = !state.sidebarVisible;
-        sidebar.classList.toggle('collapsed');
-        
-        // Update icon
-        const icon = sidebarToggle.querySelector('i');
-        if (sidebar.classList.contains('collapsed')) {
-            icon.classList.remove('fa-chevron-left');
-            icon.classList.add('fa-chevron-right');
-        } else {
-            icon.classList.remove('fa-chevron-right');
-            icon.classList.add('fa-chevron-left');
-        }
+    const logoText = document.querySelector('.logo h2');
+    if (logoText) {
+        logoText.style.cursor = 'pointer';
+        logoText.addEventListener('click', function() {
+            window.location.reload();
+        });
+    }
 
-        // Trigger map resize after animation completes
-        setTimeout(() => {
-            map.invalidateSize();
-        }, 300);
-    });
-
-    // Dark mode toggle
+    // Mørk modus-veksling
     themeToggle.addEventListener('click', function() {
         state.darkMode = !state.darkMode;
         document.body.classList.toggle('dark-mode');
         
-        // Update icon
+        // Oppdater ikon
         const icon = themeToggle.querySelector('i');
         if (state.darkMode) {
             icon.classList.remove('fa-moon');
@@ -145,11 +131,11 @@ document.addEventListener('DOMContentLoaded', function() {
             icon.classList.add('fa-moon');
         }
         
-        // Save preference
+        // Lagre preferanse
         localStorage.setItem('darkMode', state.darkMode);
     });
 
-    // Fullscreen toggle
+    // Fullskjermveksling
     fullscreenToggle.addEventListener('click', function() {
         state.isFullscreen = !state.isFullscreen;
         
@@ -180,57 +166,55 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Info button - starts tour
+    // Info-knapp - starter omvisning
     infoButton.addEventListener('click', function() {
         startTour();
     });
 
-    // Find nearest shelter
+    // Finn nærmeste tilfluktsrom
     findNearestBtn.addEventListener('click', function() {
-        // Add pulse animation temporarily to button
+        // Legg til pulseringsanimasjon midlertidig på knappen
         findNearestBtn.classList.add('pulse-action');
         setTimeout(() => findNearestBtn.classList.remove('pulse-action'), 1500);
         
-        // Show loading indicator
-        showNotification("Finding your location...", "info");
-        
-        findNearestShelter();
+        // Kall funksjonen fra mapoverlay.js
+        window.findNearestShelter();
     });
 
-    // Get directions
+    // Få veibeskrivelser
     directionsBtn.addEventListener('click', function() {
         if (!state.selectedLocation) {
-            showNotification("Please select a shelter or fire station first", "warning");
+            showNotification("Velg først et tilfluktsrom eller en brannstasjon", "warning");
             return;
         }
         
-        // Create a Google Maps directions URL
+        // Lag en Google Maps veibeskrivelse-URL
         const url = `https://www.google.com/maps/dir/?api=1&destination=${state.selectedLocation.lat},${state.selectedLocation.lng}`;
         window.open(url, '_blank');
     });
 
-    // Clear search
+    // Tøm søk
     clearSearchBtn.addEventListener('click', function() {
         searchInput.value = '';
         searchMarkers.clearLayers();
     });
 
-    // Map style buttons
+    // Kartstilknapper
     mapStyleButtons.forEach(button => {
         button.addEventListener('click', function() {
-            // Remove active class from all buttons
+            // Fjern aktiv klasse fra alle knapper
             mapStyleButtons.forEach(b => b.classList.remove('active'));
             
-            // Add active class to clicked button
+            // Legg til aktiv klasse på klikket knapp
             button.classList.add('active');
             
-            // Change map style
+            // Endre kartstil ved å bruke funksjonen fra mapoverlay.js
             const style = button.getAttribute('data-style');
-            changeMapStyle(style);
+            window.changeMapStyle(style);
         });
     });
 
-    // Tour controls
+    // Omvisningskontroller
     tourNextBtn.addEventListener('click', function() {
         nextTourStep();
     });
@@ -239,11 +223,10 @@ document.addEventListener('DOMContentLoaded', function() {
         endTour();
     });
 
-    // ===== Functions =====
+    // Funksjoner
 
-    // Show a notification toast
+    // Vis en varsling i høyre hjørne
     function showNotification(message, type = 'info') {
-        // Create notification element
         const notification = document.createElement('div');
         notification.className = `notification notification-${type} slide-in-right`;
         notification.innerHTML = `
@@ -253,7 +236,7 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
         `;
         
-        // Add to DOM and remove after a delay
+        // Legg til i DOM og fjern etter en forsinkelse
         document.body.appendChild(notification);
         
         setTimeout(() => {
@@ -274,36 +257,38 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Update shelter/station information panel
+    window.showNotification = showNotification;
+
+    // Oppdater tilfluktsrom/stasjons-informasjonspanel
     function updateLocationInfo(location) {
         state.selectedLocation = location;
         
-        // Create the details HTML
+        // Lag detaljert HTML
         let detailsHTML = '';
         
         if (location.type === 'shelter') {
             detailsHTML = `
                 <div class="location-details slide-in-right">
-                    <h4>${location.name || 'Public Shelter'}</h4>
+                    <h4>${location.name || 'Offentlig tilfluktsrom'}</h4>
                     <div class="detail-row">
                         <i class="fas fa-map-marker-alt"></i>
                         <span>${location.address}</span>
                     </div>
                     <div class="detail-row">
                         <i class="fas fa-users"></i>
-                        <span>Capacity: ${location.capacity || 'Unknown'}</span>
+                        <span>Kapasitet: ${location.capacity || 'Ukjent'}</span>
                     </div>
                     <div class="detail-row">
                         <i class="fas fa-door-open"></i>
-                        <span>Access: ${location.access || 'Not specified'}</span>
+                        <span>Tilgang: ${location.access || 'Ikke spesifisert'}</span>
                     </div>
                     <div class="emergency-note">
                         <i class="fas fa-exclamation-circle"></i>
-                        <span>In case of emergency, follow official evacuation instructions.</span>
+                        <span>I nødsituasjoner, følg offisielle evakueringsinstruksjoner.</span>
                     </div>
                     <div class="action-row">
                         <button class="small-btn" onclick="centerMapOn([${location.lat}, ${location.lng}])">
-                            <i class="fas fa-crosshairs"></i> Center
+                            <i class="fas fa-crosshairs"></i> Sentrer
                         </button>
                     </div>
                 </div>
@@ -322,11 +307,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                     <div class="detail-row">
                         <i class="fas fa-phone-alt"></i>
-                        <span>Emergency: 110</span>
+                        <span>Nødnummer: 110</span>
                     </div>
                     <div class="action-row">
                         <button class="small-btn" onclick="centerMapOn([${location.lat}, ${location.lng}])">
-                            <i class="fas fa-crosshairs"></i> Center
+                            <i class="fas fa-crosshairs"></i> Sentrer
                         </button>
                     </div>
                 </div>
@@ -336,85 +321,11 @@ document.addEventListener('DOMContentLoaded', function() {
         selectedLocationDetails.innerHTML = detailsHTML;
     }
 
-    // Find nearest shelter using browser geolocation
-    function findNearestShelter() {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(position => {
-                const userLat = position.coords.latitude;
-                const userLng = position.coords.longitude;
-                
-                // Place user marker
-                searchMarkers.clearLayers();
-                const userIcon = L.divIcon({
-                    html: '<i class="fas fa-circle-user" style="color:#0466c8; font-size:24px;"></i>',
-                    iconSize: [24, 24],
-                    iconAnchor: [12, 12]
-                });
-                
-                L.marker([userLat, userLng], {icon: userIcon})
-                 .addTo(searchMarkers)
-                 .bindPopup('<strong>Your Location</strong>')
-                 .openPopup();
-                
-                // Find nearest shelter (placeholder - in a real app, this would search actual shelter data)
-                showNotification("Found the nearest shelter!", "success");
-                
-                // Animate to location
-                map.flyTo([userLat, userLng], 14, {
-                    animate: true,
-                    duration: 1.5
-                });
-                
-            }, error => {
-                console.error("Error getting location:", error);
-                showNotification("Could not determine your location. Please enable location services.", "error");
-            });
-        } else {
-            showNotification("Geolocation is not supported by your browser", "error");
-        }
-    }
+    // Eksporter updateLocationInfo til global bruk
+    window.updateLocationInfo = updateLocationInfo;
 
-    // Change map style (placeholder function to be implemented with your map provider)
-    function changeMapStyle(style) {
-        // Remove existing base layers
-        map.eachLayer(layer => {
-            if (layer._url && layer._url.includes('tile.openstreetmap.org')) {
-                map.removeLayer(layer);
-            }
-        });
-        
-        // Add new base layer based on style
-        let newBaseLayer;
-        
-        switch (style) {
-            case 'satellite':
-                newBaseLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-                    attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
-                });
-                break;
-            case 'terrain':
-                newBaseLayer = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
-                    attribution: 'Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)'
-                });
-                break;
-            case 'streets':
-            default:
-                newBaseLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                });
-                break;
-        }
-        
-        // Add the new base layer to the map
-        newBaseLayer.addTo(map);
-        
-        // Move to back to ensure it's behind other layers
-        newBaseLayer.bringToBack();
-        
-        showNotification(`Map style changed to ${style}`, "info");
-    }
 
-    // Update statistics with optional animation
+    // Oppdater statistikk med animasjon
     function updateStatistics(stats, animate = false) {
         state.statistics = { ...state.statistics, ...stats };
         
@@ -429,7 +340,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Animate number counting up
+    // Animer tall som telles opp
     function animateNumber(element, start, end, duration) {
         let startTime = null;
         
@@ -449,7 +360,7 @@ document.addEventListener('DOMContentLoaded', function() {
         requestAnimationFrame(animation);
     }
 
-    // Tour functions
+    // Omvisningsfunksjoner
     function startTour() {
         state.activeTourStep = 0;
         updateTourStep();
@@ -470,21 +381,21 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateTourStep() {
         const step = tourSteps[state.activeTourStep];
         
-        // Update content
+        // Oppdater innhold
         document.querySelector('.tour-content h3').textContent = step.title;
         tourStepText.textContent = step.text;
         
-        // Update buttons
+        // Oppdater knapper
         if (state.activeTourStep === tourSteps.length - 1) {
-            tourNextBtn.textContent = 'Finish';
+            tourNextBtn.textContent = 'Fullfør';
         } else {
-            tourNextBtn.textContent = 'Next';
+            tourNextBtn.textContent = 'Neste';
         }
         
-        // Remove any existing highlight
+        // Fjern eksisterende fremheving
         removeHighlight();
         
-        // Add highlight if specified
+        // Legg til fremheving hvis spesifisert
         if (step.highlight) {
             highlightElement(step.highlight);
         }
@@ -509,7 +420,7 @@ document.addEventListener('DOMContentLoaded', function() {
         localStorage.setItem('tourCompleted', 'true');
     }
 
-    // Helper function to center map on coordinates
+    // Hjelpefunksjon for å sentrere kart på koordinater
     window.centerMapOn = function(coordinates) {
         map.flyTo(coordinates, map.getZoom(), {
             animate: true,
@@ -517,16 +428,16 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     };
 
-    // Initialize UI
+    // Initialiser UI
     initUI();
 
-    // Add CSS for new components dynamically
+    // Legg til CSS for nye komponenter dynamisk
     addDynamicStyles();
 
     function addDynamicStyles() {
         const styles = document.createElement('style');
         styles.innerHTML = `
-            /* Notification styles */
+            /* Varslingsstiler */
             .notification {
                 position: fixed;
                 top: 20px;
@@ -560,7 +471,7 @@ document.addEventListener('DOMContentLoaded', function() {
             .notification-warning i { color: var(--warning); }
             .notification-error i { color: var(--danger); }
             
-            /* Location details styling */
+            /* Plassdetalj-stiler */
             .location-details {
                 margin-top: var(--space-md);
             }
@@ -614,7 +525,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 background-color: var(--gray-300);
             }
             
-            /* Tour highlight */
+            /* Omvisningsfremheving */
             .tour-highlight {
                 position: relative;
                 z-index: 2001;
@@ -628,7 +539,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 100% { box-shadow: 0 0 0 4px var(--accent), 0 0 0 8px rgba(255, 209, 102, 0.3); }
             }
             
-            /* Additional animations */
+            /* Tilleggsanimasjoner */
             .slide-out-right {
                 animation: slideOutRight 0.5s forwards;
             }

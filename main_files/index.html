@@ -13,16 +13,13 @@
 </head>
 <body>
     <div class="app-container">
-        <!-- Sidebar with info panel -->
+        <!-- "Sidebar" med info panel -->
         <div id="sidebar" class="sidebar">
             <div class="sidebar-header">
                 <div class="logo">
                     <i class="fas fa-shield-alt"></i>
                     <h2>SafeShelter</h2>
                 </div>
-                <button id="sidebar-toggle" class="icon-button">
-                    <i class="fas fa-chevron-left"></i>
-                </button>
             </div>
             
             <div class="sidebar-content">
@@ -31,15 +28,15 @@
                     <div class="status-indicators">
                         <div class="status-item status-ok">
                             <i class="fas fa-fire-extinguisher"></i>
-                            <span>Fire Services</span>
+                            <span>Fire Services: Active</span>
                         </div>
                         <div class="status-item status-ok">
-                            <i class="fas fa-house-tsunami"></i>
-                            <span>Flood Warning</span>
-                        </div>
-                        <div class="status-item status-warning">
                             <i class="fas fa-bolt"></i>
-                            <span>Severe Weather</span>
+                            <span>Weather Status: Good</span>
+                        </div>
+                        <div class="status-item status-ok">
+                            <i class="fas fa-droplet"></i>
+                            <span>Flood Warning: None</span>
                         </div>
                     </div>
                 </div>
@@ -91,9 +88,9 @@
             </div>
         </div>
 
-        <!-- Main map container -->
+        <!-- "Main map" container -->
         <div class="map-container">
-            <!-- Smart search with autocomplete -->
+            <!-- Smart søk med autocomplete -->
             <div id="search-container">
                 <div class="search-input-wrapper">
                     <i class="fas fa-search search-icon"></i>
@@ -105,7 +102,7 @@
                 <ul id="search-suggestions"></ul>
             </div>
 
-            <!-- Map controls and toggles -->
+            <!-- Kart kontroller og "toggles" -->
             <div id="map-controls">
                 <div class="control-section">
                     <h4>Layers</h4>
@@ -135,9 +132,9 @@
                 </div>
             </div>
 
-            <!-- Legend for the map -->
+            <!-- "Legend" for kartet -->
             <div class="map-legend">
-                <h4>Legend</h4>
+                <h4>Icon Meanings:</h4>
                 <div class="legend-item">
                     <div class="legend-marker shelter-marker"></div>
                     <span>Shelter</span>
@@ -155,7 +152,7 @@
             <!-- Main map container -->
             <div id="map"></div>
             
-            <!-- Loading overlay -->
+            <!-- Last inn overlay -->
             <div id="loading-overlay">
                 <div class="spinner"></div>
                 <div class="loading-text">Loading map data...</div>
@@ -163,7 +160,7 @@
         </div>
     </div>
 
-    <!-- Tour guide overlay -->
+    <!-- "Tour guide" overlegg -->
     <div id="tour-overlay" class="hidden">
         <div class="tour-content">
             <h3>Welcome to SafeShelter</h3>
@@ -179,7 +176,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.8.0/proj4.js"></script>
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="mapoverlay.js"></script>
     <script src="script.js"></script>
     <script src="ui.js"></script>
