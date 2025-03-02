@@ -2,7 +2,7 @@
 
 ## Gruppemedlemmer:
 - Sigurd Munk Brekke - sigurdmb@uia.no
-- Daniel Danvik Møgster - danieldm@uia.no
+- Daniel Davik Møgster - danieldm@uia.no
 - Ole Bjørk Olsen - olebo@uia.no
 - Emil Stokken Kaasa - emilsk@uia.no
 - Sigurd Bøthun Mæland - sigurd.b.maland@uia.no
