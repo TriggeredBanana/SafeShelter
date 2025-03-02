@@ -199,3 +199,41 @@ Frontend bruker Leaflet.js for interaktive kartvisualiseringer og HTML/CSS/JavaS
 - Optimaliseringsarbeid for raskere lasting av kart og data
 - Implementasjon for live-oppdateringer
 - Forbedring av rutealgoritmer med flere faktorer (trafikk, veiarbeid)
+
+---
+
+## **En Rask Oversikt Over Applikasjonen**
+
+#### Hovedgrensesnitt for SafeShelter - Applikasjonen tilbyr et intuitivt grensesnitt med informasjon om tilfluktsrom og brannstasjoner. Sidepanelet viser statusindikator, detaljert informasjon om tilfluktsrom, og nøkkelstatistikk. Det interaktive kartet viser plasseringen av tilfluktsrom (røde markører) og brannstasjoner (oransje markører), med lett tilgang til funksjoner for å finne nærmeste tilfluktsrom eller få veibeskrivelser.
+
+![main page](<Main Page.png>)
+<br></br>
+
+#### Omvisningsfunksjon der nye brukere får en guidet omvisning av applikasjonens funksjoner. Omvisningen fremhever nøkkelelementer med en pulserende gul ramme, og gir trinnvis instruksjon om hvordan systemet brukes effektivt i nødsituasjoner. Brukere kan navigere gjennom hvert trinn eller hoppe over omvisningen helt.
+
+![tour guide 1](<Tour Guide 1.png>)
+![tour guide 2](<Tour Guide 2.png>)
+<br></br>
+
+#### Når en brannstasjon velges på kartet, vises detaljert informasjon i sidepanelet. Dette inkluderer stasjonens avdeling, stasjonstype, og kontaktinformasjon for nødstilfeller.
+![Layer Toggles & Safety Information](<Layer Toggles & Safety Information.png>)
+
+#### Velger man et tilfluktsrom vises kritisk informasjon som plassering, total kapasitet og tilgangsinstruksjoner. Sikkerhetsmerknadene gir ytterligere veiledning for nødsituasjoner.
+![Layer Toggles & Safety Information 2](<Layer Toggles & Safety Information 2.png>)
+<br></br>
+
+#### Søkefunksjonalitet: Den smarte søkefunksjonen tilbyr adresseforslag mens du skriver, noe som gjør det enkelt å raskt finne spesifikke steder eller områder.
+#### Etter å ha valgt et søkeresultat, sentreres kartet på plasseringen og viser en markør. Brukere kan deretter finne nærliggende tilfluktsrom eller utforske nærområdet.
+![Interactive Search Bar With Results](<Interactive Search Bar With Results.png>)
+![Interactive Search Bar With Results 2](<Interactive Search Bar With Results 2.png>)
+<br></br>
+
+#### Satellittkartet gir detaljerte luftbilder, nyttig for å identifisere landemerker og navigere i områder hvor gatekart kan være utilstrekkelige.
+![Different Map Types](<Different Map Types.png>)
+
+#### Terrengvisningen fremhever topografiske elementer, som kan være særlig verdifullt ved vurdering av flomrisiko eller planlegging av evakueringsruter i fjellrike områder.
+![Different Map Types 2](<Different Map Types 2.png>)
+<br></br>
+
+#### Brukere kan bruke ruteguide "Find Nearest Shelter" for å finne nærmeste tilfluktsrom ved bruk av GPS. SafeShelter tar i bruk din nåværende posisjon, identifiserer det nærmeste tilfluktsrommet, og beregner den optimale ruten. Systemet viser avstand og estimert reisetid for å hjelpe deg å nå tryggheten raskt.
+![Automatically Find Nearest Shelter Using GPS](<Automatically Find Nearest Shelter Using GPS.png>)
