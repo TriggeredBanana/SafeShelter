@@ -7,9 +7,9 @@ app.use(cors());
 
 const PORT = 5000;
 
-app.get('/api/tilfluktsrom', async (req, res) => {
+app.get('/api/tilfluktsrom_agder', async (req, res) => {
     try {
-        const response = await fetch(`${process.env.SUPABASE_URL}/rest/v1/tilfluktsrom`, {
+        const response = await fetch(`${process.env.SUPABASE_URL}/rest/v1/tilfluktsrom_agder`, {
             headers: {
                 "apikey": process.env.SUPABASE_KEY,
                 "Authorization": `Bearer ${process.env.SUPABASE_KEY}`

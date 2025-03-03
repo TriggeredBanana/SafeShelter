@@ -6,6 +6,7 @@
 // Globale variabler for karttilgang fra andre skript
 let map;
 let searchMarkers;
+let floodZoneLayer; // Legger til variabel for flomsoner
 
 // Initialiser når DOM er lastet
 document.addEventListener('DOMContentLoaded', function() {
@@ -51,7 +52,18 @@ function initializeMap() {
         maxClusterRadius: 60
     }).addTo(map);
     
-    window.floodZoneLayer = L.layerGroup();
+    // Oppretter flomsonelag fra NVE WMS-tjeneste
+        const floodZoneLayer = L.tileLayer.wms("https://nve.geodataonline.no/arcgis/services/FlomAktsomhet/MapServer/WmsServer", {
+        layers: "Flom_aktsomhetsomrade",
+        styles: "",
+        format: "image/png",
+        transparent: true,
+        crs: L.CRS.EPSG3857, // Leaflet bruker EPSG:3857
+        attribution: "Kartdata: © NVE"
+        });
+    
+    // Sett floodZoneLayer globalt tilgjengelig
+    window.floodZoneLayer = floodZoneLayer;
     
     // Lag for søkeresultater
     searchMarkers = L.layerGroup().addTo(map);
@@ -111,12 +123,17 @@ function setupEventListeners() {
         }
     });
     
+    // Implementerer toggle-funksjonalitet for flomsoner
     document.getElementById('toggle-flood-zones').addEventListener('click', function() {
         this.classList.toggle('active');
         if (this.classList.contains('active')) {
-            map.addLayer(window.floodZoneLayer);
+            if (window.floodZoneLayer) {
+                map.addLayer(window.floodZoneLayer);
+            }
         } else {
-            map.removeLayer(window.floodZoneLayer);
+            if (window.floodZoneLayer) {
+                map.removeLayer(window.floodZoneLayer);
+            }
         }
     });
     

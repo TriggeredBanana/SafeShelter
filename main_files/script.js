@@ -91,7 +91,7 @@ async function loadEmergencyData() {
 // Hent tilfluktsromdata fra backend
 async function fetchShelterData() {
     try {
-        const response = await fetch("http://localhost:5000/api/tilfluktsrom");
+        const response = await fetch("http://localhost:5000/api/tilfluktsrom_agder");
         
         if (!response.ok) {
             throw new Error(`Kunne ikke hente tilfluktsromdata: ${response.status}`);
