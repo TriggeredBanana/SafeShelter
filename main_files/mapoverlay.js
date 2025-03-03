@@ -51,7 +51,7 @@ function initializeMap() {
         maxClusterRadius: 60
     }).addTo(map);
     
-    window.floodZoneLayer = L.layerGroup();
+    window.floodZoneLayer = L.layerGroup().addTo(map);
     
     // Lag for søkeresultater
     searchMarkers = L.layerGroup().addTo(map);
