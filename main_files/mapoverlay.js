@@ -180,6 +180,9 @@ function setupEventListeners() {
     
     // Håndter vindustørrelsesendring
     window.addEventListener('resize', () => map.invalidateSize());
+
+    document.getElementById('find-nearest-station').addEventListener('click', findNearestFireStation);
+
 }
 
 // Endre kartstil
@@ -361,6 +364,54 @@ function findNearestShelter() {
     );
 }
 
+function findNearestFireStation() {
+    showNotification("Finner din posisjon...", "info");
+
+    if (!navigator.geolocation) {
+        showNotification("Geolokalisering støttes ikke av din nettleser", "error");
+        return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+        function(position) {
+            const userLat = position.coords.latitude;
+            const userLng = position.coords.longitude;
+
+            // Fjern tidligere søkemarkører
+            searchMarkers.clearLayers();
+
+            // Legg til brukerposisjonsmarkør
+            const userIcon = L.divIcon({
+                html: '<i class="fas fa-user" style="color:#0466c8; font-size:24px;"></i>',
+                iconSize: [24, 24],
+                iconAnchor: [12, 24]
+            });
+
+            const userMarker = L.marker([userLat, userLng], {
+                icon: userIcon
+            })
+            .addTo(searchMarkers)
+            .bindPopup('<strong>Din posisjon</strong>')
+            .openPopup();
+
+            showNotification("Posisjon funnet! Finner nærmeste brannstasjon...", "success");
+
+            // Finn nærmeste brannstasjon
+            findNearestStation(userLat, userLng);
+        },
+        function(error) {
+            console.error("Geolokaliseringsfeil:", error);
+            showNotification("Kunne ikke hente posisjon.", "error");
+        },
+        {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0
+        }
+    );
+}
+
+
 // Finn nærmeste tilfluktsrom ved å beregne avstander
 function findNearest(userLat, userLng) {
     // Først sjekk om vi har tilfluktsromdata lastet
@@ -409,7 +460,50 @@ function findNearest(userLat, userLng) {
     } else {
         showNotification("Ingen tilfluktsrom funnet i nærheten", "warning");
     }
+
+    
 }
+
+function findNearestStation(userLat, userLng) {
+    if (!window.fireStationLayer || window.fireStationLayer.getLayers().length === 0) {
+        showNotification("Ingen brannstasjonsdata tilgjengelig", "error");
+        return;
+    }
+
+    let nearestStation = null;
+    let shortestDistance = Infinity;
+
+    // Gå gjennom alle brannstasjonsmarkører for å finne den nærmeste
+    window.fireStationLayer.eachLayer(function(layer) {
+        const stationLat = layer.getLatLng().lat;
+        const stationLng = layer.getLatLng().lng;
+        const directDistance = calculateDistance(userLat, userLng, stationLat, stationLng);
+
+        if (directDistance < shortestDistance) {
+            shortestDistance = directDistance;
+            nearestStation = layer;
+        }
+    });
+
+    if (nearestStation) {
+        const stationLat = nearestStation.getLatLng().lat;
+        const stationLng = nearestStation.getLatLng().lng;
+
+        showNotification("Beregner rute til nærmeste brannstasjon...", "info");
+
+        // Hent veiavstand og tegn ruten
+        getRoadDistanceAndRoute(
+            userLat, userLng,
+            stationLat, stationLng,
+            function(routeData) {
+                displayRouteAndDistance(userLat, userLng, stationLat, stationLng, routeData, nearestStation);
+            }
+        );
+    } else {
+        showNotification("Ingen brannstasjoner funnet i nærheten", "warning");
+    }
+}
+
 
 // Hent veiavstand og rute mellom to punkter ved hjelp av OSRM
 function getRoadDistanceAndRoute(startLat, startLng, endLat, endLng, callback) {
@@ -653,4 +747,5 @@ function debounce(func, delay) {
 window.map = map;
 window.searchLocation = searchLocation;
 window.findNearestShelter = findNearestShelter;
+window.findNearestFireStation = findNearestFireStation;
 window.changeMapStyle = changeMapStyle;
