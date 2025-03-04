@@ -76,7 +76,7 @@ function initializeMap() {
     
     // Opprett egendefinerte ikoner
     window.shelterIcon = L.divIcon({
-        html: '<div class="shelter-marker-icon"><i class="fas fa-person-shelter"></i></div>',
+        html: '<div class="shelter-marker-icon"><i class="fas fa-home"></i></div>',
         iconSize: [30, 30],
         iconAnchor: [15, 30],
         popupAnchor: [0, -30],
@@ -84,7 +84,7 @@ function initializeMap() {
     });
     
     window.fireStationIcon = L.divIcon({
-        html: '<div class="fire-marker-icon"><i class="fas fa-fire-flame-simple"></i></div>',
+        html: '<div class="fire-marker-icon"><i class="fas fa-fire"></i></div>',
         iconSize: [30, 30],
         iconAnchor: [15, 30],
         popupAnchor: [0, -30],
@@ -115,8 +115,8 @@ function setupEventListeners() {
     });
     
     document.getElementById('toggle-firestations').addEventListener('click', function() {
-        this.classList.toggle('active');
-        if (this.classList.contains('active')) {
+        this.classList.toggle('fire-active');
+        if (this.classList.contains('fire-active')) {
             map.addLayer(window.fireStationLayer);
         } else {
             map.removeLayer(window.fireStationLayer);
@@ -125,8 +125,8 @@ function setupEventListeners() {
     
     // Implementerer toggle-funksjonalitet for flomsoner
     document.getElementById('toggle-flood-zones').addEventListener('click', function() {
-        this.classList.toggle('active');
-        if (this.classList.contains('active')) {
+        this.classList.toggle('flood-active');
+        if (this.classList.contains('flood-active')) {
             if (window.floodZoneLayer) {
                 map.addLayer(window.floodZoneLayer);
             }
@@ -177,11 +177,15 @@ function setupEventListeners() {
     if (findNearestBtn) {
         findNearestBtn.addEventListener('click', findNearestShelter);
     }
+
+    // Finn nærmeste brannstasjon-knapp
+    const findNearestStationBtn = document.getElementById('find-nearest-station');
+    if (findNearestStationBtn) {
+        findNearestStationBtn.addEventListener('click', findNearestFireStation);
+    }
     
     // Håndter vindustørrelsesendring
-    window.addEventListener('resize', () => map.invalidateSize());
-
-    document.getElementById('find-nearest-station').addEventListener('click', findNearestFireStation);
+    window.addEventListener('resize', () => map.invalidateSize())
 
 }
 

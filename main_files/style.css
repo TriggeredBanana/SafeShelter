@@ -266,6 +266,29 @@
     transform: translateY(-2px);
     box-shadow: var(--shadow-md);
   }
+
+  .action-button.fire-station {
+    background-color: var(--warning);
+    color: white;
+  }
+
+  .action-button.fire-station:hover {
+    background-color: #d1851b;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+  
+  .toggle-button.fire-active {
+    background-color: var(--warning);
+    color: white;
+  }
+  
+  .toggle-button.flood-active {
+    background-color: rgba(128, 0, 128, 0.8);
+    color: white;
+  }
+  
+
   
   .icon-button {
     width: 40px;
@@ -429,7 +452,7 @@
     color: white;
   }
   
-  .toggle-button:hover:not(.active) {
+  .toggle-button:hover:not(.active):not(.fire-active):not(.flood-active) {
     background-color: var(--gray-300);
   }
   

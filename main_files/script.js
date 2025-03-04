@@ -332,11 +332,11 @@ function createDefaultIcon(type) {
     if (type === 'shelter') {
         className = 'shelter-marker-icon';
         color = '#e63946'; // var(--primary)
-        icon = 'fa-person-shelter';
+        icon = 'fa-home';
     } else {
         className = 'fire-marker-icon';
         color = '#ff9f1c'; // var(--warning)
-        icon = 'fa-fire-flame-simple';
+        icon = 'fa-fire';
     }
     
     return L.divIcon({
