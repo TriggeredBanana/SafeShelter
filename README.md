@@ -9,16 +9,15 @@
 - Henrik Sæverud Lorentzen - henriksl@uia.no
 
 ## Prosjektbeskrivelse
-Et interaktivt kartprosjekt for å lokalisere tilfluktsrom og brannstasjoner i krisesituasjoner som brann eller flom.
+Et interaktivt kartprosjekt for å lokalisere tilfluktsrom, brannstasjoner og utsatte flomområder i krisesituasjoner som ved brann eller flom.
 
 ---
 
 ## **Innholdsfortegnelse**
 
-- [Oversikt](#Oversikt)
-- [Problemstilling](#Problemstilling)
+- [Oversikt og problemstilling](#oversikt-og-problemstilling)
 - [Teknologivalg og Arkitektur](#teknologivalg-og-arkitektur)
-- [Datakilder og Databehandling](#datakilder-og-databehandling)
+- [Datakilder](#datakilder)
 - [Backend/API-Implementasjon](#backendapi-implementasjon)
 - [Frontend og Visualisering](#frontend-og-visualisering)
 - [Hovedfunksjoner](#hovedfunksjoner)
@@ -28,18 +27,12 @@ Et interaktivt kartprosjekt for å lokalisere tilfluktsrom og brannstasjoner i k
 
 ---
 
-## **Oversikt**
+## **Oversikt og problemstilling**
+Ved ekstreme værhendelser som flom eller brann er det avgjørende at innbyggere raskt kan finne trygge tilfluktsrom og nødvendige nødetater. Kartløsninger med sanntidsdata kan spille en kritisk rolle i beredskapsarbeid ved å gi oppdatert informasjon om nærmeste tilfluktsrom, brannstasjoner og flomutsatte soner.
 
-Dette prosjektet er en del av et universitetsoppdrag hvor studenter utvikler en interaktiv kartapplikasjon ved hjelp av Leaflet. Prosjektet integrerer åpne data, backend-APIer og visualiseringer for å håndtere en spesifikk tematisk problemstilling: Hvordan lokalisere og få tilgang til tilfluktsrom i tilfelle nødsituasjoner som brann eller flom.
+I Norge har flere områder varierende tilgang til offentlige tilfluktsrom, og i en nødsituasjon kan avstanden til nærmeste sikre sted være avgjørende for liv og helse. Derfor er det viktig å utvikle verktøy som kombinerer sanntidsposisjon, geodata og interaktive kartlag for å gi brukeren rask og presis informasjon om tryggeste rute til nærmeste ressurs - noe som leder til spørsmålet: 
 
----
-
-## **Problemstilling**
-
-- Visualisere plasseringen av tilfluktsrom og brannstasjoner, og hvordan man kan nå dem under en krisesituasjon
-- Beregne og vise faktiske kjøreruter til nærmeste tilfluktsrom basert på brukerens posisjon
-- Visualisere spesielt utsatte områder for kriser som flom og brann
-- Vise flom- og brannrisikoområder basert på meteorologiske data
+Hvordan kan et geografisk informasjonssystem bruke sanntidsposisjon til å hjelpe brukeren med å finne nærmeste tilfluktsrom og brannstasjon, samt visualisere flomutsatte soner, slik at man raskt kan ta informerte beslutninger i kritiske situasjoner?
 
 ---
 
@@ -49,32 +42,34 @@ Dette prosjektet er en del av et universitetsoppdrag hvor studenter utvikler en 
   - Leaflet.js for kartvisualisering
   - HTML/CSS og JavaScript for brukergrensesnitt
   - OSRM (Open Source Routing Machine) for ruteberegninger
+  - FontAwesome for kartmarkører og UI-ikoner
+  - Leaflet WMS for håndtering av WMS-lag (NVE flomsoner)
+  - Leaflet.markercluster for clustering av markører
   
 - **Backend:** 
-  - Supabase som database og serverløs backend
-  - Express.js for API-endepunkter
+  - Node.js med Express.js for API-endepunkter
+  - Supabase (PostgreSQL + PostGIS) for database og geospatiale spørringer
   
 - **Databehandling:** 
-  - QGIS for håndtering av geospatiale data
-  - Python for datatransformasjon
+  - QGIS for geospatial analyse og filkonvertering
+  - Python-skript for rengjøring og transformasjon av datasett
+  - Proj4js for koordinattransformasjoner i nettleseren
+  - PostgreSQL (psql) + PostGIS for import, lagring og spørringer på geodata
   
 - **Datakilder:** 
   - GeoNorge
+  - NVE (Norges vassdrags- og energidirektorat) via WMS
+  - OpenStreetMap (OSM) for basiskart og POI-data
 
 ---
 
-## **Datakilder og Databehandling**
+## **Datakilder**
 
-- **Datasett:**
+- **Datasett (alle filene er lagret i PostGIS-format i Supabase):**
     - [Brannstasjoner](https://kartkatalog.geonorge.no/metadata/brannstasjoner/0ccce81d-a72e-46ca-8bd9-57b362376485?search=Brannstasjoner)
-    - [Flomsoner](https://kartkatalog.geonorge.no/metadata/flomsoner/e95008fc-0945-4d66-8bc9-e50ab3f50401)
     - [TilfluktsromOffentlige](https://kartkatalog.geonorge.no/metadata/tilfluktsrom-offentlige/dbae9aae-10e7-4b75-8d67-7f0e8828f3d8?search=Tilfluk)
-    - Alle filene er lagret i PostGIS-format i Supabase
-
-- **Databehandlingsverktøy:**
-    - QGIS for geospatial analyse og filkonvertering
-    - Python-skript for rengjøring og transformasjon av datasett
-    - Proj4js for koordinattransformasjoner i nettleseren
+ 
+    - [Flomsoner](https://kartkatalog.geonorge.no/metadata/flomsoner/e95008fc-0945-4d66-8bc9-e50ab3f50401) (WMS, NVE)
 
 ---
 
@@ -84,10 +79,10 @@ Backend-en er implementert ved hjelp av Supabase som database, som gir enkel til
 
 ### **Viktige API-endepunkter:**
 
-| Endepunkt | Metode | Beskrivelse |
-|---|---|---|
-| `/api/tilfluktsrom` | GET | Henter tilfluktsromdata fra Supabase |
-| `/api/brannstasjoner_agder` | GET | Henter brannstasjonsdata fra Supabase |
+| Endepunkt                   | Metode | Beskrivelse                           |
+| --------------------------- | ------ | ------------------------------------- |
+| `/api/tilfluktsrom_agder`   | GET    | Henter tilfluktsromdata fra Supabase  |
+| `/api/brannstasjoner_agder` | GET    | Henter brannstasjonsdata fra Supabase |
 
 ---
 
@@ -99,9 +94,11 @@ Frontend bruker Leaflet.js for interaktive kartvisualiseringer og HTML/CSS/JavaS
 
 - Dynamiske markører for tilfluktsrom og brannstasjoner
 - Flere kartlag (gater, satellitt og terreng)
+- Flomsoner via WMS-lag fra NVE
 - Interaktive popups med informasjon
 - Animerte rutevisualiseringer
 - Markørklynger for bedre ytelse med mange datapunkter
+- Applikasjonsomvisning
 - Mørk modus for nattbruk
 
 ---
@@ -115,24 +112,40 @@ Frontend bruker Leaflet.js for interaktive kartvisualiseringer og HTML/CSS/JavaS
 - Faktisk kjørerute beregnes ved hjelp av OSRM API
 - Ruten vises på kartet med distanse og estimert kjøretid
 
-### **2. Kartsøk**
+### **2. Finn nærmeste brannstasjon**
+- Brukerens posisjon hentes via nettleserens geolokalisering
+- Avstand beregnes til alle brannstasjoner i databasen
+- Nærmeste brannstasjon identifiseres
+- Faktisk kjørerute beregnes ved hjelp av OSRM API
+- Ruten vises på kartet med distanse og estimert kjøretid
+- Knapp for å finne nærmeste brannstasjon i brukergrensesnittet
+
+### **3. Visning av flomsoner**
+- Data hentes fra NVE WMS-tjeneste og vises dynamisk på kartet
+- Brukeren kan aktivere/deaktivere flomsoner med en knapp
+- Laget blir værende aktivt selv ved zooming ut/in for bedre oversikt
+- Kartet gir informasjon om flomutsatte områder i sanntid
+
+### **4. Kartsøk**
 - Adressesøk med autofullføring
 - Resultater vises på kartet
 - Koordinattransformasjon fra ulike projeksjoner til WGS84
 
-### **3. Informasjonspanel**
+### **5. Informasjonspanel**
 - Detaljert informasjon om valgte tilfluktsrom eller brannstasjoner
 - Kapasitetsdata for tilfluktsrom
 - Kontaktinformasjon for brannstasjoner
+- Varsler om flomfare basert på kartlagene
+- Interaktiv veiledning som hjelper nye brukere med å forstå funksjonalitetene i systemet
 
-### **4. Kartilpasninger**
-- Bytte mellom ulike kartlag
-- Aktivere/deaktivere markørlag
-- Visning av flomsoner (når tilgjengelig)
+### **6. Kartilpasninger**
+- Bytte mellom ulike kartlag (gater, satellitt, terreng)
+- Aktivere/deaktivere markørlag (tilfluktsrom, brannstasjoner, flomsoner)
 - Fullskjermsmodus
 - Logo-klikk for rask tilbakestilling av kartet
 
 ---
+
 
 ## **Installasjon og Oppsett**
 
@@ -183,7 +196,6 @@ Frontend bruker Leaflet.js for interaktive kartvisualiseringer og HTML/CSS/JavaS
 ## **Fremtidige Forbedringer**
 
 ### **Planlagte oppdateringer:**
-- Fullstendig oversettelse av grensesnitt til norsk
 - Støtte for alternative transportmetoder (gange, kollektivtransport)
 - Offline-modus med lokal datalagring for bruk i nødsituasjoner
 - Forbedret håndtering av store datasett med avanserte klyngeteknikker
@@ -204,7 +216,7 @@ Frontend bruker Leaflet.js for interaktive kartvisualiseringer og HTML/CSS/JavaS
 
 ## **En Rask Oversikt Over Applikasjonen**
 
-#### Hovedgrensesnitt for SafeShelter - Applikasjonen tilbyr et intuitivt grensesnitt med informasjon om tilfluktsrom og brannstasjoner. Sidepanelet viser statusindikator, detaljert informasjon om tilfluktsrom, og nøkkelstatistikk. Det interaktive kartet viser plasseringen av tilfluktsrom (røde markører) og brannstasjoner (oransje markører), med lett tilgang til funksjoner for å finne nærmeste tilfluktsrom eller få veibeskrivelser.
+#### Hovedgrensesnitt for SafeShelter - Applikasjonen tilbyr et intuitivt grensesnitt med informasjon om tilfluktsrom, brannstasjoner og utsatte flomsoner. Sidepanelet viser statusindikator, detaljert informasjon om tilfluktsrom, og nøkkelstatistikk. Det interaktive kartet viser plasseringen av tilfluktsrom (røde markører) og brannstasjoner (oransje markører), med lett tilgang til funksjoner for å finne nærmeste tilfluktsrom eller få veibeskrivelser.
 
 ![main page](images/main-page.png)
 <br></br>
