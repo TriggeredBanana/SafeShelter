@@ -271,6 +271,12 @@
     background-color: var(--warning);
     color: white;
   }
+
+  .action-button.fire-station:hover {
+    background-color: #d1851b;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
   
   .toggle-button.fire-active {
     background-color: var(--warning);

@@ -177,11 +177,15 @@ function setupEventListeners() {
     if (findNearestBtn) {
         findNearestBtn.addEventListener('click', findNearestShelter);
     }
+
+    // Finn nærmeste brannstasjon-knapp
+    const findNearestStationBtn = document.getElementById('find-nearest-station');
+    if (findNearestStationBtn) {
+        findNearestStationBtn.addEventListener('click', findNearestFireStation);
+    }
     
     // Håndter vindustørrelsesendring
-    window.addEventListener('resize', () => map.invalidateSize());
-
-    document.getElementById('find-nearest-station').addEventListener('click', findNearestFireStation);
+    window.addEventListener('resize', () => map.invalidateSize())
 
 }
 
