@@ -138,7 +138,7 @@ Frontend bruker Leaflet.js for interaktive kartvisualiseringer og HTML/CSS/JavaS
 - Varsler om flomfare basert på kartlagene
 - Interaktiv veiledning som hjelper nye brukere med å forstå funksjonalitetene i systemet
 
-### **6. Kartilpasninger**
+### **6. Karttilpasninger**
 - Bytte mellom ulike kartlag (gater, satellitt, terreng)
 - Aktivere/deaktivere markørlag (tilfluktsrom, brannstasjoner, flomsoner)
 - Fullskjermsmodus
@@ -216,36 +216,45 @@ Frontend bruker Leaflet.js for interaktive kartvisualiseringer og HTML/CSS/JavaS
 
 ## **En Rask Oversikt Over Applikasjonen**
 
-#### Hovedgrensesnitt for SafeShelter - Applikasjonen tilbyr et intuitivt grensesnitt med informasjon om tilfluktsrom, brannstasjoner og utsatte flomsoner. Sidepanelet viser statusindikator, detaljert informasjon om tilfluktsrom, og nøkkelstatistikk. Det interaktive kartet viser plasseringen av tilfluktsrom (røde markører) og brannstasjoner (oransje markører), med lett tilgang til funksjoner for å finne nærmeste tilfluktsrom eller få veibeskrivelser.
+#### **Hovedgrensesnitt for SafeShelter**
+Applikasjonen tilbyr et intuitivt grensesnitt med informasjon om tilfluktsrom, brannstasjoner og utsatte flomsoner. Sidepanelet viser statusindikator, detaljert informasjon om tilfluktsrom, og nøkkelstatistikk. Det interaktive kartet viser plasseringen av tilfluktsrom (røde markører) og brannstasjoner (oransje markører), med lett tilgang til funksjoner for å finne nærmeste tilfluktsrom og/eller brannstasjon, samt en mer detaljert veibeskrivelse av valgt destinasjon på kartet gjennom Google Maps.
 
 ![main page](images/main-page.png)
 <br></br>
 
-#### Omvisningsfunksjon der nye brukere får en guidet omvisning av applikasjonens funksjoner. Omvisningen fremhever nøkkelelementer med en pulserende gul ramme, og gir trinnvis instruksjon om hvordan systemet brukes effektivt i nødsituasjoner. Brukere kan navigere gjennom hvert trinn eller hoppe over omvisningen helt.
+Gjennom omvisningsfunksjonen kan nye brukere få en guidet omvisning av applikasjonens funksjoner. Omvisningen fremhever nøkkelelementer med en pulserende gul ramme, og gir trinnvis instruksjon om hvordan systemet brukes effektivt i nødsituasjoner. Brukere kan navigere gjennom hvert trinn eller hoppe over omvisningen helt.
 
 ![tour guide 1](images/tour-guide-1.png)
 ![tour guide 2](images/tour-guide-2.png)
 <br></br>
 
-#### Når en brannstasjon velges på kartet, vises detaljert informasjon i sidepanelet. Dette inkluderer stasjonens avdeling, stasjonstype, og kontaktinformasjon for nødstilfeller.
+Når en brannstasjon velges på kartet, vises detaljert informasjon i sidepanelet. Dette inkluderer stasjonens avdeling, stasjonstype, og kontaktinformasjon for nødstilfeller.
+
 ![Layer Toggles & Safety Information](images/layer-toggles-safety-info.png)
 
-#### Velger man et tilfluktsrom vises kritisk informasjon som plassering, total kapasitet og tilgangsinstruksjoner. Sikkerhetsmerknadene gir ytterligere veiledning for nødsituasjoner.
+Velger man et tilfluktsrom vises kritisk informasjon som plassering, total kapasitet og tilgangsinstruksjoner. Sikkerhetsmerknadene gir ytterligere veiledning for nødsituasjoner.
+
 ![Layer Toggles & Safety Information 2](images/layer-toggles-safety-info-2.png)
 <br></br>
 
 #### Søkefunksjonalitet: Den smarte søkefunksjonen tilbyr adresseforslag mens du skriver, noe som gjør det enkelt å raskt finne spesifikke steder eller områder.
-#### Etter å ha valgt et søkeresultat, sentreres kartet på plasseringen og viser en markør. Brukere kan deretter finne nærliggende tilfluktsrom eller utforske nærområdet.
+Etter å ha valgt et søkeresultat, sentreres kartet på plasseringen og viser en markør. Brukere kan deretter finne nærliggende tilfluktsrom eller utforske nærområdet.
+
 ![Interactive Search Bar With Results](images/search-bar-results.png)
 ![Interactive Search Bar With Results 2](images/search-bar-results-2.png)
 <br></br>
 
-#### Satellittkartet gir detaljerte luftbilder, nyttig for å identifisere landemerker og navigere i områder hvor gatekart kan være utilstrekkelige.
+Satellittkartet gir detaljerte luftbilder, nyttig for å identifisere landemerker og navigere i områder hvor gatekart kan være utilstrekkelige.
+
 ![Different Map Types](images/map-type-satellite.png)
 
-#### Terrengvisningen fremhever topografiske elementer, som kan være særlig verdifullt ved vurdering av flomrisiko eller planlegging av evakueringsruter i fjellrike områder.
+Terrengvisningen fremhever topografiske elementer, som kan være særlig verdifullt ved vurdering av flomrisiko eller planlegging av evakueringsruter i fjellrike områder.
+
 ![Different Map Types 2](images/map-type-terrain.png)
 <br></br>
 
-#### Brukere kan bruke ruteguide "Find Nearest Shelter" for å finne nærmeste tilfluktsrom ved bruk av GPS. SafeShelter tar i bruk din nåværende posisjon, identifiserer det nærmeste tilfluktsrommet, og beregner den optimale ruten. Systemet viser avstand og estimert reisetid for å hjelpe deg å nå tryggheten raskt.
+Brukere kan bruke ruteguide "Finn Nærmeste Tilfluktsrom" eller "Finn Nærmeste Brannstasjon" for å finne nærmeste tilfluktsrom eller brannstasjon ved bruk av GPS. SafeShelter tar i bruk din nåværende posisjon, identifiserer det nærmeste beredskapsfasilitet før den beregner den optimale ruten. Systemet viser avstand og estimert reisetid for å hjelpe deg å nå tryggheten raskt.
+
 ![Automatically Find Nearest Shelter Using GPS](images/nearest-shelter-gps.png)
+![Automatically Find Nearest Station Using GPS](images/nearest-station-gps.png)
+
