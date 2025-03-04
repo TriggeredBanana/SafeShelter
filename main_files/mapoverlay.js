@@ -329,7 +329,7 @@ function findNearestShelter() {
             .bindPopup('<strong>Din posisjon</strong>')
             .openPopup();
             
-            showNotification("Posisjon funnet! Finner nærmeste tilfluktsrom...", "success");
+            showNotification("Posisjon funnet! Finner nærmeste tilfluktsrom...", "suksess");
             
             // Finn nærmeste tilfluktsrom ved å beregne avstander
             findNearest(userLat, userLng);
@@ -394,7 +394,7 @@ function findNearestFireStation() {
             .bindPopup('<strong>Din posisjon</strong>')
             .openPopup();
 
-            showNotification("Posisjon funnet! Finner nærmeste brannstasjon...", "success");
+            showNotification("Posisjon funnet! Finner nærmeste brannstasjon...", "suksess");
 
             // Finn nærmeste brannstasjon
             findNearestStation(userLat, userLng);
@@ -628,7 +628,7 @@ function displayRouteAndDistance(userLat, userLng, shelterLat, shelterLng, route
     });
     
     // Vis suksessmelding
-    showNotification(`Fant nærmeste tilfluktsrom (${distanceText}, omtrent ${durationText} med bil)`, "success");
+    showNotification(`Fant nærmeste tilfluktsrom (${distanceText}, omtrent ${durationText} med bil)`, "suksess");
     
     // Utløs et klikk på det nærmeste tilfluktsrommet for å vise detaljene i sidefeltet
     nearestShelter.fire('click');
@@ -722,7 +722,7 @@ async function searchLocation(query) {
                 duration: 1
             });
             
-            showNotification("Posisjon funnet!", "success");
+            showNotification("Posisjon funnet!", "suksess");
         } else {
             showNotification("Ingen resultater funnet for søket ditt", "warning");
         }

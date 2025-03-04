@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SafeShelter - Emergency Response System</title>
+    <title>SafeShelter - Beredskapssystem</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
@@ -24,57 +24,57 @@
             
             <div class="sidebar-content">
                 <div class="status-panel">
-                    <h3>Emergency Services Status</h3>
+                    <h3>Beredskapsstatus</h3>
                     <div class="status-indicators">
                         <div class="status-item status-ok">
                             <i class="fas fa-fire-extinguisher"></i>
-                            <span>Fire Services: Active</span>
+                            <span>Brannvesen: Tilgjengelig</span>
                         </div>
                         <div class="status-item status-ok">
                             <i class="fas fa-bolt"></i>
-                            <span>Weather Status: Good</span>
+                            <span>Værstatus: God</span>
                         </div>
                         <div class="status-item status-ok">
                             <i class="fas fa-droplet"></i>
-                            <span>Flood Warning: None</span>
+                            <span>Flomvarsel: Ingen</span>
                         </div>
                     </div>
                 </div>
 
                 <div class="info-panel" id="shelter-info">
-                    <h3>Safety Information</h3>
-                    <p>Select a shelter or fire station on the map to see details.</p>
+                    <h3>Sikkerhetsinformasjon</h3>
+                    <p>Velg et tilfluktsrom eller en brannstasjon på kartet for å se detaljer.</p>
                     <div id="selected-location-details"></div>
                 </div>
                 
                 <div class="stats-panel">
-                    <h3>Shelter Overview</h3>
+                    <h3>Tilfluktsromoversikt</h3>
                     <div class="stat-card">
                         <div class="stat-value" id="total-shelters">--</div>
-                        <div class="stat-label">Total Shelters</div>
+                        <div class="stat-label">Totalt antall tilfluktsrom</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-value" id="total-capacity">--</div>
-                        <div class="stat-label">Total Capacity</div>
+                        <div class="stat-label">Total kapasitet</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-value" id="fire-stations">--</div>
-                        <div class="stat-label">Fire Stations</div>
+                        <div class="stat-label">Brannstasjoner</div>
                     </div>
                 </div>
                 
                 <div class="action-buttons">
                     <button id="find-nearest" class="action-button primary">
                         <i class="fas fa-home" aria-hidden="true"></i>
-                        Find Nearest Shelter
+                        Finn Nærmeste Tilfluktsrom
                     </button>
                     <button id="find-nearest-station" class="action-button primary">
                         <i class="fas fa-fire" aria-hidden="true"></i>
-                        Find Nearest Fire Station
+                        Finn Nærmeste Brannstasjon
                     </button>
                     <button id="directions-button" class="action-button secondary">
                         <i class="fas fa-route" aria-hidden="true"></i>
-                        Get Directions
+                        Få Veibeskrivelse
                     </button>
                 </div>
             </div>
@@ -109,47 +109,47 @@
             <!-- Kart kontroller og "toggles" -->
             <div id="map-controls">
                 <div class="control-section">
-                    <h4>Layers</h4>
+                    <h4>Lag</h4>
                     <div class="toggle-button-group">
                         <button id="toggle-shelters" class="toggle-button active">
                             <i class="fas fa-person-shelter"></i>
-                            <span>Shelters</span>
+                            <span>Tilfluktsrom</span>
                         </button>
                         <button id="toggle-firestations" class="toggle-button active">
                             <i class="fas fa-fire-flame-simple"></i>
-                            <span>Fire Stations</span>
+                            <span>Brannstasjoner</span>
                         </button>
                         <button id="toggle-flood-zones" class="toggle-button active">
                             <i class="fas fa-water"></i>
-                            <span>Flood Zones</span>
+                            <span>Flomsoner</span>
                         </button>
                     </div>
                 </div>
                 
                 <div class="control-section">
-                    <h4>Map Style</h4>
+                    <h4>Kartstil</h4>
                     <div class="map-style-selector">
-                        <button class="map-style active" data-style="streets">Streets</button>
-                        <button class="map-style" data-style="satellite">Satellite</button>
-                        <button class="map-style" data-style="terrain">Terrain</button>
+                        <button class="map-style active" data-style="streets">Gater</button>
+                        <button class="map-style" data-style="satellite">Satellitt</button>
+                        <button class="map-style" data-style="terrain">Terreng</button>
                     </div>
                 </div>
             </div>
 
             <!-- "Legend" for kartet -->
             <div class="map-legend">
-                <h4>Icon Meanings:</h4>
+                <h4>Symbolforklaring:</h4>
                 <div class="legend-item">
                     <div class="legend-marker shelter-marker"></div>
-                    <span>Shelter</span>
+                    <span>Tilfluktsrom</span>
                 </div>
                 <div class="legend-item">
                     <div class="legend-marker fire-marker"></div>
-                    <span>Fire Station</span>
+                    <span>Brannstasjon</span>
                 </div>
                 <div class="legend-item">
                     <div class="legend-marker flood-zone"></div>
-                    <span>Flood Risk Zone</span>
+                    <span>Flomrisikosone</span>
                 </div>
             </div>
 
@@ -159,7 +159,7 @@
             <!-- Last inn overlay -->
             <div id="loading-overlay">
                 <div class="spinner"></div>
-                <div class="loading-text">Loading map data...</div>
+                <div class="loading-text">Laster inn kartdata...</div>
             </div>
         </div>
     </div>
@@ -167,11 +167,11 @@
     <!-- "Tour guide" overlegg -->
     <div id="tour-overlay" class="hidden">
         <div class="tour-content">
-            <h3>Welcome to SafeShelter</h3>
-            <p id="tour-step-text">This tool helps you locate emergency shelters and fire stations.</p>
+            <h3>Velkommen til SafeShelter</h3>
+            <p id="tour-step-text">Dette verktøyet hjelper deg med å finne tilfluktsrom og brannstasjoner.</p>
             <div class="tour-buttons">
-                <button id="tour-skip">Skip Tour</button>
-                <button id="tour-next" class="primary">Next</button>
+                <button id="tour-skip">Hopp over</button>
+                <button id="tour-next" class="primary">Neste</button>
             </div>
         </div>
     </div>
