@@ -76,7 +76,7 @@ function initializeMap() {
     
     // Opprett egendefinerte ikoner
     window.shelterIcon = L.divIcon({
-        html: '<div class="shelter-marker-icon"><i class="fas fa-person-shelter"></i></div>',
+        html: '<div class="shelter-marker-icon"><i class="fas fa-home"></i></div>',
         iconSize: [30, 30],
         iconAnchor: [15, 30],
         popupAnchor: [0, -30],
@@ -84,7 +84,7 @@ function initializeMap() {
     });
     
     window.fireStationIcon = L.divIcon({
-        html: '<div class="fire-marker-icon"><i class="fas fa-fire-flame-simple"></i></div>',
+        html: '<div class="fire-marker-icon"><i class="fas fa-fire"></i></div>',
         iconSize: [30, 30],
         iconAnchor: [15, 30],
         popupAnchor: [0, -30],
