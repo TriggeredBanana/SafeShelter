@@ -115,8 +115,8 @@ function setupEventListeners() {
     });
     
     document.getElementById('toggle-firestations').addEventListener('click', function() {
-        this.classList.toggle('active');
-        if (this.classList.contains('active')) {
+        this.classList.toggle('fire-active');
+        if (this.classList.contains('fire-active')) {
             map.addLayer(window.fireStationLayer);
         } else {
             map.removeLayer(window.fireStationLayer);
@@ -125,8 +125,8 @@ function setupEventListeners() {
     
     // Implementerer toggle-funksjonalitet for flomsoner
     document.getElementById('toggle-flood-zones').addEventListener('click', function() {
-        this.classList.toggle('active');
-        if (this.classList.contains('active')) {
+        this.classList.toggle('flood-active');
+        if (this.classList.contains('flood-active')) {
             if (window.floodZoneLayer) {
                 map.addLayer(window.floodZoneLayer);
             }
