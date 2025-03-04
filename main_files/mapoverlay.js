@@ -6,6 +6,7 @@
 // Globale variabler for karttilgang fra andre skript
 let map;
 let searchMarkers;
+let floodZoneLayer; // Legger til variabel for flomsoner
 
 // Initialiser når DOM er lastet
 document.addEventListener('DOMContentLoaded', function() {
@@ -51,7 +52,18 @@ function initializeMap() {
         maxClusterRadius: 60
     }).addTo(map);
     
-    window.floodZoneLayer = L.layerGroup().addTo(map);
+    // Oppretter flomsonelag fra NVE WMS-tjeneste
+        const floodZoneLayer = L.tileLayer.wms("https://nve.geodataonline.no/arcgis/services/FlomAktsomhet/MapServer/WmsServer", {
+        layers: "Flom_aktsomhetsomrade",
+        styles: "",
+        format: "image/png",
+        transparent: true,
+        crs: L.CRS.EPSG3857, // Leaflet bruker EPSG:3857
+        attribution: "Kartdata: © NVE"
+        });
+    
+    // Sett floodZoneLayer globalt tilgjengelig
+    window.floodZoneLayer = floodZoneLayer;
     
     // Lag for søkeresultater
     searchMarkers = L.layerGroup().addTo(map);
@@ -111,12 +123,17 @@ function setupEventListeners() {
         }
     });
     
+    // Implementerer toggle-funksjonalitet for flomsoner
     document.getElementById('toggle-flood-zones').addEventListener('click', function() {
         this.classList.toggle('active');
         if (this.classList.contains('active')) {
-            map.addLayer(window.floodZoneLayer);
+            if (window.floodZoneLayer) {
+                map.addLayer(window.floodZoneLayer);
+            }
         } else {
-            map.removeLayer(window.floodZoneLayer);
+            if (window.floodZoneLayer) {
+                map.removeLayer(window.floodZoneLayer);
+            }
         }
     });
     
@@ -163,6 +180,9 @@ function setupEventListeners() {
     
     // Håndter vindustørrelsesendring
     window.addEventListener('resize', () => map.invalidateSize());
+
+    document.getElementById('find-nearest-station').addEventListener('click', findNearestFireStation);
+
 }
 
 // Endre kartstil
@@ -309,7 +329,7 @@ function findNearestShelter() {
             .bindPopup('<strong>Din posisjon</strong>')
             .openPopup();
             
-            showNotification("Posisjon funnet! Finner nærmeste tilfluktsrom...", "success");
+            showNotification("Posisjon funnet! Finner nærmeste tilfluktsrom...", "suksess");
             
             // Finn nærmeste tilfluktsrom ved å beregne avstander
             findNearest(userLat, userLng);
@@ -343,6 +363,54 @@ function findNearestShelter() {
         }
     );
 }
+
+function findNearestFireStation() {
+    showNotification("Finner din posisjon...", "info");
+
+    if (!navigator.geolocation) {
+        showNotification("Geolokalisering støttes ikke av din nettleser", "error");
+        return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+        function(position) {
+            const userLat = position.coords.latitude;
+            const userLng = position.coords.longitude;
+
+            // Fjern tidligere søkemarkører
+            searchMarkers.clearLayers();
+
+            // Legg til brukerposisjonsmarkør
+            const userIcon = L.divIcon({
+                html: '<i class="fas fa-user" style="color:#0466c8; font-size:24px;"></i>',
+                iconSize: [24, 24],
+                iconAnchor: [12, 24]
+            });
+
+            const userMarker = L.marker([userLat, userLng], {
+                icon: userIcon
+            })
+            .addTo(searchMarkers)
+            .bindPopup('<strong>Din posisjon</strong>')
+            .openPopup();
+
+            showNotification("Posisjon funnet! Finner nærmeste brannstasjon...", "suksess");
+
+            // Finn nærmeste brannstasjon
+            findNearestStation(userLat, userLng);
+        },
+        function(error) {
+            console.error("Geolokaliseringsfeil:", error);
+            showNotification("Kunne ikke hente posisjon.", "error");
+        },
+        {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0
+        }
+    );
+}
+
 
 // Finn nærmeste tilfluktsrom ved å beregne avstander
 function findNearest(userLat, userLng) {
@@ -392,7 +460,50 @@ function findNearest(userLat, userLng) {
     } else {
         showNotification("Ingen tilfluktsrom funnet i nærheten", "warning");
     }
+
+    
 }
+
+function findNearestStation(userLat, userLng) {
+    if (!window.fireStationLayer || window.fireStationLayer.getLayers().length === 0) {
+        showNotification("Ingen brannstasjonsdata tilgjengelig", "error");
+        return;
+    }
+
+    let nearestStation = null;
+    let shortestDistance = Infinity;
+
+    // Gå gjennom alle brannstasjonsmarkører for å finne den nærmeste
+    window.fireStationLayer.eachLayer(function(layer) {
+        const stationLat = layer.getLatLng().lat;
+        const stationLng = layer.getLatLng().lng;
+        const directDistance = calculateDistance(userLat, userLng, stationLat, stationLng);
+
+        if (directDistance < shortestDistance) {
+            shortestDistance = directDistance;
+            nearestStation = layer;
+        }
+    });
+
+    if (nearestStation) {
+        const stationLat = nearestStation.getLatLng().lat;
+        const stationLng = nearestStation.getLatLng().lng;
+
+        showNotification("Beregner rute til nærmeste brannstasjon...", "info");
+
+        // Hent veiavstand og tegn ruten
+        getRoadDistanceAndRoute(
+            userLat, userLng,
+            stationLat, stationLng,
+            function(routeData) {
+                displayRouteAndDistance(userLat, userLng, stationLat, stationLng, routeData, nearestStation);
+            }
+        );
+    } else {
+        showNotification("Ingen brannstasjoner funnet i nærheten", "warning");
+    }
+}
+
 
 // Hent veiavstand og rute mellom to punkter ved hjelp av OSRM
 function getRoadDistanceAndRoute(startLat, startLng, endLat, endLng, callback) {
@@ -517,7 +628,7 @@ function displayRouteAndDistance(userLat, userLng, shelterLat, shelterLng, route
     });
     
     // Vis suksessmelding
-    showNotification(`Fant nærmeste tilfluktsrom (${distanceText}, omtrent ${durationText} med bil)`, "success");
+    showNotification(`Fant nærmeste tilfluktsrom (${distanceText}, omtrent ${durationText} med bil)`, "suksess");
     
     // Utløs et klikk på det nærmeste tilfluktsrommet for å vise detaljene i sidefeltet
     nearestShelter.fire('click');
@@ -611,7 +722,7 @@ async function searchLocation(query) {
                 duration: 1
             });
             
-            showNotification("Posisjon funnet!", "success");
+            showNotification("Posisjon funnet!", "suksess");
         } else {
             showNotification("Ingen resultater funnet for søket ditt", "warning");
         }
@@ -636,4 +747,5 @@ function debounce(func, delay) {
 window.map = map;
 window.searchLocation = searchLocation;
 window.findNearestShelter = findNearestShelter;
+window.findNearestFireStation = findNearestFireStation;
 window.changeMapStyle = changeMapStyle;
