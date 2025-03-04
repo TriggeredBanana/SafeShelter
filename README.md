@@ -9,7 +9,7 @@
 - Henrik Sæverud Lorentzen - henriksl@uia.no
 
 ## Prosjektbeskrivelse
-Et interaktivt kartprosjekt for å lokalisere tilfluktsrom, brannstasjoner og utsatte flomområder i krisesituasjoner som ved brann eller flom.
+**SafeShelter** er en fullstack geografisk beredskapsløsning som kombinerer sanntidsposisjonering med visualisering av tilfluktsrom, brannstasjoner og flomutsatte områder. Systemet muliggjør rask identifisering av tryggeste ruter til nærmeste sikkerhetsfasiliteter under krisesituasjoner som flom, og representerer innovativ anvendelse av geografisk IT i samfunnssikkerhet.
 
 ---
 
@@ -70,6 +70,27 @@ Hvordan kan et geografisk informasjonssystem bruke sanntidsposisjon til å hjelp
     - [TilfluktsromOffentlige](https://kartkatalog.geonorge.no/metadata/tilfluktsrom-offentlige/dbae9aae-10e7-4b75-8d67-7f0e8828f3d8?search=Tilfluk)
  
     - [Flomsoner](https://kartkatalog.geonorge.no/metadata/flomsoner/e95008fc-0945-4d66-8bc9-e50ab3f50401) (WMS, NVE)
+
+---
+
+### **Databehandlingsprosess:**
+
+Arbeidet med geodata foregikk i flere trinn:
+
+1. **Datainnsamling:** Hentet data i PostGIS-format fra GeoNorge for tilfluktsrom og brannstasjoner.
+
+2. **Forberedende behandling i QGIS:**
+   - Filtrering av datasett for optimalisering
+   - Transformasjon fra EUREF89/UTM32N (EPSG:25832) til WGS84 (EPSG:4326) for kartkompatibilitet
+   - Attributtfiltrering for å beholde kun nødvendige felter som blant annet adresse, kapasitet og stasjonstype
+
+3. **Transformasjon og optimalisering:**
+   - Konvertering av geometry-datatyper
+   - Tilrettelegging av data for effektiv henting via API-kall
+
+4. **Koordinattransformasjon:**
+   - Implementert Proj4js-bibliotek for håndtering av koordinattransformasjoner direkte i nettleseren
+   - Dynamisk transformasjon mellom projeksjoner ved behov
 
 ---
 
@@ -143,6 +164,17 @@ Frontend bruker Leaflet.js for interaktive kartvisualiseringer og HTML/CSS/JavaS
 - Aktivere/deaktivere markørlag (tilfluktsrom, brannstasjoner, flomsoner)
 - Fullskjermsmodus
 - Logo-klikk for rask tilbakestilling av kartet
+
+### **7. Analyse og visualisering av resultater**
+- **Geografiske analyser:**
+  - Nærmeste nabo-analyse for å identifisere korteste avstand til nødfasiliteter
+  - Analyse via OSRM API for å beregne faktiske kjøreruter basert på veinettverk
+  - Analyse for å identifisere sikkerhetsfasiliteter innenfor spesifikke avstander
+
+- **Analyseresultater visualiseres gjennom:**
+  - Ruter med optimal veivalg til nærmeste fasiliteter
+  - Avstand og tidsestimater presentert direkte på kartet
+  - Dynamisk klyngedannelse av markører for å illustrere tettheten av tilfluktsrom og brannstasjoner
 
 ---
 
