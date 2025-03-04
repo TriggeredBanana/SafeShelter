@@ -216,45 +216,104 @@ Frontend bruker Leaflet.js for interaktive kartvisualiseringer og HTML/CSS/JavaS
 
 ## **En Rask Oversikt Over Applikasjonen**
 
-#### **Hovedgrensesnitt for SafeShelter**
+#### **Hovedgrensesnitt for SafeShelter** ####
 Applikasjonen tilbyr et intuitivt grensesnitt med informasjon om tilfluktsrom, brannstasjoner og utsatte flomsoner. Sidepanelet viser statusindikator, detaljert informasjon om tilfluktsrom, og nøkkelstatistikk. Det interaktive kartet viser plasseringen av tilfluktsrom (røde markører) og brannstasjoner (oransje markører), med lett tilgang til funksjoner for å finne nærmeste tilfluktsrom og/eller brannstasjon, samt en mer detaljert veibeskrivelse av valgt destinasjon på kartet gjennom Google Maps.
+<details>
+  <summary>📍 Klikk for å vise hovedgrensesnittet</summary>
 
-![main page](images/main-page.png)
+  ![main page](images/main-page.png)
+
+</details>
 <br></br>
+
+**Omvisningsfunksjon**
 
 Gjennom omvisningsfunksjonen kan nye brukere få en guidet omvisning av applikasjonens funksjoner. Omvisningen fremhever nøkkelelementer med en pulserende gul ramme, og gir trinnvis instruksjon om hvordan systemet brukes effektivt i nødsituasjoner. Brukere kan navigere gjennom hvert trinn eller hoppe over omvisningen helt.
+<details>
+  <summary>📍 Klikk for å vise omvisningen</summary>
 
-![tour guide 1](images/tour-guide-1.png)
-![tour guide 2](images/tour-guide-2.png)
+  ![tour guide 1](images/tour-guide-1.png)
+  ![tour guide 2](images/tour-guide-2.png)
+
+</details>
 <br></br>
 
-Når en brannstasjon velges på kartet, vises detaljert informasjon i sidepanelet. Dette inkluderer stasjonens avdeling, stasjonstype, og kontaktinformasjon for nødstilfeller.
+**Informasjonspanel for tilfluktsrom og brannstasjoner**
 
-![Layer Toggles & Safety Information](images/layer-toggles-safety-info.png)
+Når en brannstasjon velges på kartet, vises detaljert informasjon i sidepanelet. Dette inkluderer stasjonens avdeling, stasjonstype, og kontaktinformasjon for nødstilfeller.
+<details>
+  <summary>📍 Klikk for å vise brannstasjonens informasjonsvisning</summary>
+
+  ![Layer Toggles & Safety Information](images/layer-toggles-safety-info.png)
+  
+</details>
 
 Velger man et tilfluktsrom vises kritisk informasjon som plassering, total kapasitet og tilgangsinstruksjoner. Sikkerhetsmerknadene gir ytterligere veiledning for nødsituasjoner.
 
-![Layer Toggles & Safety Information 2](images/layer-toggles-safety-info-2.png)
+<details>
+  <summary>📍 Klikk for å vise tilfluktsromsinformasjon</summary>
+
+  ![Layer Toggles & Safety Information 2](images/layer-toggles-safety-info-2.png)
+
+</details>
 <br></br>
 
-#### Søkefunksjonalitet: Den smarte søkefunksjonen tilbyr adresseforslag mens du skriver, noe som gjør det enkelt å raskt finne spesifikke steder eller områder.
+#### **Søkefunksjonalitet**
+
+Den smarte søkefunksjonen tilbyr adresseforslag mens du skriver, noe som gjør det enkelt å raskt finne spesifikke steder eller områder.
 Etter å ha valgt et søkeresultat, sentreres kartet på plasseringen og viser en markør. Brukere kan deretter finne nærliggende tilfluktsrom eller utforske nærområdet.
+<details>
+  <summary>📍 Klikk for å vise søkefunksjonen</summary>
 
-![Interactive Search Bar With Results](images/search-bar-results.png)
-![Interactive Search Bar With Results 2](images/search-bar-results-2.png)
+  ![Interactive Search Bar With Results](images/search-bar-results.png)
+  ![Interactive Search Bar With Results 2](images/search-bar-results-2.png)
+
+</details>
 <br></br>
+
+#### **Kartlag og visninger**
 
 Satellittkartet gir detaljerte luftbilder, nyttig for å identifisere landemerker og navigere i områder hvor gatekart kan være utilstrekkelige.
+<details>
+  <summary>📍 Klikk for å vise satellittkart</summary>
 
-![Different Map Types](images/map-type-satellite.png)
+  ![Different Map Types](images/map-type-satellite.png)
+
+</details>
 
 Terrengvisningen fremhever topografiske elementer, som kan være særlig verdifullt ved vurdering av flomrisiko eller planlegging av evakueringsruter i fjellrike områder.
 
-![Different Map Types 2](images/map-type-terrain.png)
+<details>
+  <summary>📍 Klikk for å vise terrengkart</summary>
+
+  ![Different Map Types 2](images/map-type-terrain.png)
+
+</details>
 <br></br>
+
+#### **Finn nærmeste tilfluktsrom eller brannstasjon**
 
 Brukere kan bruke ruteguide "Finn Nærmeste Tilfluktsrom" eller "Finn Nærmeste Brannstasjon" for å finne nærmeste tilfluktsrom eller brannstasjon ved bruk av GPS. SafeShelter tar i bruk din nåværende posisjon, identifiserer det nærmeste beredskapsfasilitet før den beregner den optimale ruten. Systemet viser avstand og estimert reisetid for å hjelpe deg å nå tryggheten raskt.
 
-![Automatically Find Nearest Shelter Using GPS](images/nearest-shelter-gps.png)
-![Automatically Find Nearest Station Using GPS](images/nearest-station-gps.png)
+<details>
+  <summary>📍 Klikk for å vise GPS-funksjonen for tilfluktsrom</summary>
+
+  ![Automatically Find Nearest Shelter Using GPS](images/nearest-shelter-gps.png)
+  ![Automatically Find Nearest Station Using GPS](images/nearest-station-gps.png)
+
+</details>
+<br></br>
+
+#### **Flomsoner i Ulike Kartlag**
+
+Brukere kan visualisere flomutsatte områder gjennom et dedikert flomsonelag, som kan aktiveres eller deaktiveres etter behov. Laget er integrert med NVE sin WMS-tjeneste og vises sømløst over de forskjellige karttypene. Ved å kombinere flomdata med gatekart, satellittbilder og terrengkart kan brukerne få en mer nyansert forståelse av risikoen i ulike områder. Dette hjelper både innbyggere og nødetater med å identifisere trygge evakueringsruter i tilfelle flom.
+
+<details>
+  <summary>📍 Klikk her for å vise flomsoner i forskjellige kartlag</summary>
+
+  ![Flood Zones on Streets Map](images/flood-zones-streets.png)
+  ![Flood Zones on Satellite Map](images/flood-zones-satellite.png)
+  ![Flood Zones on Terrain Map](images/flood-zones-terrain.png)
+
+</details>
 
