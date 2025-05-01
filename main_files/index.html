@@ -12,16 +12,26 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
 </head>
 <body>
+    <header class="main-header">
+        <div class="header-content">
+            <div class="logo">
+                <a href="index.html" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: var(--space-sm);">
+                    <i class="fas fa-shield-alt"></i>
+                    <h1>SafeShelter</h1>
+                </a>
+            </div>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="index.html" class="active">Kart</a></li>
+                    <li><a href="feedback.html">Rapporter Sikkerhetsproblem</a></li>
+                    <li><a href="activeReports.html">Aktive Innmeldinger</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
     <div class="app-container">
         <!-- "Sidebar" med info panel -->
         <div id="sidebar" class="sidebar">
-            <div class="sidebar-header">
-                <div class="logo">
-                    <i class="fas fa-shield-alt"></i>
-                    <h2>SafeShelter</h2>
-                </div>
-            </div>
-            
             <div class="sidebar-content">
                 <div class="status-panel">
                     <h3>Beredskapsstatus</h3>

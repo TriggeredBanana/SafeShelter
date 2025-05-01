@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#e63946">
+    <title>SafeShelter - Innmeldinger</title>
+    <link rel="stylesheet" href="activeReports.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+</head>
+<body>
+    <header class="main-header">
+        <div class="header-content">
+            <div class="logo">
+                <a href="index.html" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: var(--space-sm);">
+                    <i class="fas fa-shield-alt"></i>
+                    <h1>SafeShelter</h1>
+                </a>
+            </div>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="index.html">Kart</a></li>
+                    <li><a href="feedback.html">Rapporter Sikkerhetsproblem</a></li>
+                    <li><a href="activeReports.html" class="active">Aktive Innmeldinger</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="reports-container">
+        <div class="page-intro">
+            <h2>Aktive Innmeldinger</h2>
+            <p>Se gjeldende innmeldinger om farlige forhold, blokkerte veier eller andre sikkerhetsproblemer i ditt område.</p>
+        </div>
+
+        <!-- Reports section - moved from feedback.html -->
+        <section class="reports-showcase">
+            <div class="showcase-header">
+                <div class="showcase-title">
+                    <h3><i class="fas fa-list-ul"></i> Innmeldingsoversikt</h3>
+                </div>
+                <div class="showcase-filters">
+                    <select id="filter-type">
+                        <option value="all">Alle typer</option>
+                        <option value="blocked-road">Blokkert vei</option>
+                        <option value="flooding">Flom</option>
+                        <option value="facility-issue">Problem med fasilitet</option>
+                        <option value="power-outage">Strømbrudd</option>
+                        <option value="hazard">Annen fare</option>
+                    </select>
+                    <select id="filter-severity">
+                        <option value="all">Alle alvorlighetsgrader</option>
+                        <option value="high">Høy</option>
+                        <option value="medium">Medium</option>
+                        <option value="low">Lav</option>
+                    </select>
+                    <button id="filter-nearby" class="btn-filter">
+                        <i class="fas fa-location-crosshairs"></i> Vis nærmeste
+                    </button>
+                    <button id="clear-reports" class="btn-filter" style="background-color: var(--gray-500);">
+                        <i class="fas fa-trash"></i> Tilbakestill
+                    </button>
+                </div>
+            </div>
+            
+            <div class="reports-content">
+                <div class="reports-list-container">
+                    <h4>Aktive Innmeldinger</h4>
+                    <div id="reports-list" class="reports-list">
+                        <div class="loading-reports">
+                            <div class="spinner"></div>
+                            <p>Laster inn rapporter...</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="reports-map-container">
+                    <h4>Geografisk oversikt</h4>
+                    <div id="reports-map" class="reports-map"></div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="main-footer">
+        <div class="footer-content">
+            <p>&copy; 2025 SafeShelter - Et verktøy for kriseberedskap</p>
+            <div class="emergency-contacts">
+                <span><strong>Nødnumre:</strong></span>
+                <span><i class="fas fa-ambulance"></i> Ambulanse: 113</span>
+                <span><i class="fas fa-fire"></i> Brann: 110</span>
+                <span><i class="fas fa-shield-alt"></i> Politi: 112</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.8.0/proj4.js"></script>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="activeReports.js"></script>
+</body>
+</html>

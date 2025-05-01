@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#e63946">
+    <title>SafeShelter - Sikkerhetsrapportering</title>
+    <link rel="stylesheet" href="feedback.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+</head>
+<body>
+    <header class="main-header">
+        <div class="header-content">
+            <div class="logo">
+                <a href="index.html" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: var(--space-sm);">
+                    <i class="fas fa-shield-alt"></i>
+                    <h1>SafeShelter</h1>
+                </a>
+            </div>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="index.html">Kart</a></li>
+                    <li><a href="feedback.html" class="active">Rapporter Sikkerhetsproblem</a></li>
+                    <li><a href="activeReports.html">Aktive Innmeldinger</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="feedback-container">
+        <div class="page-intro">
+            <h2>Har du oppdaget noe?</h2>
+            <p>Del viktig informasjon om farlige forhold, blokkerte veier, eller problemer med fasiliteter for å hjelpe andre i nødsituasjoner.</p>
+        </div>
+
+        <!-- Full-width report form section -->
+        <section class="report-section">
+            <div class="section-header">
+                <h3><i class="fas fa-exclamation-triangle"></i> Rapporter sikkerhetsproblem</h3>
+            </div>
+            <form id="safety-report-form" class="safety-form">
+                <div class="form-group" id="report-type-group">
+                    <label for="report-type">Type rapport</label>
+                    <select id="report-type" required>
+                        <option value="" disabled selected>Velg type</option>
+                        <option value="blocked-road">Blokkert vei</option>
+                        <option value="flooding">Flom</option>
+                        <option value="facility-issue">Problem med fasilitet</option>
+                        <option value="power-outage">Strømbrudd</option>
+                        <option value="hazard">Annen fare</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <div class="sev-container">
+                        <div class="sev-title">Velg nivå av alvorlighetsgrad:</div>
+                        <div class="sev-selector">
+                            <input type="radio" id="severity-low" name="severity" value="low">
+                            <label for="severity-low" class="sev-option sev-low">
+                                <div class="sev-icon">
+                                    <svg viewBox="0 0 24 24" class="sev-svg"><circle cx="12" cy="12" r="10"/></svg>
+                                    <span class="sev-level-icon">!</span>
+                                </div>
+                                <div class="sev-details">
+                                    <span class="sev-level">Lav</span>
+                                    <span class="sev-desc">Ikke presserende, informativ</span>
+                                </div>
+                                <div class="sev-check"></div>
+                            </label>
+                            
+                            <input type="radio" id="severity-medium" name="severity" value="medium" checked>
+                            <label for="severity-medium" class="sev-option sev-medium">
+                                <div class="sev-icon">
+                                    <svg viewBox="0 0 24 24" class="sev-svg"><circle cx="12" cy="12" r="10"/></svg>
+                                    <span class="sev-level-icon">!!</span>
+                                </div>
+                                <div class="sev-details">
+                                    <span class="sev-level">Medium</span>
+                                    <span class="sev-desc">Krever oppmerksomhet</span>
+                                </div>
+                                <div class="sev-check"></div>
+                            </label>
+                            
+                            <input type="radio" id="severity-high" name="severity" value="high">
+                            <label for="severity-high" class="sev-option sev-high">
+                                <div class="sev-icon">
+                                    <svg viewBox="0 0 24 24" class="sev-svg"><circle cx="12" cy="12" r="10"/></svg>
+                                    <span class="sev-level-icon">!!!</span>
+                                </div>
+                                <div class="sev-details">
+                                    <span class="sev-level">Høy</span>
+                                    <span class="sev-desc">Kritisk situasjon, haster</span>
+                                </div>
+                                <div class="sev-check"></div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="report-description">Beskrivelse</label>
+                    <textarea id="report-description" rows="4" maxlength="500" required placeholder="Beskriv situasjonen..."></textarea>
+                    <div class="char-count"><span id="char-count">0</span>/500</div>
+                </div>
+
+                <div class="form-group location-group">
+                    <label for="report-location">Lokasjon</label>
+                    <div class="location-inputs">
+                        <input type="text" id="location-address" placeholder="Søk etter adresse eller klikk på kartet">
+                        <button type="button" id="use-my-location">
+                            <i class="fas fa-crosshairs"></i> Bruk min posisjon
+                        </button>
+                    </div>
+                    <div id="address-suggestions" class="address-suggestions hidden"></div>
+                    <div id="location-map" class="location-map"></div>
+                    <p class="location-selected"><i class="fas fa-map-marker-alt"></i> <span id="selected-location">Ingen lokasjon valgt</span></p>
+                    <input type="hidden" id="report-lat">
+                    <input type="hidden" id="report-lng">
+                </div>
+
+                <div class="form-group">
+                    <label for="report-photo">Last opp bilde (valgfritt)</label>
+                    <div class="file-upload">
+                        <label for="report-photo" class="file-upload-label">
+                            <i class="fas fa-camera"></i>
+                            <span id="photo-filename">Velg bilde</span>
+                        </label>
+                        <input type="file" id="report-photo" accept="image/*">
+                    </div>
+                    <div id="image-preview" class="image-preview hidden"></div>
+                </div>
+
+                <div class="form-group contact-group">
+                    <label>
+                        <input type="checkbox" id="contact-toggle"> 
+                        Inkluder kontaktinformasjon (valgfritt)
+                    </label>
+                    <div id="contact-fields" class="hidden">
+                        <input type="text" id="contact-name" placeholder="Navn">
+                        <input type="tel" id="contact-phone" placeholder="Telefonnummer">
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-paper-plane"></i> Send rapport
+                    </button>
+                    <button type="reset" class="btn-secondary">
+                        <i class="fas fa-redo"></i> Nullstill
+                    </button>
+                </div>
+            </form>
+        </section>
+    </main>
+
+    <!-- Report submission confirmation modal -->
+    <div id="confirmation-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header success">
+                <i class="fas fa-check-circle"></i>
+                <h4>Rapport sendt!</h4>
+            </div>
+            <div class="modal-body">
+                <p>Takk for din rapport. Den er nå synlig for andre brukere og kan hjelpe i nødsituasjoner.</p>
+                <p>Rapport-ID: <span id="report-id">SR-12345</span></p>
+            </div>
+            <div class="modal-footer">
+                <button id="new-report-btn" class="btn-secondary">
+                    <i class="fas fa-plus"></i> Lag ny rapport
+                </button>
+                <button id="view-report-btn" class="btn-primary">
+                    <i class="fas fa-eye"></i> Se rapporten
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="main-footer">
+        <div class="footer-content">
+            <p>&copy; 2025 SafeShelter - Et verktøy for kriseberedskap</p>
+            <div class="emergency-contacts">
+                <span><strong>Nødnumre:</strong></span>
+                <span><i class="fas fa-ambulance"></i> Ambulanse: 113</span>
+                <span><i class="fas fa-fire"></i> Brann: 110</span>
+                <span><i class="fas fa-shield-alt"></i> Politi: 112</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.8.0/proj4.js"></script>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="feedback.js"></script>
+</body>
+</html>
