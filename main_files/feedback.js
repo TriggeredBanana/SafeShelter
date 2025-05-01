@@ -1,21 +1,10 @@
-/**
- * SafeShelter - Crowdsourced Safety Reports Module
- * Handles collection, display, and interaction with user-submitted safety reports
- */
-
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize maps
-    let locationMap, reportsMap;
+    let locationMap;
     let selectedLocationMarker = null;
-    let userPosition = null;
-    let allReports = [];
-    let reportMarkers = [];
-    let currentSlide = 0;
-    const reportsPerView = 3; // Number of reports visible at once in slider
     
     // DOM elements
     const reportForm = document.getElementById('safety-report-form');
-    const reportsSlider = document.getElementById('reports-slider');
     const descriptionField = document.getElementById('report-description');
     const charCount = document.getElementById('char-count');
     const imagePreview = document.getElementById('image-preview');
@@ -24,14 +13,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const contactToggle = document.getElementById('contact-toggle');
     const contactFields = document.getElementById('contact-fields');
     const confirmationModal = document.getElementById('confirmation-modal');
-    const filterType = document.getElementById('filter-type');
-    const filterSeverity = document.getElementById('filter-severity');
-    const filterNearby = document.getElementById('filter-nearby');
     const useMyLocationBtn = document.getElementById('use-my-location');
-    const slideNextBtn = document.getElementById('slide-next');
-    const slidePrevBtn = document.getElementById('slide-prev');
-    const toggleShowcaseBtn = document.getElementById('toggle-showcase');
-    const showcaseContent = document.querySelector('.showcase-content');
     
     // Initialize the application
     initializeApp();
@@ -39,10 +21,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Main initialization function
     function initializeApp() {
         initializeLocationMap();
-        initializeReportsMap();
         setupEventListeners();
-        loadExistingReports();
-        setupShowcaseToggle();
     }
     
     // Initialize the location selection map
@@ -56,14 +35,6 @@ document.addEventListener('DOMContentLoaded', function() {
         locationMap.on('click', function(e) {
             setSelectedLocation(e.latlng.lat, e.latlng.lng);
         });
-    }
-    
-    // Initialize the reports overview map
-    function initializeReportsMap() {
-        reportsMap = L.map('reports-map').setView([58.1599, 8.0182], 10);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap contributors'
-        }).addTo(reportsMap);
     }
     
     // Setup event listeners for user interaction
@@ -103,18 +74,8 @@ document.addEventListener('DOMContentLoaded', function() {
         
         document.getElementById('view-report-btn').addEventListener('click', function() {
             confirmationModal.classList.add('hidden');
-            document.querySelector('.reports-showcase').scrollIntoView({ behavior: 'smooth' });
-            
-            // Open the showcase if it's closed
-            if (showcaseContent.classList.contains('collapsed')) {
-                toggleShowcase();
-            }
+            window.location.href = 'activeReports.html';
         });
-        
-        // Filters
-        filterType.addEventListener('change', filterReports);
-        filterSeverity.addEventListener('change', filterReports);
-        filterNearby.addEventListener('click', showNearbyReports);
         
         // Use my location button
         useMyLocationBtn.addEventListener('click', useCurrentLocation);
@@ -139,44 +100,93 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }, 10);
         });
-        
-        // Slider navigation
-        slideNextBtn.addEventListener('click', () => {
-            navigateSlider(1);
-        });
-        
-        slidePrevBtn.addEventListener('click', () => {
-            navigateSlider(-1);
-        });
-    }
-    
-    // Setup showcase toggle functionality
-    function setupShowcaseToggle() {
-        // Start with the showcase expanded
-        showcaseContent.classList.remove('collapsed');
-        
-        toggleShowcaseBtn.addEventListener('click', toggleShowcase);
-    }
-    
-    // Toggle the showcase visibility
-    function toggleShowcase() {
-        showcaseContent.classList.toggle('collapsed');
-        
-        // Change the icon direction
-        const icon = toggleShowcaseBtn.querySelector('i');
-        if (showcaseContent.classList.contains('collapsed')) {
-            icon.classList.remove('fa-chevron-up');
-            icon.classList.add('fa-chevron-down');
-        } else {
-            icon.classList.remove('fa-chevron-down');
-            icon.classList.add('fa-chevron-up');
+
+        // Address autofill functionality
+        const locationAddressField = document.getElementById('location-address');
+        const addressSuggestions = document.getElementById('address-suggestions');
+
+        locationAddressField.addEventListener('input', debounce(function() {
+            const query = this.value.trim();
             
-            // Refresh the map when expanding
-            setTimeout(() => {
-                if (reportsMap) {
-                    reportsMap.invalidateSize();
-                }
-            }, 300);
+            // Clear suggestions if query is too short
+            if (query.length < 3) {
+                addressSuggestions.innerHTML = '';
+                addressSuggestions.classList.add('hidden');
+                return;
+            }
+            
+            // Fetch address suggestions
+            fetchAddressSuggestions(query);
+        }, 300));
+
+        // Close suggestions when clicking outside
+        document.addEventListener('click', function(e) {
+            if (e.target !== locationAddressField && e.target !== addressSuggestions) {
+                addressSuggestions.classList.add('hidden');
+            }
+        });
+
+        // Fetch address suggestions from Nominatim
+        async function fetchAddressSuggestions(query) {
+            try {
+                const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5`);
+                if (!response.ok) throw new Error('Network response was not ok');
+                
+                const data = await response.json();
+                displayAddressSuggestions(data);
+            } catch (error) {
+                console.error('Error fetching address suggestions:', error);
+            }
+        }
+
+        // Display address suggestions in dropdown
+        function displayAddressSuggestions(suggestions) {
+            // Clear previous suggestions
+            addressSuggestions.innerHTML = '';
+            
+            if (suggestions.length === 0) {
+                addressSuggestions.classList.add('hidden');
+                return;
+            }
+            
+            // Create suggestion items
+            suggestions.forEach(place => {
+                const item = document.createElement('div');
+                item.className = 'suggestion-item';
+                item.textContent = place.display_name;
+                
+                // When clicked, set the location
+                item.addEventListener('click', function() {
+                    // Update input field
+                    locationAddressField.value = place.display_name;
+                    
+                    // Set map location
+                    setSelectedLocation(
+                        parseFloat(place.lat),
+                        parseFloat(place.lon)
+                    );
+                    
+                    // Hide suggestions
+                    addressSuggestions.classList.add('hidden');
+                });
+                
+                addressSuggestions.appendChild(item);
+            });
+            
+            // Show suggestions
+            addressSuggestions.classList.remove('hidden');
+        }
+
+        // Add debounce utility function if not already present
+        function debounce(func, wait) {
+            let timeout;
+            return function(...args) {
+                const context = this;
+                clearTimeout(timeout);
+                timeout = setTimeout(() => {
+                    func.apply(context, args);
+                }, wait);
+            };
         }
     }
     
@@ -220,7 +230,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     const lat = position.coords.latitude;
                     const lng = position.coords.longitude;
                     
-                    userPosition = { lat, lng };
+                    // Set the selected location
                     setSelectedLocation(lat, lng);
                     
                     // Re-enable the button
@@ -228,25 +238,29 @@ document.addEventListener('DOMContentLoaded', function() {
                     useMyLocationBtn.innerHTML = '<i class="fas fa-crosshairs"></i> Bruk min posisjon';
                 },
                 function(error) {
-                    console.error("Geolocation error:", error);
-                    
-                    // Show error notification
-                    const notification = document.createElement('div');
-                    notification.className = 'notification error';
-                    notification.innerHTML = `
-                        <i class="fas fa-exclamation-circle"></i>
-                        <span>Kunne ikke hente posisjonen din. Vennligst prøv igjen eller klikk på kartet.</span>
-                    `;
-                    document.body.appendChild(notification);
-                    
-                    // Remove notification after 5 seconds
-                    setTimeout(() => {
-                        notification.remove();
-                    }, 5000);
+                    console.error('Geolocation error:', error);
                     
                     // Re-enable the button
                     useMyLocationBtn.disabled = false;
                     useMyLocationBtn.innerHTML = '<i class="fas fa-crosshairs"></i> Bruk min posisjon';
+                    
+                    // Show error message based on error code
+                    let errorMsg;
+                    switch(error.code) {
+                        case error.PERMISSION_DENIED:
+                            errorMsg = "Posisjonstilgang nektet. Vennligst aktiver posisjonstjenester.";
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            errorMsg = "Posisjonsinformasjon er utilgjengelig.";
+                            break;
+                        case error.TIMEOUT:
+                            errorMsg = "Forespørsel om posisjon tidsavbrutt.";
+                            break;
+                        default:
+                            errorMsg = "En ukjent feil oppstod under henting av posisjon.";
+                    }
+                    
+                    alert(errorMsg);
                 }, 
                 { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
             );
@@ -324,23 +338,29 @@ document.addEventListener('DOMContentLoaded', function() {
             timestamp: new Date().toISOString(),
             status: 'active',
             contact: contactName ? { name: contactName, phone: contactPhone } : null,
-            // In a real implementation, the photo would be uploaded to a server
             hasPhoto: document.getElementById('report-photo').files.length > 0
         };
         
-        // In a real implementation, this would be sent to a server
-        console.log('Submitting report:', report);
-        
-        // For demo, we'll just add it to our local collection
-        allReports.unshift(report);
-        
-        // Update the reports display
-        displayReports(allReports);
-        addReportToMap(report);
+        // Save report to localStorage
+        saveReportToLocalStorage(report);
         
         // Show confirmation modal
         document.getElementById('report-id').textContent = report.id;
         confirmationModal.classList.remove('hidden');
+    }
+    
+    // Add new function to save reports to localStorage
+    function saveReportToLocalStorage(report) {
+        // Get existing reports from localStorage or initialize empty array
+        const existingReports = JSON.parse(localStorage.getItem('safetyReports') || '[]');
+        
+        // Add new report
+        existingReports.push(report);
+        
+        // Save back to localStorage
+        localStorage.setItem('safetyReports', JSON.stringify(existingReports));
+        
+        console.log('Report saved to localStorage:', report);
     }
     
     // Validate form before submission
@@ -403,471 +423,5 @@ document.addEventListener('DOMContentLoaded', function() {
         const parent = element.parentNode;
         const errors = parent.querySelectorAll('.validation-error');
         errors.forEach(error => error.remove());
-    }
-    
-    // Load existing reports (mock data for demo)
-    function loadExistingReports() {
-        // Show loading state
-        reportsSlider.innerHTML = `
-            <div class="loading-reports">
-                <div class="spinner"></div>
-                <p>Laster inn rapporter...</p>
-            </div>
-        `;
-        
-        // Simulate API call delay
-        setTimeout(() => {
-            // Generate some mock reports
-            allReports = generateMockReports();
-            
-            // Display the reports
-            displayReports(allReports);
-            
-            // Add reports to map
-            allReports.forEach(report => addReportToMap(report));
-        }, 1500);
-    }
-    
-    // Generate mock safety reports
-    function generateMockReports() {
-        const types = ['blocked-road', 'flooding', 'facility-issue', 'power-outage', 'hazard'];
-        const severities = ['low', 'medium', 'high'];
-        const baseLocation = { lat: 58.1599, lng: 8.0182 }; // Kristiansand
-        
-        const mockReports = [];
-        
-        // Generate more reports for better carousel effect
-        for (let i = 0; i < 15; i++) {
-            // Generate a location within ~5km of base location
-            const lat = baseLocation.lat + (Math.random() - 0.5) * 0.1;
-            const lng = baseLocation.lng + (Math.random() - 0.5) * 0.1;
-            
-            // Create mock report
-            mockReports.push({
-                id: 'SR-' + Math.floor(Math.random() * 100000),
-                type: types[Math.floor(Math.random() * types.length)],
-                severity: severities[Math.floor(Math.random() * severities.length)],
-                description: getRandomDescription(types[Math.floor(Math.random() * types.length)]),
-                location: {
-                    lat: lat,
-                    lng: lng,
-                    address: `Nær ${lat.toFixed(4)}, ${lng.toFixed(4)}`
-                },
-                timestamp: new Date(Date.now() - Math.floor(Math.random() * 86400000 * 7)).toISOString(), // Within last week
-                status: Math.random() > 0.2 ? 'active' : 'resolved',
-                hasPhoto: Math.random() > 0.6
-            });
-        }
-        
-        return mockReports;
-    }
-    
-    // Get a random description based on report type
-    function getRandomDescription(type) {
-        const descriptions = {
-            'blocked-road': [
-                'Vei blokkert av falt tre. Ikke mulig å passere med bil.',
-                'Store vannmengder har oversvømt veien. Ufremkommelig.',
-                'Steinras har blokkert hele veibanen. Anbefaler omvei.'
-            ],
-            'flooding': [
-                'Vann stiger raskt i området. Første etasje oversvømt.',
-                'Elven har gått over sine bredder. Flere hus evakuert.',
-                'Kraftig flom i området. Ikke forsøk å krysse vannet med bil.'
-            ],
-            'facility-issue': [
-                'Ingen strøm i tilfluktsrommet. Nødlys fungerer ikke.',
-                'Inngangsdør til brannstasjonen er blokkert.',
-                'Vannlekkasje i tilfluktsrommet, deler av rommet er utilgjengelig.'
-            ],
-            'power-outage': [
-                'Strømbrudd i hele området. Har vart i over 3 timer.',
-                'Transformator skadet av lyn. Reparasjon pågår.',
-                'Flere strømledninger har falt ned. Hold avstand!'
-            ],
-            'hazard': [
-                'Giftig utslipp fra fabrikken. Hold vinduer lukket.',
-                'Ustabilt jordsmonn etter kraftig regn. Fare for ras.',
-                'Is på veien gjør kjøreforholdene svært farlige.'
-            ]
-        };
-        
-        const typeDescriptions = descriptions[type] || descriptions['hazard'];
-        return typeDescriptions[Math.floor(Math.random() * typeDescriptions.length)];
-    }
-    
-    // Display the reports in the horizontal slider
-    function displayReports(reports) {
-        const activeReports = reports.filter(report => report.status === 'active');
-        
-        if (activeReports.length === 0) {
-            reportsSlider.innerHTML = `
-                <div class="no-reports">
-                    <i class="fas fa-info-circle"></i>
-                    <p>Ingen rapporter funnet med valgte filtre.</p>
-                </div>
-            `;
-            return;
-        }
-        
-        // Create slide track container
-        reportsSlider.innerHTML = `<div class="slide-track"></div>`;
-        const slideTrack = reportsSlider.querySelector('.slide-track');
-        
-        // Add report cards to the track
-        activeReports.forEach(report => {
-            // Format timestamp to Norwegian locale
-            const reportDate = new Date(report.timestamp);
-            const formattedDate = reportDate.toLocaleString('no-NO', {
-                day: 'numeric',
-                month: 'short',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-            
-            // Get icon based on report type
-            const typeIcon = getReportTypeIcon(report.type);
-            
-            // Create report card
-            const reportCard = document.createElement('div');
-            reportCard.className = `report-card severity-${report.severity}`;
-            reportCard.dataset.reportId = report.id;
-            reportCard.innerHTML = `
-                <div class="report-header">
-                    <div class="report-type">
-                        <i class="${typeIcon}"></i>
-                        <span>${getReportTypeName(report.type)}</span>
-                    </div>
-                    <span class="report-date">${formattedDate}</span>
-                </div>
-                <div class="report-body">
-                    <p class="report-description">${report.description}</p>
-                    ${report.hasPhoto ? '<div class="report-has-photo"><i class="fas fa-camera"></i> Bilde tilgjengelig</div>' : ''}
-                </div>
-                <div class="report-footer">
-                    <div class="report-location">
-                        <i class="fas fa-map-marker-alt"></i>
-                        <span>${report.location.address}</span>
-                    </div>
-                    <button class="btn-show-on-map" data-report-id="${report.id}">
-                        <i class="fas fa-map"></i> Vis på kart
-                    </button>
-                </div>
-            `;
-            
-            slideTrack.appendChild(reportCard);
-        });
-        
-        // Add event listeners to "show on map" buttons
-        document.querySelectorAll('.btn-show-on-map').forEach(button => {
-            button.addEventListener('click', function() {
-                const reportId = this.getAttribute('data-report-id');
-                showReportOnMap(reportId);
-            });
-        });
-        
-        // Click on report card selects it on the map
-        document.querySelectorAll('.report-card').forEach(card => {
-            card.addEventListener('click', function(e) {
-                // Don't fire if clicking on the show on map button
-                if (e.target.closest('.btn-show-on-map')) return;
-                
-                const reportId = this.dataset.reportId;
-                showReportOnMap(reportId);
-            });
-        });
-        
-        // Reset slide position and update navigation state
-        currentSlide = 0;
-        navigateSlider(0);
-    }
-    
-    // Show report on the map
-    function showReportOnMap(reportId) {
-        const report = allReports.find(r => r.id === reportId);
-        
-        if (report) {
-            reportsMap.setView([report.location.lat, report.location.lng], 15);
-            
-            // Find the marker and open its popup
-            reportMarkers.forEach(marker => {
-                if (marker.reportId === reportId) {
-                    marker.openPopup();
-                }
-            });
-            
-            // Highlight the report card
-            document.querySelectorAll('.report-card').forEach(card => {
-                card.classList.remove('highlighted');
-                if (card.dataset.reportId === reportId) {
-                    card.classList.add('highlighted');
-                    
-                    // Find which slide it's on
-                    const allCards = Array.from(document.querySelectorAll('.report-card'));
-                    const cardIndex = allCards.indexOf(card);
-                    const slideIndex = Math.floor(cardIndex / reportsPerView);
-                    
-                    // Only navigate if not already on correct slide
-                    if (Math.floor(currentSlide / reportsPerView) !== slideIndex) {
-                        currentSlide = slideIndex * reportsPerView;
-                        navigateSlider(0);
-                    }
-                }
-            });
-        }
-    }
-    
-    // Add a report to the map
-    function addReportToMap(report) {
-        const markerIcon = L.divIcon({
-            html: `<div class="report-marker severity-${report.severity}"><i class="${getReportTypeIcon(report.type)}"></i></div>`,
-            className: '',
-            iconSize: [32, 32],
-            iconAnchor: [16, 32],
-            popupAnchor: [0, -32]
-        });
-        
-        const marker = L.marker([report.location.lat, report.location.lng], {
-            icon: markerIcon
-        }).addTo(reportsMap);
-        
-        // Store the report ID with the marker for reference
-        marker.reportId = report.id;
-        
-        // Create popup content
-        const popupContent = document.createElement('div');
-        popupContent.className = 'report-popup';
-        popupContent.innerHTML = `
-            <div class="report-popup-header severity-${report.severity}">
-                <i class="${getReportTypeIcon(report.type)}"></i>
-                <span>${getReportTypeName(report.type)}</span>
-            </div>
-            <div class="report-popup-body">
-                <p>${report.description}</p>
-                <div class="report-popup-meta">
-                    <span><i class="fas fa-calendar"></i> ${new Date(report.timestamp).toLocaleString('no-NO', {day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'})}</span>
-                    <span class="severity-badge severity-${report.severity}">${getSeverityName(report.severity)}</span>
-                </div>
-            </div>
-        `;
-        
-        marker.bindPopup(popupContent);
-        
-        // Store marker reference
-        reportMarkers.push(marker);
-        
-        return marker;
-    }
-    
-    // Navigate the slider
-    function navigateSlider(direction) {
-        const slideTrack = document.querySelector('.slide-track');
-        const cards = slideTrack.querySelectorAll('.report-card');
-        
-        // Calculate boundaries
-        const maxSlide = Math.max(0, cards.length - reportsPerView);
-        
-        // Update currentSlide
-        currentSlide = currentSlide + direction;
-        
-        // Ensure within bounds
-        currentSlide = Math.max(0, Math.min(currentSlide, maxSlide));
-        
-        // Update button states
-        slidePrevBtn.disabled = currentSlide === 0;
-        slideNextBtn.disabled = currentSlide >= maxSlide;
-        
-        // Apply the transform to move the slider
-        slideTrack.style.transform = `translateX(-${currentSlide * (100 / reportsPerView)}%)`;
-    }
-    
-    // Filter reports based on user selections
-    function filterReports() {
-        const typeFilter = filterType.value;
-        const severityFilter = filterSeverity.value;
-        
-        const filteredReports = allReports.filter(report => {
-            return (typeFilter === 'all' || report.type === typeFilter) &&
-                   (severityFilter === 'all' || report.severity === severityFilter);
-        });
-        
-        // Clear map markers
-        reportMarkers.forEach(marker => reportsMap.removeLayer(marker));
-        reportMarkers = [];
-        
-        // Display filtered reports
-        displayReports(filteredReports);
-        
-        // Add filtered markers to the map
-        filteredReports.forEach(report => addReportToMap(report));
-    }
-    
-    // Filter reports by proximity (show nearby reports)
-    function showNearbyReports() {
-        if (!userPosition) {
-            // If we don't have the user's position, get it
-            if ('geolocation' in navigator) {
-                filterNearby.disabled = true;
-                filterNearby.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Henter posisjon...';
-                
-                navigator.geolocation.getCurrentPosition(
-                    function(position) {
-                        userPosition = {
-                            lat: position.coords.latitude,
-                            lng: position.coords.longitude
-                        };
-                        
-                        filterNearby.disabled = false;
-                        filterNearby.innerHTML = '<i class="fas fa-location-crosshairs"></i> Vis nærmeste';
-                        
-                        // Now filter by proximity
-                        filterByProximity();
-                    },
-                    function(error) {
-                        console.error("Geolocation error:", error);
-                        
-                        filterNearby.disabled = false;
-                        filterNearby.innerHTML = '<i class="fas fa-location-crosshairs"></i> Vis nærmeste';
-                        
-                        alert("Kunne ikke hente posisjonen din. Vennligst prøv igjen eller velg en posisjon på kartet.");
-                    }, 
-                    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-                );
-            } else {
-                alert("Din nettleser støtter ikke geolokalisering.");
-            }
-        } else {
-            // We already have the user's position, so filter
-            filterByProximity();
-        }
-    }
-    
-    // Filter reports by proximity to user location
-    function filterByProximity() {
-        const maxDistance = 10; // kilometers
-        
-        const nearbyReports = allReports.filter(report => {
-            const distance = calculateDistance(
-                userPosition.lat, userPosition.lng,
-                report.location.lat, report.location.lng
-            );
-            
-            return distance <= maxDistance;
-        });
-        
-        // Sort by distance
-        nearbyReports.sort((a, b) => {
-            const distanceA = calculateDistance(
-                userPosition.lat, userPosition.lng,
-                a.location.lat, a.location.lng
-            );
-            const distanceB = calculateDistance(
-                userPosition.lat, userPosition.lng,
-                b.location.lat, b.location.lng
-            );
-            
-            return distanceA - distanceB;
-        });
-        
-        // Clear map markers
-        reportMarkers.forEach(marker => reportsMap.removeLayer(marker));
-        reportMarkers = [];
-        
-        // Display nearby reports
-        displayReports(nearbyReports);
-        
-        // Add nearby markers to the map
-        nearbyReports.forEach(report => addReportToMap(report));
-        
-        // Center map on user location with appropriate zoom
-        if (nearbyReports.length > 0) {
-            const bounds = L.latLngBounds([
-                [userPosition.lat, userPosition.lng],
-                ...nearbyReports.map(report => [report.location.lat, report.location.lng])
-            ]);
-            reportsMap.fitBounds(bounds);
-            
-            // Add user marker if not already there
-            addUserMarkerToMap();
-        } else {
-            reportsMap.setView([userPosition.lat, userPosition.lng], 13);
-            addUserMarkerToMap();
-        }
-    }
-    
-    // Add user marker to map
-    function addUserMarkerToMap() {
-        // Remove existing user marker if any
-        if (window.userLocationMarker) {
-            reportsMap.removeLayer(window.userLocationMarker);
-        }
-        
-        // Add new user marker
-        window.userLocationMarker = L.marker([userPosition.lat, userPosition.lng], {
-            icon: L.divIcon({
-                html: '<div class="user-marker"><i class="fas fa-user"></i></div>',
-                className: '',
-                iconSize: [32, 32],
-                iconAnchor: [16, 16]
-            })
-        }).addTo(reportsMap);
-        
-        window.userLocationMarker.bindPopup('Din posisjon');
-    }
-    
-    // Calculate distance between two points using the Haversine formula
-    function calculateDistance(lat1, lon1, lat2, lon2) {
-        const R = 6371; // Earth's radius in km
-        const dLat = toRadians(lat2 - lat1);
-        const dLon = toRadians(lon2 - lon1);
-        
-        const a = 
-            Math.sin(dLat/2) * Math.sin(dLat/2) +
-            Math.cos(toRadians(lat1)) * Math.cos(toRadians(lat2)) * 
-            Math.sin(dLon/2) * Math.sin(dLon/2);
-            
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-        const distance = R * c;
-        
-        return distance;
-    }
-    
-    function toRadians(degrees) {
-        return degrees * (Math.PI / 180);
-    }
-    
-    // Helper functions to get type name and icon
-    function getReportTypeName(type) {
-        const typeNames = {
-            'blocked-road': 'Blokkert vei',
-            'flooding': 'Flom',
-            'facility-issue': 'Problem med fasilitet',
-            'power-outage': 'Strømbrudd',
-            'hazard': 'Annen fare'
-        };
-        
-        return typeNames[type] || 'Ukjent type';
-    }
-    
-    function getReportTypeIcon(type) {
-        const typeIcons = {
-            'blocked-road': 'fas fa-road',
-            'flooding': 'fas fa-water',
-            'facility-issue': 'fas fa-building',
-            'power-outage': 'fas fa-bolt',
-            'hazard': 'fas fa-exclamation-triangle'
-        };
-        
-        return typeIcons[type] || 'fas fa-exclamation-circle';
-    }
-    
-    function getSeverityName(severity) {
-        const severityNames = {
-            'low': 'Lav',
-            'medium': 'Medium',
-            'high': 'Høy'
-        };
-        
-        return severityNames[severity] || 'Ukjent';
     }
 });

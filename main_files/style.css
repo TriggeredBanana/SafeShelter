@@ -1,7 +1,7 @@
 :root {
     /* Fargepalett - nødtema med god tilgjengelighet */
-    --primary: #e63946;      /* Nødrød */
-    --primary-dark: #c1121f;
+    --primary: #d64045;      /* Nødrød */
+    --primary-dark: #b5333a;
     --secondary: #0466c8;    /* Tillitsblå */
     --accent: #ffd166;       /* Varselgul */
     --success: #2a9d8f;      /* Trygg grønn */
@@ -77,6 +77,99 @@
     font-weight: 600;
     margin-bottom: var(--space-md);
   }
+
+  /* ----- Header & Navigation ----- */
+  .main-header {
+    background-color: var(--primary);
+    color: white;
+    padding: var(--space-md) var(--space-lg);
+    box-shadow: var(--shadow-md);
+    position: relative;
+    z-index: 100;
+  }
+
+  .main-header::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.1;
+    pointer-events: none;
+  }
+
+  .header-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 1280px;
+    width: 100%;
+    margin: 0;
+    padding: 0 var(--space-lg);
+  }
+  
+  .logo {
+    margin-right: auto; /* Push logo to the left */
+  }
+
+  .logo i {
+    font-size: 1.5rem;
+    filter: drop-shadow(0 1px 2px rgba(0,0,0,0.2));
+  }
+
+  .logo h1 {
+    margin-bottom: 0;
+    font-size: 1.5rem;
+    color: white;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  .main-nav {
+    margin-left: var(--space-xl);
+  }
+
+  .main-nav ul {
+    display: flex;
+    list-style: none;
+    gap: var(--space-lg);
+  }
+
+  .main-nav a {
+    color: white;
+    text-decoration: none;
+    font-weight: 600;
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--radius-md);
+    transition: all var(--transition-fast);
+    position: relative;
+  }
+
+  .main-nav a::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: var(--space-md);
+    right: var(--space-md);
+    height: 2px;
+    background-color: white;
+    transform: scaleX(0);
+    transform-origin: center;
+    transition: transform var(--transition-normal);
+  }
+
+  .main-nav a:hover::after {
+    transform: scaleX(1);
+  }
+
+  .main-nav a.active {
+    background-color: rgba(255, 255, 255, 0.15);
+  }
+
+  .main-nav a.active::after {
+    transform: scaleX(1);
+  }
   
   /* App-layout */
   .app-container {
@@ -112,6 +205,11 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+  }
+
+  .sidebar-header h2 {
+    margin-bottom: 0;
+    color: white;
   }
   
   .logo {

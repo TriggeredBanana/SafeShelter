@@ -15,13 +15,16 @@
     <header class="main-header">
         <div class="header-content">
             <div class="logo">
-                <i class="fas fa-shield-alt"></i>
-                <h1>SafeShelter</h1>
+                <a href="index.html" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: var(--space-sm);">
+                    <i class="fas fa-shield-alt"></i>
+                    <h1>SafeShelter</h1>
+                </a>
             </div>
             <nav class="main-nav">
                 <ul>
                     <li><a href="index.html">Kart</a></li>
-                    <li><a href="feedback.html" class="active">Sikkerhetsrapporter</a></li>
+                    <li><a href="feedback.html" class="active">Rapporter Sikkerhetsproblem</a></li>
+                    <li><a href="activeReports.html">Aktive Innmeldinger</a></li>
                 </ul>
             </nav>
         </div>
@@ -29,7 +32,7 @@
 
     <main class="feedback-container">
         <div class="page-intro">
-            <h2>Crowdsourced Sikkerhetsrapporter</h2>
+            <h2>Har du oppdaget noe?</h2>
             <p>Del viktig informasjon om farlige forhold, blokkerte veier, eller problemer med fasiliteter for å hjelpe andre i nødsituasjoner.</p>
         </div>
 
@@ -111,6 +114,7 @@
                             <i class="fas fa-crosshairs"></i> Bruk min posisjon
                         </button>
                     </div>
+                    <div id="address-suggestions" class="address-suggestions hidden"></div>
                     <div id="location-map" class="location-map"></div>
                     <p class="location-selected"><i class="fas fa-map-marker-alt"></i> <span id="selected-location">Ingen lokasjon valgt</span></p>
                     <input type="hidden" id="report-lat">
@@ -149,60 +153,6 @@
                     </button>
                 </div>
             </form>
-        </section>
-
-        <!-- Horizontal slider for active reports -->
-        <section class="reports-showcase">
-            <div class="showcase-header">
-                <div class="showcase-title">
-                    <h3><i class="fas fa-list-ul"></i> Aktive rapporter</h3>
-                    <button id="toggle-showcase" class="toggle-showcase-btn">
-                        <i class="fas fa-chevron-up"></i>
-                    </button>
-                </div>
-                <div class="showcase-filters">
-                    <select id="filter-type">
-                        <option value="all">Alle typer</option>
-                        <option value="blocked-road">Blokkert vei</option>
-                        <option value="flooding">Flom</option>
-                        <option value="facility-issue">Problem med fasilitet</option>
-                        <option value="power-outage">Strømbrudd</option>
-                        <option value="hazard">Annen fare</option>
-                    </select>
-                    <select id="filter-severity">
-                        <option value="all">Alle alvorlighetsgrader</option>
-                        <option value="high">Høy</option>
-                        <option value="medium">Medium</option>
-                        <option value="low">Lav</option>
-                    </select>
-                    <button id="filter-nearby" class="btn-filter">
-                        <i class="fas fa-location-crosshairs"></i> Vis nærmeste
-                    </button>
-                </div>
-            </div>
-            
-            <div class="showcase-content">
-                <div class="showcase-slider-container">
-                    <button id="slide-prev" class="slide-nav-btn slide-prev">
-                        <i class="fas fa-chevron-left"></i>
-                    </button>
-                    
-                    <div id="reports-slider" class="reports-slider">
-                        <div class="loading-reports">
-                            <div class="spinner"></div>
-                            <p>Laster inn rapporter...</p>
-                        </div>
-                    </div>
-                    
-                    <button id="slide-next" class="slide-nav-btn slide-next">
-                        <i class="fas fa-chevron-right"></i>
-                    </button>
-                </div>
-                
-                <div class="showcase-map-container">
-                    <div id="reports-map" class="reports-map"></div>
-                </div>
-            </div>
         </section>
     </main>
 
