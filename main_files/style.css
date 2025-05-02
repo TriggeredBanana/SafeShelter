@@ -75,7 +75,12 @@
     padding: var(--space-md) var(--space-lg);
     box-shadow: var(--shadow-md);
     position: relative;
+    height: 70px;
     z-index: 100;
+  }
+
+  .app-container, main.feedback-container, main.reports-container {
+    height: calc(100vh - 70px);
   }
 
   .main-header::after {
@@ -97,10 +102,13 @@
     width: 100%;
     margin: 0;
     padding: 0 var(--space-lg);
+    position: relative;
   }
   
   .logo {
-    margin-right: auto; /* Push logo to the left */
+    margin-right: auto;
+    position: relative;
+    z-index: 2;
   }
 
   .logo i {
@@ -116,8 +124,18 @@
     letter-spacing: -0.01em;
   }
 
+  #logo-shield {
+    margin-top: 1px;
+  }
+
   .main-nav {
-    margin-left: var(--space-xl);
+    position: absolute;
+    left: 50;
+    right: 0;
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+    z-index: 1;
   }
 
   .main-nav ul {
@@ -431,7 +449,7 @@
   #search-container {
     position: absolute;
     top: var(--space-lg);
-    left: 50%;
+    left: 43%;
     transform: translateX(-50%);
     z-index: 1002;
     width: 100%;

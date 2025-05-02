@@ -97,13 +97,17 @@ main {
 /* ----- Header & Navigation ----- */
 .main-header {
     background-color: var(--primary);
-    background-image: linear-gradient(to right, var(--primary), var(--primary-dark));
     color: white;
     padding: var(--space-md) var(--space-lg);
     box-shadow: var(--shadow-md);
     position: relative;
+    height: 70px;
     z-index: 100;
-}
+  }
+
+.app-container, main.feedback-container, main.reports-container {
+    height: calc(100vh - 70px);
+  }
 
 .main-header::after {
     content: '';
@@ -123,12 +127,17 @@ main {
     max-width: 1280px;
     width: 100%;
     margin: 0;
+    margin-top: 3px;
     padding: 0 var(--space-lg);
-  }
+    position: relative;
+}
   
-  .logo {
+.logo {
     margin-right: auto;
-  }
+    margin-top: 1px;
+    position: relative;
+    z-index: 2;
+}
 
 .logo i {
     font-size: 1.5rem;
@@ -144,7 +153,13 @@ main {
 }
 
 .main-nav {
-    margin-left: var(--space-xl);
+    position: absolute;
+    left: 50;
+    right: 0;
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+    z-index: 1;
 }
 
 .main-nav ul {
