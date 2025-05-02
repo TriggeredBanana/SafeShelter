@@ -16,7 +16,7 @@
         <div class="header-content">
             <div class="logo">
                 <a href="index.html" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: var(--space-sm);">
-                    <i class="fas fa-shield-alt"></i>
+                    <i id="logo-shield" class="fas fa-shield-alt"></i>
                     <h1>SafeShelter</h1>
                 </a>
             </div>
@@ -90,9 +90,6 @@
             </div>
             
             <div class="sidebar-footer">
-                <button id="theme-toggle" class="icon-button">
-                    <i class="fas fa-moon"></i>
-                </button>
                 <button id="fullscreen-toggle" class="icon-button">
                     <i class="fas fa-expand"></i>
                 </button>
@@ -175,16 +172,7 @@
     </div>
 
     <!-- "Tour guide" overlegg -->
-    <div id="tour-overlay" class="hidden">
-        <div class="tour-content">
-            <h3>Velkommen til SafeShelter</h3>
-            <p id="tour-step-text">Dette verktøyet hjelper deg med å finne tilfluktsrom og brannstasjoner.</p>
-            <div class="tour-buttons">
-                <button id="tour-skip">Hopp over</button>
-                <button id="tour-next" class="primary">Neste</button>
-            </div>
-        </div>
-    </div>
+    <div id="tour-overlay" class="hidden"></div>
 
     <!-- Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.8.0/proj4.js"></script>

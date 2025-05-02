@@ -97,13 +97,17 @@ main {
 /* ----- Header & Navigation ----- */
 .main-header {
     background-color: var(--primary);
-    background-image: linear-gradient(to right, var(--primary), var(--primary-dark));
     color: white;
     padding: var(--space-md) var(--space-lg);
     box-shadow: var(--shadow-md);
     position: relative;
+    height: 70px;
     z-index: 100;
-}
+  }
+
+.app-container, main.feedback-container, main.reports-container {
+    height: calc(100vh - 70px);
+  }
 
 .main-header::after {
     content: '';
@@ -123,12 +127,17 @@ main {
     max-width: 1280px;
     width: 100%;
     margin: 0;
+    margin-top: 3px;
     padding: 0 var(--space-lg);
-  }
+    position: relative;
+}
   
-  .logo {
+.logo {
     margin-right: auto;
-  }
+    margin-top: 1px;
+    position: relative;
+    z-index: 2;
+}
 
 .logo i {
     font-size: 1.5rem;
@@ -144,7 +153,13 @@ main {
 }
 
 .main-nav {
-    margin-left: var(--space-xl);
+    position: absolute;
+    left: 50;
+    right: 0;
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+    z-index: 1;
 }
 
 .main-nav ul {
@@ -1283,59 +1298,6 @@ input[type="radio"]:checked + .sev-option .sev-svg {
     0% { background-position: 0% 50%; }
     50% { background-position: 100% 50%; }
     100% { background-position: 0% 50%; }
-}
-
-/* ----- Dark Mode ----- */
-.dark-mode {
-    --light: #2b2d42;
-    --dark: #edf2f4;
-    --gray-100: #333;
-    --gray-200: #444;
-    --gray-300: #555;
-    --gray-800: #eee;
-    --gray-900: #f8f9fa;
-}
-
-.dark-mode body {
-    background: linear-gradient(135deg, #222, #333);
-}
-
-.dark-mode .report-section,
-.dark-mode .page-intro,
-.dark-mode .modal-content,
-.dark-mode .notification {
-    background-color: var(--gray-800);
-    color: var(--dark);
-    border-color: var(--gray-700);
-}
-
-.dark-mode .section-header {
-    background-color: var(--gray-900);
-    border-color: var(--gray-700);
-}
-
-.dark-mode .safety-form select,
-.dark-mode .safety-form input[type="text"],
-.dark-mode .safety-form input[type="tel"],
-.dark-mode .safety-form textarea {
-    background-color: var(--gray-800);
-    color: var(--dark);
-    border-color: var(--gray-600);
-}
-
-.dark-mode .severity-label,
-.dark-mode .file-upload-label {
-    background-color: var(--gray-900);
-    color: var(--gray-300);
-}
-
-.dark-mode .btn-secondary {
-    background-color: var(--gray-700);
-    color: var(--gray-200);
-}
-
-.dark-mode .modal-body {
-    color: var(--gray-300);
 }
 
 /* ----- Responsive Design ----- */
