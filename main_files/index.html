@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+    <link rel="stylesheet" href="chat.css" />
 </head>
 <body>
     <header class="main-header">
@@ -143,7 +144,7 @@
                 </div>
             </div>
 
-            <!-- "Legend" for kartet -->
+            <!-- "Legend" for kartet 
             <div class="map-legend">
                 <h4>Symbolforklaring:</h4>
                 <div class="legend-item">
@@ -158,7 +159,7 @@
                     <div class="legend-marker flood-zone"></div>
                     <span>Flomrisikosone</span>
                 </div>
-            </div>
+            </div> -->
 
             <!-- Main map container -->
             <div id="map"></div>
@@ -167,6 +168,31 @@
             <div id="loading-overlay">
                 <div class="spinner"></div>
                 <div class="loading-text">Laster inn kartdata...</div>
+            </div>
+        </div>
+        
+    <!-- AI Emergency Assistant Chat -->
+    <div id="emergency-chat-container" class="emergency-chat-container">
+        <button id="chat-toggle-btn" class="chat-toggle-btn">
+            <i class="fas fa-comment-dots"></i>
+            <span>SafeShelter Assistent</span>
+        </button>
+        
+        <div id="chat-panel" class="chat-panel hidden">
+            <div class="chat-header">
+                <h3><i class="fas fa-robot"></i> SafeShelter Assistent</h3>
+                <button id="chat-close-btn" class="chat-close-btn"><i class="fas fa-times"></i></button>
+            </div>
+            <div id="chat-messages" class="chat-messages">
+                <div class="message bot-message">
+                    <div class="message-content">
+                        <p>Hei! Jeg er SafeShelter-assistenten. Jeg kan gi deg informasjon om beredskap, nødsituasjoner og sikkerhetstiltak. Hva trenger du hjelp med?</p>
+                    </div>
+                </div>
+            </div>
+            <div class="chat-input-container">
+                <input type="text" id="chat-input" placeholder="Still et spørsmål..." />
+                <button id="chat-send-btn"><i class="fas fa-paper-plane"></i></button>
             </div>
         </div>
     </div>
@@ -181,5 +207,6 @@
     <script src="mapoverlay.js"></script>
     <script src="script.js"></script>
     <script src="ui.js"></script>
+    <script src="chat.js"></script>
 </body>
 </html>
