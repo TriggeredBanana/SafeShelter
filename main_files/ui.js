@@ -548,7 +548,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function positionTooltip(tooltip, rect, scrollTop, scrollLeft) {
-        const tooltipWidth = 300; // Fixed tooltip width
+        const tooltipWidth = 400; // Match the actual CSS width
         const tooltipHeight = 200; // Estimated tooltip height
         const windowWidth = window.innerWidth;
         const windowHeight = window.innerHeight;
@@ -557,45 +557,73 @@ document.addEventListener('DOMContentLoaded', function() {
         
         let tooltipX, tooltipY, position;
         
-        // Special positioning for specific steps
+        // Get current tour step and highlighted element
         const currentStep = state.activeTourStep;
         const highlightedElement = document.querySelector('[data-tour-highlighted="true"]');
         
-        // Step 5 - Tilfluktsrominformasjon
+        // Step-specific positioning
         if (highlightedElement && highlightedElement.id === "shelter-info") {
-            // Position the tooltip below the element with more space
+            // Step 5 - Tilfluktsrominformasjon
             position = 'bottom';
-            tooltipY = rect.bottom + 25; // Add more space below
-            tooltipX = elementCenterX;
+            tooltipY = rect.bottom + 25;
+            tooltipX = Math.min(elementCenterX, windowWidth - (tooltipWidth/2) - 20);
+            tooltipX = Math.max(tooltipX, tooltipWidth/2 + 20);
         }
-        // Step 6 - Nødhandlinger (action buttons)
         else if (highlightedElement && highlightedElement.classList.contains('action-buttons')) {
-            // Position the tooltip above the element with more space
+            // Step 6 - Nødhandlinger (action buttons)
             position = 'top';
-            tooltipY = rect.top - 25; // Add more space above
-            tooltipX = elementCenterX;
+            tooltipY = rect.top - 70;
+            tooltipX = Math.min(elementCenterX, windowWidth - (tooltipWidth/2) - 20);
+            tooltipX = Math.max(tooltipX, tooltipWidth/2 + 20);
         }
-        // Default positioning logic for other steps
+        else if (highlightedElement && highlightedElement.id === "search-container") {
+            // Step 3 - Search container
+            position = 'bottom';
+            tooltipY = rect.bottom + 20;
+            tooltipX = Math.min(elementCenterX, windowWidth - (tooltipWidth/2) - 20);
+            tooltipX = Math.max(tooltipX, tooltipWidth/2 + 20);
+        }
+        else if (highlightedElement && highlightedElement.id === "map-controls") {
+            // Step 4 - Map controls
+            position = 'left';
+            tooltipY = elementCenterY;
+            tooltipX = rect.left - tooltipWidth - 20;
+            
+            // If not enough space on left, try bottom
+            if (tooltipX < 20) {
+                position = 'bottom';
+                tooltipX = elementCenterX;
+                tooltipY = rect.bottom + 20;
+                
+                // Ensure tooltip is within screen horizontally
+                tooltipX = Math.min(tooltipX, windowWidth - (tooltipWidth/2) - 20);
+                tooltipX = Math.max(tooltipX, tooltipWidth/2 + 20);
+            }
+        }
         else {
-            // Determine best position (above, below, left, right)
-            if (rect.top > tooltipHeight + 20) {
-                // Enough space above
-                tooltipY = rect.top - 10;
+            // Default positioning logic for other steps
+            if (rect.top > tooltipHeight + 40 && rect.left > windowWidth/2 - tooltipWidth/2 && rect.right < windowWidth/2 + tooltipWidth/2) {
+                // Enough space above and horizontally centered
+                tooltipY = rect.top - 20;
                 tooltipX = elementCenterX;
                 position = 'top';
-            } else if (windowHeight - rect.bottom > tooltipHeight + 20) {
+            } else if (windowHeight - rect.bottom > tooltipHeight + 40) {
                 // Enough space below
-                tooltipY = rect.bottom + 10;
+                tooltipY = rect.bottom + 20;
                 tooltipX = elementCenterX;
                 position = 'bottom';
-            } else if (rect.left > tooltipWidth + 20) {
+                
+                // Ensure tooltip is within screen horizontally
+                tooltipX = Math.min(tooltipX, windowWidth - (tooltipWidth/2) - 20);
+                tooltipX = Math.max(tooltipX, tooltipWidth/2 + 20);
+            } else if (rect.left > tooltipWidth + 40) {
                 // Enough space to the left
-                tooltipX = rect.left - tooltipWidth - 10;
+                tooltipX = rect.left - tooltipWidth/2 - 20;
                 tooltipY = elementCenterY;
                 position = 'left';
-            } else if (windowWidth - rect.right > tooltipWidth + 20) {
+            } else if (windowWidth - rect.right > tooltipWidth + 40) {
                 // Enough space to the right
-                tooltipX = rect.right + 10;
+                tooltipX = rect.right + tooltipWidth/2 + 20;
                 tooltipY = elementCenterY;
                 position = 'right';
             } else {
@@ -803,16 +831,17 @@ document.addEventListener('DOMContentLoaded', function() {
             .tour-spotlight-border {
                 position: absolute;
                 z-index: 2001;
-                box-shadow: 0 0 0 2px var(--accent);
+                box-shadow: 0 0 0 2px var(--accent), 0 0 12px rgba(255, 218, 132, 1);
                 pointer-events: none;
-                border-radius: 6px;
+                border-radius: 12px;
                 animation: spotlight-pulse 1.5s infinite;
+                border: 6px solid rgba(255, 218, 132, 1);
             }
             
             .tour-tooltip {
                 position: absolute;
                 z-index: 2005;
-                width: 300px;
+                width: 400px;
                 background-color: white;
                 border-radius: 12px;
                 box-shadow: 0 6px 30px rgba(0, 0, 0, 0.15);
@@ -865,8 +894,8 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             .tour-header {
-                background: var(--accent);
-                color: var(--dark);
+                background-color: var(--primary) !important;
+                color: white;
                 padding: 16px 20px;
                 display: flex;
                 justify-content: space-between;
@@ -936,8 +965,8 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             .tour-prev {
-                background-color: var(--gray-300);
-                color: var(--gray-700);
+                background-color: var(--gray-800);
+                color: var(--gray-800);
             }
             
             .tour-prev:hover:not(:disabled) {
@@ -950,12 +979,13 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             .tour-next {
-                background-color: var(--primary);
+                background-color: var(--primary) !important;
                 color: white;
+                font-weight: bold;
             }
             
             .tour-next:hover {
-                background-color: var(--primary-dark);
+                background-color: var(--primary-dark) !important;
                 transform: translateY(-1px);
                 box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
             }
@@ -970,9 +1000,9 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             @keyframes spotlight-pulse {
-                0% { box-shadow: 0 0 0 2px var(--accent), 0 0 0 4px rgba(255, 209, 102, 0.3); }
-                50% { box-shadow: 0 0 0 3px var(--accent), 0 0 0 7px rgba(255, 209, 102, 0.3); }
-                100% { box-shadow: 0 0 0 2px var(--accent), 0 0 0 4px rgba(255, 209, 102, 0.3); }
+                0% { box-shadow: 0 0 0 3px var(--accent), 0 0 10px 4px rgba(255, 218, 132, 0.7); }
+                50% { box-shadow: 0 0 0 5px var(--accent), 0 0 15px 7px rgba(255, 218, 132, 0.7); }
+                100% { box-shadow: 0 0 0 3px var(--accent), 0 0 10px 4px rgba(255, 218, 132, 0.7); }
             }
             
             @keyframes highlight-pulse {
