@@ -63,9 +63,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const loadingOverlay = document.getElementById('loading-overlay');
     const selectedLocationDetails = document.getElementById('selected-location-details');
     const tourOverlay = document.getElementById('tour-overlay');
-    const tourStepText = document.getElementById('tour-step-text');
-    const tourNextBtn = document.getElementById('tour-next');
-    const tourSkipBtn = document.getElementById('tour-skip');
 
     // Statistikkelementer
     const totalSheltersEl = document.getElementById('total-shelters');
@@ -186,17 +183,6 @@ document.addEventListener('DOMContentLoaded', function() {
             window.changeMapStyle(style);
         });
     });
-
-    // Omvisningskontroller
-    tourNextBtn.addEventListener('click', function() {
-        nextTourStep();
-    });
-
-    tourSkipBtn.addEventListener('click', function() {
-        endTour();
-    });
-
-    // Funksjoner
 
     // Vis en varsling i høyre hjørne
     function showNotification(message, type = 'info') {
@@ -333,11 +319,58 @@ document.addEventListener('DOMContentLoaded', function() {
         requestAnimationFrame(animation);
     }
 
-    // Omvisningsfunksjoner
+    // Omvisningsfunksjoner - forbedret versjon
     function startTour() {
+        // Create the tour container if it doesn't exist
+        createTourInterface();
+        
+        // Reset step and start
         state.activeTourStep = 0;
         updateTourStep();
+        
+        // Show the overlay with fade-in
+        tourOverlay.style.opacity = '0';
         tourOverlay.classList.remove('hidden');
+        setTimeout(() => {
+            tourOverlay.style.opacity = '1';
+        }, 10);
+    }
+
+    function createTourInterface() {
+        // Remove existing tour DOM elements if they exist
+        const existingTooltip = document.getElementById('tour-tooltip');
+        if (existingTooltip) existingTooltip.remove();
+        
+        // Create tooltip for step-specific guidance
+        const tourTooltip = document.createElement('div');
+        tourTooltip.id = 'tour-tooltip';
+        tourTooltip.className = 'tour-tooltip hidden';
+        tourTooltip.innerHTML = `
+            <div class="tour-tooltip-content">
+                <div class="tour-header">
+                    <h3></h3>
+                    <button class="tour-close" aria-label="Lukk omvisning">×</button>
+                </div>
+                <div class="tour-body">
+                    <p></p>
+                </div>
+                <div class="tour-footer">
+                    <div class="tour-progress">
+                        <span class="tour-current">1</span>/<span class="tour-total">${tourSteps.length}</span>
+                    </div>
+                    <div class="tour-buttons">
+                        <button class="tour-prev" disabled>Forrige</button>
+                        <button class="tour-next">Neste</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(tourTooltip);
+        
+        // Set up event listeners for the new elements
+        document.querySelector('.tour-close').addEventListener('click', endTour);
+        document.querySelector('.tour-prev').addEventListener('click', prevTourStep);
+        document.querySelector('.tour-next').addEventListener('click', nextTourStep);
     }
 
     function nextTourStep() {
@@ -351,46 +384,286 @@ document.addEventListener('DOMContentLoaded', function() {
         updateTourStep();
     }
 
-    function updateTourStep() {
-        const step = tourSteps[state.activeTourStep];
+    function prevTourStep() {
+        state.activeTourStep--;
         
-        // Oppdater innhold
-        document.querySelector('.tour-content h3').textContent = step.title;
-        tourStepText.textContent = step.text;
-        
-        // Oppdater knapper
-        if (state.activeTourStep === tourSteps.length - 1) {
-            tourNextBtn.textContent = 'Fullfør';
-        } else {
-            tourNextBtn.textContent = 'Neste';
+        if (state.activeTourStep < 0) {
+            state.activeTourStep = 0;
         }
         
-        // Fjern eksisterende fremheving
+        updateTourStep();
+    }
+
+    function updateTourStep() {
+        const step = tourSteps[state.activeTourStep];
+        const tooltip = document.getElementById('tour-tooltip');
+        const prevBtn = document.querySelector('.tour-prev');
+        const nextBtn = document.querySelector('.tour-next');
+        
+        // Update tooltip content
+        tooltip.querySelector('h3').textContent = step.title;
+        tooltip.querySelector('.tour-body p').textContent = step.text;
+        tooltip.querySelector('.tour-current').textContent = state.activeTourStep + 1;
+        
+        // Update navigation buttons
+        prevBtn.disabled = state.activeTourStep === 0;
+        
+        if (state.activeTourStep === tourSteps.length - 1) {
+            nextBtn.textContent = 'Fullfør';
+        } else {
+            nextBtn.textContent = 'Neste';
+        }
+        
+        // First hide the tooltip during transition
+        tooltip.classList.add('hidden');
+        
+        // Remove existing highlights
         removeHighlight();
         
-        // Legg til fremheving hvis spesifisert
+        // Add new highlight if specified
         if (step.highlight) {
-            highlightElement(step.highlight);
+            setTimeout(() => highlightElement(step.highlight), 100);
+        } else {
+            // For steps with no highlight, center the tooltip
+            tooltip.style.top = '50%';
+            tooltip.style.left = '50%';
+            tooltip.style.transform = 'translate(-50%, -50%)';
+            tooltip.classList.remove('hidden');
         }
     }
 
     function highlightElement(selector) {
         const element = document.querySelector(selector);
-        if (!element) return;
+        const tooltip = document.getElementById('tour-tooltip');
         
+        if (!element) {
+            console.warn(`Element not found: ${selector}`);
+            tooltip.classList.remove('hidden');
+            return;
+        }
+        
+        // Add highlight class to element
         element.classList.add('tour-highlight');
-        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        element.setAttribute('data-tour-highlighted', 'true');
+        
+        // Make sure the element is in view - handle sidebar content separately
+        const sidebarContent = document.querySelector('.sidebar-content');
+        
+        // Special handling for action buttons (nødhandlinger)
+        if (selector === '.action-buttons') {
+            // First ensure sidebar is visible if it contains our element
+            if (sidebarContent) {
+                // Scroll the sidebar to show the action buttons
+                sidebarContent.scrollTop = sidebarContent.scrollHeight;
+                
+                // Wait for scrolling to complete
+                setTimeout(() => {
+                    // Get updated position after scrolling
+                    const rect = element.getBoundingClientRect();
+                    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                    const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+                    
+                    // Create spotlight effect with updated position
+                    createSpotlight(rect);
+                    
+                    // Position the tooltip based on available space
+                    positionTooltip(tooltip, rect, scrollTop, scrollLeft);
+                    
+                    // Show tooltip with slight delay for smooth transition
+                    setTimeout(() => {
+                        tooltip.classList.remove('hidden');
+                    }, 300);
+                }, 500); // Wait longer for scrolling to complete
+            }
+        } else if (sidebarContent && sidebarContent.contains(element)) {
+            // For other elements inside sidebar, make sure they're scrolled into view
+            element.scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'center'
+            });
+            
+            // Wait for scrolling to complete
+            setTimeout(() => {
+                // Get updated position after scrolling
+                const updatedRect = element.getBoundingClientRect();
+                const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+                
+                // Create spotlight effect with updated position
+                createSpotlight(updatedRect);
+                
+                // Position the tooltip based on available space
+                positionTooltip(tooltip, updatedRect, scrollTop, scrollLeft);
+                
+                // Show tooltip
+                tooltip.classList.remove('hidden');
+            }, 500);
+        } else {
+            // For other elements (not in sidebar), get position and highlight
+            const rect = element.getBoundingClientRect();
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+            
+            // Create spotlight effect
+            createSpotlight(rect);
+            
+            // Position the tooltip based on available space
+            positionTooltip(tooltip, rect, scrollTop, scrollLeft);
+            
+            // Scroll element into view
+            element.scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'center'
+            });
+            
+            // Show tooltip with slight delay for smooth transition
+            setTimeout(() => {
+                tooltip.classList.remove('hidden');
+            }, 300);
+        }
+    }
+    
+    function createSpotlight(rect) {
+        // Clear any existing spotlights
+        const existingSpotlights = document.querySelectorAll('.tour-spotlight, .tour-spotlight-border');
+        existingSpotlights.forEach(el => el.remove());
+        
+        // Create the spotlight effect
+        const spotlight = document.createElement('div');
+        spotlight.className = 'tour-spotlight';
+        spotlight.style.top = `${rect.top}px`;
+        spotlight.style.left = `${rect.left}px`;
+        spotlight.style.width = `${rect.width}px`;
+        spotlight.style.height = `${rect.height}px`;
+        document.body.appendChild(spotlight);
+        
+        // Create a pulsating border around the spotlight
+        const border = document.createElement('div');
+        border.className = 'tour-spotlight-border';
+        border.style.top = `${rect.top - 5}px`;
+        border.style.left = `${rect.left - 5}px`;
+        border.style.width = `${rect.width + 10}px`;
+        border.style.height = `${rect.height + 10}px`;
+        document.body.appendChild(border);
+    }
+    
+    function positionTooltip(tooltip, rect, scrollTop, scrollLeft) {
+        const tooltipWidth = 300; // Fixed tooltip width
+        const tooltipHeight = 200; // Estimated tooltip height
+        const windowWidth = window.innerWidth;
+        const windowHeight = window.innerHeight;
+        const elementCenterX = rect.left + rect.width / 2;
+        const elementCenterY = rect.top + rect.height / 2;
+        
+        let tooltipX, tooltipY, position;
+        
+        // Special positioning for specific steps
+        const currentStep = state.activeTourStep;
+        const highlightedElement = document.querySelector('[data-tour-highlighted="true"]');
+        
+        // Step 5 - Tilfluktsrominformasjon
+        if (highlightedElement && highlightedElement.id === "shelter-info") {
+            // Position the tooltip below the element with more space
+            position = 'bottom';
+            tooltipY = rect.bottom + 25; // Add more space below
+            tooltipX = elementCenterX;
+        }
+        // Step 6 - Nødhandlinger (action buttons)
+        else if (highlightedElement && highlightedElement.classList.contains('action-buttons')) {
+            // Position the tooltip above the element with more space
+            position = 'top';
+            tooltipY = rect.top - 25; // Add more space above
+            tooltipX = elementCenterX;
+        }
+        // Default positioning logic for other steps
+        else {
+            // Determine best position (above, below, left, right)
+            if (rect.top > tooltipHeight + 20) {
+                // Enough space above
+                tooltipY = rect.top - 10;
+                tooltipX = elementCenterX;
+                position = 'top';
+            } else if (windowHeight - rect.bottom > tooltipHeight + 20) {
+                // Enough space below
+                tooltipY = rect.bottom + 10;
+                tooltipX = elementCenterX;
+                position = 'bottom';
+            } else if (rect.left > tooltipWidth + 20) {
+                // Enough space to the left
+                tooltipX = rect.left - tooltipWidth - 10;
+                tooltipY = elementCenterY;
+                position = 'left';
+            } else if (windowWidth - rect.right > tooltipWidth + 20) {
+                // Enough space to the right
+                tooltipX = rect.right + 10;
+                tooltipY = elementCenterY;
+                position = 'right';
+            } else {
+                // Default to centered
+                tooltipX = windowWidth / 2;
+                tooltipY = windowHeight / 2;
+                position = 'center';
+            }
+        }
+        
+        // Apply position and transform based on position
+        tooltip.className = `tour-tooltip tooltip-${position}`;
+        
+        if (position === 'top') {
+            tooltip.style.top = `${tooltipY - tooltipHeight}px`;
+            tooltip.style.left = `${tooltipX}px`;
+            tooltip.style.transform = 'translateX(-50%)';
+        } else if (position === 'bottom') {
+            tooltip.style.top = `${tooltipY}px`;
+            tooltip.style.left = `${tooltipX}px`;
+            tooltip.style.transform = 'translateX(-50%)';
+        } else if (position === 'left') {
+            tooltip.style.top = `${tooltipY}px`;
+            tooltip.style.left = `${tooltipX}px`;
+            tooltip.style.transform = 'translate(0, -50%)';
+        } else if (position === 'right') {
+            tooltip.style.top = `${tooltipY}px`;
+            tooltip.style.left = `${tooltipX}px`;
+            tooltip.style.transform = 'translate(0, -50%)';
+        } else {
+            tooltip.style.top = '50%';
+            tooltip.style.left = '50%';
+            tooltip.style.transform = 'translate(-50%, -50%)';
+        }
     }
 
     function removeHighlight() {
-        const highlighted = document.querySelectorAll('.tour-highlight');
-        highlighted.forEach(el => el.classList.remove('tour-highlight'));
+        // Remove spotlight and border elements
+        const spotlights = document.querySelectorAll('.tour-spotlight, .tour-spotlight-border');
+        spotlights.forEach(el => el.remove());
+        
+        // Remove highlight class from any elements
+        const highlighted = document.querySelectorAll('[data-tour-highlighted="true"]');
+        highlighted.forEach(el => {
+            el.classList.remove('tour-highlight');
+            el.removeAttribute('data-tour-highlighted');
+        });
     }
 
     function endTour() {
-        tourOverlay.classList.add('hidden');
-        removeHighlight();
-        localStorage.setItem('tourCompleted', 'true');
+        // Fade out overlay
+        tourOverlay.style.opacity = '0';
+        
+        // Hide tooltip
+        const tooltip = document.getElementById('tour-tooltip');
+        if (tooltip) tooltip.classList.add('hidden');
+        
+        // Clean up after animation
+        setTimeout(() => {
+            tourOverlay.classList.add('hidden');
+            removeHighlight();
+            
+            // Remove tooltip element
+            if (tooltip) tooltip.remove();
+            
+            // Mark tour as completed
+            localStorage.setItem('tourCompleted', 'true');
+        }, 300);
     }
 
     // Hjelpefunksjon for å sentrere kart på koordinater
@@ -499,17 +772,213 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             /* Omvisningsfremheving */
+            #tour-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                background-color: transparent;
+                z-index: 2000;
+                background: rgba(0, 0, 0, 0.1);
+                transition: opacity 0.3s ease;
+                pointer-events: auto;
+            }
+        
             .tour-highlight {
                 position: relative;
                 z-index: 2001;
-                box-shadow: 0 0 0 4px var(--accent), 0 0 0 8px rgba(255, 209, 102, 0.3);
-                animation: pulse-highlight 1.5s infinite;
+                animation: highlight-pulse 2s infinite;
             }
             
-            @keyframes pulse-highlight {
-                0% { box-shadow: 0 0 0 4px var(--accent), 0 0 0 8px rgba(255, 209, 102, 0.3); }
-                50% { box-shadow: 0 0 0 8px var(--accent), 0 0 0 12px rgba(255, 209, 102, 0.3); }
-                100% { box-shadow: 0 0 0 4px var(--accent), 0 0 0 8px rgba(255, 209, 102, 0.3); }
+            .tour-spotlight {
+                position: absolute;
+                z-index: 2002;
+                background: transparent;
+                box-shadow: none;
+                pointer-events: none;
+                border-radius: 4px;
+            }
+            
+            .tour-spotlight-border {
+                position: absolute;
+                z-index: 2001;
+                box-shadow: 0 0 0 2px var(--accent);
+                pointer-events: none;
+                border-radius: 6px;
+                animation: spotlight-pulse 1.5s infinite;
+            }
+            
+            .tour-tooltip {
+                position: absolute;
+                z-index: 2005;
+                width: 300px;
+                background-color: white;
+                border-radius: 12px;
+                box-shadow: 0 6px 30px rgba(0, 0, 0, 0.15);
+                transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+                overflow: hidden;
+            }
+            
+            .tour-tooltip.hidden {
+                opacity: 0;
+                pointer-events: none;
+                transform: scale(0.9) translateY(10px);
+            }
+            
+            .tour-tooltip::after {
+                content: '';
+                position: absolute;
+                width: 14px;
+                height: 14px;
+                background: white;
+                transform: rotate(45deg);
+            }
+            
+            .tooltip-top::after {
+                bottom: -7px;
+                left: 50%;
+                margin-left: -7px;
+            }
+            
+            .tooltip-bottom::after {
+                top: -7px;
+                left: 50%;
+                margin-left: -7px;
+            }
+            
+            .tooltip-left::after {
+                right: -7px;
+                top: 50%;
+                margin-top: -7px;
+            }
+            
+            .tooltip-right::after {
+                left: -7px;
+                top: 50%;
+                margin-top: -7px;
+            }
+            
+            .tour-tooltip-content {
+                position: relative;
+                z-index: 1;
+            }
+            
+            .tour-header {
+                background: var(--accent);
+                color: var(--dark);
+                padding: 16px 20px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+            
+            .tour-header h3 {
+                margin: 0;
+                font-size: 1.2rem;
+                font-weight: 700;
+            }
+            
+            .tour-close {
+                background: none;
+                border: none;
+                font-size: 1.5rem;
+                line-height: 1;
+                padding: 0;
+                cursor: pointer;
+                color: var(--dark);
+                opacity: 0.7;
+                transition: opacity 0.2s;
+            }
+            
+            .tour-close:hover {
+                opacity: 1;
+            }
+            
+            .tour-body {
+                padding: 20px;
+                color: var(--gray-800);
+                font-size: 1rem;
+                line-height: 1.6;
+            }
+            
+            .tour-body p {
+                margin: 0;
+            }
+            
+            .tour-footer {
+                padding: 15px 20px;
+                background-color: var(--gray-100);
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                border-top: 1px solid var(--gray-200);
+            }
+            
+            .tour-progress {
+                font-size: 0.9rem;
+                font-weight: 600;
+                color: var(--gray-600);
+            }
+            
+            .tour-buttons {
+                display: flex;
+                gap: 8px;
+            }
+            
+            .tour-prev, .tour-next {
+                padding: 8px 15px;
+                border: none;
+                border-radius: 20px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.2s ease;
+            }
+            
+            .tour-prev {
+                background-color: var(--gray-300);
+                color: var(--gray-700);
+            }
+            
+            .tour-prev:hover:not(:disabled) {
+                background-color: var(--gray-400);
+            }
+            
+            .tour-prev:disabled {
+                opacity: 0.5;
+                cursor: default;
+            }
+            
+            .tour-next {
+                background-color: var(--primary);
+                color: white;
+            }
+            
+            .tour-next:hover {
+                background-color: var(--primary-dark);
+                transform: translateY(-1px);
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            }
+
+            .tour-secondary {
+                background-color: var(--secondary);
+                color: white;
+            }
+            
+            .tour-secondary:hover {
+                background-color: var(--secondary-dark);
+            }
+            
+            @keyframes spotlight-pulse {
+                0% { box-shadow: 0 0 0 2px var(--accent), 0 0 0 4px rgba(255, 209, 102, 0.3); }
+                50% { box-shadow: 0 0 0 3px var(--accent), 0 0 0 7px rgba(255, 209, 102, 0.3); }
+                100% { box-shadow: 0 0 0 2px var(--accent), 0 0 0 4px rgba(255, 209, 102, 0.3); }
+            }
+            
+            @keyframes highlight-pulse {
+                0% { box-shadow: 0 0 0 0 rgba(255, 209, 102, 0.4); }
+                70% { box-shadow: 0 0 0 8px rgba(255, 209, 102, 0); }
+                100% { box-shadow: 0 0 0 0 rgba(255, 209, 102, 0); }
             }
             
             /* Tilleggsanimasjoner */
