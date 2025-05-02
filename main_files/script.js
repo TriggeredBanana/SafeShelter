@@ -3,10 +3,23 @@
  * Håndterer datahenting, prosessering og visualisering på kartet
  */
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     initializeDataLoading();
     loadEmergencyData();
 });
+
+let userPosition = null;
+window.fireStationsData = [];
+
+if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+        pos => userPosition = pos.coords,
+        err => console.warn("Geolocation feilet:", err)
+    );
+}
+
+initializeDataLoading();
+loadEmergencyData();
 
 // Initialiser datainnlasting med visuell tilbakemelding
 function initializeDataLoading() {
@@ -21,7 +34,7 @@ function initializeDataLoading() {
             </div>
         `;
     }
-    
+
     // Legg til stiler for innlastingsindikator
     const styleEl = document.createElement('style');
     styleEl.id = 'loading-indicator-style';
@@ -59,27 +72,27 @@ async function loadEmergencyData() {
             fetchShelterData(),
             fetchFireStationData()
         ]);
-        
+
         // Behandle og vis data på kartet
         if (shelters && shelters.length > 0) {
             processShelterData(shelters);
         }
-        
+
         if (fireStations && fireStations.length > 0) {
             processFireStationData(fireStations);
         }
-        
+
         // Oppdater statistikkpanelet med antall
         updateStatistics(shelters.length, fireStations.length);
 
         // Fjern innlastingsstilene
         document.getElementById('loading-indicator-style')?.remove();
-        
+
         // Vis vellykket melding
         if (typeof showNotification === 'function') {
             showNotification("Alle nødressurser lastet inn", "success");
         }
-        
+
     } catch (error) {
         console.error('Feil ved lasting av beredskapsdata:', error);
         if (typeof showNotification === 'function') {
@@ -92,11 +105,11 @@ async function loadEmergencyData() {
 async function fetchShelterData() {
     try {
         const response = await fetch("http://localhost:5000/api/tilfluktsrom_agder");
-        
+
         if (!response.ok) {
             throw new Error(`Kunne ikke hente tilfluktsromdata: ${response.status}`);
         }
-        
+
         const data = await response.json();
         console.log(`Hentet ${data.length} tilfluktsrom`);
         return data;
@@ -113,12 +126,13 @@ async function fetchShelterData() {
 async function fetchFireStationData() {
     try {
         const response = await fetch("http://localhost:5000/api/brannstasjoner_agder");
-        
+
         if (!response.ok) {
             throw new Error(`Kunne ikke hente brannstasjonsdata: ${response.status}`);
         }
-        
+
         const data = await response.json();
+        fireStationsData = data; // Lagre data i global variabel for senere bruk
         console.log(`Hentet ${data.length} brannstasjoner`);
         return data;
     } catch (error) {
@@ -132,27 +146,30 @@ async function fetchFireStationData() {
 
 // Behandle tilfluktsromdata og legg til på kartet
 function processShelterData(shelters) {
+    if (window.shelterLayer) {
+        window.shelterLayer.clearLayers();
+    }
     // Sett opp koordinattransformasjon (UTM sone 32N til WGS84)
     proj4.defs('EPSG:25832', '+proj=utm +zone=32 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs');
-    
+
     let totalCapacity = 0;
     
     // Behandle hvert tilfluktsrom
     shelters.forEach(shelter => {
         // Hent ut koordinater
         const coordinates = extractCoordinates(shelter.geom);
-        
+
         if (coordinates && shelter.adresse) {
             // Legg til tilfluktsromkapasitet til totalen (hvis tilgjengelig)
             if (shelter.plasser && !isNaN(parseInt(shelter.plasser))) {
                 totalCapacity += parseInt(shelter.plasser);
             }
-            
+
             // Lag markør med egendefinert ikon (definert i mapoverlay.js)
             const marker = L.marker([coordinates.latitude, coordinates.longitude], {
                 icon: window.shelterIcon || createDefaultIcon('shelter')
             }).addTo(window.shelterLayer);
-            
+
             // Lag informativ popup
             marker.bindPopup(`
                 <div class="location-popup">
@@ -179,42 +196,46 @@ function processShelterData(shelters) {
                     </div>
                 </div>
             `);
-            
+
             // Legg til sveve-effekt
-            marker.on('mouseover', function() {
+            marker.on('mouseover', function () {
                 this._icon.classList.add('marker-hover');
             });
-            
-            marker.on('mouseout', function() {
+
+            marker.on('mouseout', function () {
                 this._icon.classList.remove('marker-hover');
             });
         }
     });
-    
+
     window.shelterCapacity = totalCapacity;
-    
+
     // Legg til stil for markør-sveve-effekt
     addMarkerStyles();
 }
 
 // Behandle brannstasjonsdata og legg til på kartet
 function processFireStationData(fireStations) {
+    if (window.fireStationLayer) {
+        window.fireStationLayer.clearLayers();
+    }
+    
     // Sett opp UTM til WGS84-transformasjon hvis nødvendig
     if (!proj4.defs['EPSG:25832']) {
         proj4.defs('EPSG:25832', '+proj=utm +zone=32 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs');
     }
-    
+
     // Behandle hver brannstasjon
     fireStations.forEach(station => {
         // Hent ut koordinater
         const coordinates = extractCoordinatesUTM(station.geom);
-        
+
         if (coordinates && station.sted) {
             // Lag markør med egendefinert ikon
             const marker = L.marker([coordinates.latitude, coordinates.longitude], {
                 icon: window.fireStationIcon || createDefaultIcon('fire')
             }).addTo(window.fireStationLayer);
-            
+
             // Lag detaljert popup
             marker.bindPopup(`
                 <div class="location-popup">
@@ -241,13 +262,13 @@ function processFireStationData(fireStations) {
                     </div>
                 </div>
             `);
-            
+
             // Legg til sveve-effekt
-            marker.on('mouseover', function() {
+            marker.on('mouseover', function () {
                 this._icon.classList.add('marker-hover');
             });
-            
-            marker.on('mouseout', function() {
+
+            marker.on('mouseout', function () {
                 this._icon.classList.remove('marker-hover');
             });
         }
@@ -258,7 +279,7 @@ function processFireStationData(fireStations) {
 function extractCoordinates(geom) {
     try {
         if (!geom) return null;
-        
+
         // Håndter ulike geometriformater
         if (typeof geom === 'string') {
             try {
@@ -268,21 +289,21 @@ function extractCoordinates(geom) {
                 return null;
             }
         }
-        
+
         // Punktgeometri
         if (geom.type === "Point" && Array.isArray(geom.coordinates)) {
             // Sjekk om koordinater trenger transformasjon
             const [x, y] = geom.coordinates;
-            
+
             // Sjekk om koordinater er i UTM (større verdier)
             if (Math.abs(x) > 180 || Math.abs(y) > 90) {
                 return transformUTMToWGS84(x, y);
             }
-            
+
             // Om koordinater ser ut til å være i WGS84 allerede
             return { latitude: y, longitude: x };
         }
-        
+
         console.warn('Geometritype ikke støttet:', geom.type);
         return null;
     } catch (error) {
@@ -297,10 +318,10 @@ function extractCoordinatesUTM(geom) {
         if (!geom || !geom.type || !geom.coordinates || !Array.isArray(geom.coordinates)) {
             return null;
         }
-        
+
         // Hent x og y fra koordinater
         const [x, y] = geom.coordinates;
-        
+
         return transformUTMToWGS84(x, y);
     } catch (error) {
         console.error('Feil ved utvinning av UTM-koordinater:', error);
@@ -313,9 +334,9 @@ function transformUTMToWGS84(x, y) {
     try {
         // Transformer fra UTM til WGS84
         const wgs84 = proj4('EPSG:25832', 'WGS84', [x, y]);
-        
+
         // Returner som breddegrad/lengdegrad-objekt for Leaflet
-        return { 
+        return {
             latitude: wgs84[1],  // Breddegrad er Y-koordinat i WGS84
             longitude: wgs84[0]  // Lengdegrad er X-koordinat i WGS84
         };
@@ -328,7 +349,7 @@ function transformUTMToWGS84(x, y) {
 // Lag standardikon hvis egendefinerte ikoner ikke er tilgjengelige
 function createDefaultIcon(type) {
     let className, color, icon;
-    
+
     if (type === 'shelter') {
         className = 'shelter-marker-icon';
         color = '#e63946'; // var(--primary)
@@ -338,7 +359,7 @@ function createDefaultIcon(type) {
         color = '#ff9f1c'; // var(--warning)
         icon = 'fa-fire';
     }
-    
+
     return L.divIcon({
         html: `<div class="${className}"><i class="fas ${icon}"></i></div>`,
         iconSize: [30, 30],
@@ -355,7 +376,7 @@ function updateStatistics(shelterCount, fireStationCount) {
     const totalSheltersEl = document.getElementById('total-shelters');
     const totalCapacityEl = document.getElementById('total-capacity');
     const fireStationsEl = document.getElementById('fire-stations');
-    
+
     // Hvis statistikkpanelet finnes, oppdater det
     if (statsPanel) {
         statsPanel.innerHTML = `
@@ -379,7 +400,7 @@ function updateStatistics(shelterCount, fireStationCount) {
         if (totalCapacityEl) totalCapacityEl.textContent = window.shelterCapacity || 0;
         if (fireStationsEl) fireStationsEl.textContent = fireStationCount;
     }
-    
+
     // Hvis UI.js har animert tellerfunksjon, bruk den
     if (typeof window.animateNumber === 'function') {
         if (totalSheltersEl) window.animateNumber(totalSheltersEl, 0, shelterCount, 1500);
@@ -389,7 +410,7 @@ function updateStatistics(shelterCount, fireStationCount) {
 }
 
 // Håndter valg av plassering fra kartet
-window.selectLocation = function(location) {
+window.selectLocation = function (location) {
     // Lagre den valgte plasseringen i en global variabel som backup
     window.selectedLocation = location;
 
@@ -398,13 +419,13 @@ window.selectLocation = function(location) {
         window.updateLocationInfo(location);
     } else {
         console.log('Valgt plassering:', location);
-        
+
         // Vis plasseringsinformasjon i sidefeltet hvis det finnes en beholder for det
         const detailsContainer = document.getElementById('selected-location-details');
-        
+
         if (detailsContainer) {
             let detailsHTML = '';
-            
+
             if (location.type === 'shelter') {
                 detailsHTML = `
                     <div class="location-details">
@@ -422,11 +443,11 @@ window.selectLocation = function(location) {
                     </div>
                 `;
             }
-            
+
             detailsContainer.innerHTML = detailsHTML;
         }
     }
-    
+
     // Sentrer kartet på den valgte plasseringen
     if (window.map) {
         window.map.flyTo([location.lat, location.lng], 16, {
@@ -440,7 +461,7 @@ window.selectLocation = function(location) {
 function addMarkerStyles() {
     // Sjekk om stilene allerede eksisterer
     if (document.getElementById('marker-styles')) return;
-    
+
     const styleEl = document.createElement('style');
     styleEl.id = 'marker-styles';
     styleEl.textContent = `
@@ -492,3 +513,15 @@ function addMarkerStyles() {
     `;
     document.head.appendChild(styleEl);
 }
+
+function haversineDistance([lat1, lon1], [lat2, lon2]) {
+    const toRad = v => v * Math.PI/180;
+    const R = 6371; // jordens radius i km
+    const dLat = toRad(lat2 - lat1),
+          dLon = toRad(lon2 - lon1);
+    const a = Math.sin(dLat/2)**2
+            + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2))
+            * Math.sin(dLon/2)**2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  }
+  
