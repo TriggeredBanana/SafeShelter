@@ -7,7 +7,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialiser systemtilstand
     let state = {
         sidebarVisible: true,
-        darkMode: localStorage.getItem('darkMode') === 'true',
         isFullscreen: false,
         activeTourStep: 0,
         selectedLocation: null,
@@ -78,13 +77,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Initialiser UI-tilstand
     function initUI() {
-        // Bruk mørk modus hvis lagret
-        if (state.darkMode) {
-            document.body.classList.add('dark-mode');
-            themeToggle.querySelector('i').classList.remove('fa-moon');
-            themeToggle.querySelector('i').classList.add('fa-sun');
-        }
-
         // Skjul lastings-overlegg med animasjon
         setTimeout(() => {
             loadingOverlay.style.opacity = '0';
@@ -115,25 +107,6 @@ document.addEventListener('DOMContentLoaded', function() {
             window.location.reload();
         });
     }
-
-    // Mørk modus-veksling
-    themeToggle.addEventListener('click', function() {
-        state.darkMode = !state.darkMode;
-        document.body.classList.toggle('dark-mode');
-        
-        // Oppdater ikon
-        const icon = themeToggle.querySelector('i');
-        if (state.darkMode) {
-            icon.classList.remove('fa-moon');
-            icon.classList.add('fa-sun');
-        } else {
-            icon.classList.remove('fa-sun');
-            icon.classList.add('fa-moon');
-        }
-        
-        // Lagre preferanse
-        localStorage.setItem('darkMode', state.darkMode);
-    });
 
     // Fullskjermveksling
     fullscreenToggle.addEventListener('click', function() {

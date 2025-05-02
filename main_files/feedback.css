@@ -1285,59 +1285,6 @@ input[type="radio"]:checked + .sev-option .sev-svg {
     100% { background-position: 0% 50%; }
 }
 
-/* ----- Dark Mode ----- */
-.dark-mode {
-    --light: #2b2d42;
-    --dark: #edf2f4;
-    --gray-100: #333;
-    --gray-200: #444;
-    --gray-300: #555;
-    --gray-800: #eee;
-    --gray-900: #f8f9fa;
-}
-
-.dark-mode body {
-    background: linear-gradient(135deg, #222, #333);
-}
-
-.dark-mode .report-section,
-.dark-mode .page-intro,
-.dark-mode .modal-content,
-.dark-mode .notification {
-    background-color: var(--gray-800);
-    color: var(--dark);
-    border-color: var(--gray-700);
-}
-
-.dark-mode .section-header {
-    background-color: var(--gray-900);
-    border-color: var(--gray-700);
-}
-
-.dark-mode .safety-form select,
-.dark-mode .safety-form input[type="text"],
-.dark-mode .safety-form input[type="tel"],
-.dark-mode .safety-form textarea {
-    background-color: var(--gray-800);
-    color: var(--dark);
-    border-color: var(--gray-600);
-}
-
-.dark-mode .severity-label,
-.dark-mode .file-upload-label {
-    background-color: var(--gray-900);
-    color: var(--gray-300);
-}
-
-.dark-mode .btn-secondary {
-    background-color: var(--gray-700);
-    color: var(--gray-200);
-}
-
-.dark-mode .modal-body {
-    color: var(--gray-300);
-}
-
 /* ----- Responsive Design ----- */
 @media (max-width: 992px) {
     .footer-content {

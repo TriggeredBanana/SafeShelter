@@ -44,19 +44,6 @@
     --radius-full: 9999px;
   }
   
-  /* Variabler for mørk modus */
-  .dark-mode {
-    --primary: #ff6b6b;
-    --secondary: #4cc9f0;
-    --light: #2b2d42;
-    --dark: #edf2f4;
-    --gray-100: #333;
-    --gray-200: #444;
-    --gray-300: #555;
-    --gray-800: #eee;
-    --gray-900: #f8f9fa;
-  }
-  
   /* Globale stiler */
   * {
     margin: 0;
@@ -248,8 +235,16 @@
   .sidebar-footer {
     padding: var(--space-md);
     display: flex;
-    justify-content: space-between;
+    justify-content: center;;
     border-top: 1px solid var(--gray-300);
+  }
+
+  #fullscreen-toggle {
+    margin-right: 30px;
+  }
+
+  #info-button {
+    margin-left: 30px;
   }
   
   /* Statuspanel */
