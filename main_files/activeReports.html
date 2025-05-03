@@ -10,6 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link rel="stylesheet" href="chat.css" />
 </head>
 <body>
     <header class="main-header">
@@ -85,6 +86,33 @@
         </section>
     </main>
 
+    <!-- AI Emergency Assistant Chat -->
+    <div id="emergency-chat-container" class="emergency-chat-container">
+        <button id="chat-toggle-btn" class="chat-toggle-btn">
+            <i class="fas fa-comment-dots"></i>
+            <span>SafeShelter Assistent</span>
+        </button>
+        
+        <div id="chat-panel" class="chat-panel hidden">
+            <div class="chat-header">
+                <h3><i class="fas fa-robot"></i> SafeShelter Assistent</h3>
+                <button id="chat-close-btn" class="chat-close-btn"><i class="fas fa-times"></i></button>
+            </div>
+            <div id="chat-messages" class="chat-messages">
+                <div class="message bot-message">
+                    <div class="bot-icon"><i class="fas fa-robot"></i></div>
+                    <div class="message-content">
+                        <p>Hei! Jeg er SafeShelter-assistenten. Jeg kan gi deg informasjon om beredskap, nødsituasjoner og sikkerhetstiltak. Hva trenger du hjelp med?</p>
+                    </div>
+                </div>
+            </div>
+            <div class="chat-input-container">
+                <input type="text" id="chat-input" placeholder="Still et spørsmål..." />
+                <button id="chat-send-btn"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
+
     <footer class="main-footer">
         <div class="footer-content">
             <p>&copy; 2025 SafeShelter - Et verktøy for kriseberedskap</p>
@@ -101,5 +129,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.8.0/proj4.js"></script>
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script src="activeReports.js"></script>
+    <script src="chat.js"></script>
 </body>
 </html>
