@@ -108,12 +108,22 @@ document.addEventListener('DOMContentLoaded', function() {
             formattedMessage = formatBotMessage(message);
         }
         
-        messageElement.innerHTML = `
-            <div class="message-content">
-                ${formattedMessage}
-                <div class="message-time">${timeString}</div>
-            </div>
-        `;
+        if (sender === 'bot') {
+            messageElement.innerHTML = `
+                <div class="bot-icon"><i class="fas fa-robot"></i></div>
+                <div class="message-content">
+                    ${formattedMessage}
+                    <div class="message-time">${timeString}</div>
+                </div>
+            `;
+        } else {
+            messageElement.innerHTML = `
+                <div class="message-content">
+                    ${formattedMessage}
+                    <div class="message-time">${timeString}</div>
+                </div>
+            `;
+        }
         
         chatMessages.appendChild(messageElement);
         
