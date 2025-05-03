@@ -152,7 +152,7 @@ function processShelterData(shelters) {
             const marker = L.marker([coordinates.latitude, coordinates.longitude], {
                 icon: window.shelterIcon || createDefaultIcon('shelter')
             }).addTo(window.shelterLayer);
-            
+
             // Lag informativ popup
             marker.bindPopup(`
                 <div class="location-popup">
@@ -166,15 +166,12 @@ function processShelterData(shelters) {
                         <span>Kapasitet: ${shelter.plasser || 'Ukjent'}</span>
                     </div>
                     <div class="popup-actions">
-                        <button onclick="selectLocation({
-                            type: 'shelter',
-                            lat: ${coordinates.latitude},
-                            lng: ${coordinates.longitude},
-                            name: 'Offentlig tilfluktsrom',
-                            address: '${shelter.adresse?.replace(/'/g, "\\'")}',
-                            capacity: '${shelter.plasser || "Ukjent"}'
-                        })">
-                            <i class="fas fa-info-circle"></i> Detaljer
+                        <button onclick="getDirectionsToLocation(
+                            ${coordinates.latitude}, 
+                            ${coordinates.longitude}, 
+                            'Offentlig tilfluktsrom - ${shelter.adresse?.replace(/'/g, "\\'") || "Adresse ikke spesifisert"}'
+                        )">
+                            <i class="fas fa-route"></i> Få veibeskrivelse
                         </button>
                     </div>
                 </div>
@@ -214,7 +211,7 @@ function processFireStationData(fireStations) {
             const marker = L.marker([coordinates.latitude, coordinates.longitude], {
                 icon: window.fireStationIcon || createDefaultIcon('fire')
             }).addTo(window.fireStationLayer);
-            
+
             // Lag detaljert popup
             marker.bindPopup(`
                 <div class="location-popup">
@@ -228,15 +225,12 @@ function processFireStationData(fireStations) {
                         <span>Type: ${station.stasjonstype || 'Standard'}</span>
                     </div>
                     <div class="popup-actions">
-                        <button onclick="selectLocation({
-                            type: 'firestation',
-                            lat: ${coordinates.latitude},
-                            lng: ${coordinates.longitude},
-                            name: '${station.sted?.replace(/'/g, "\\'")}',
-                            address: '${station.brannvesen?.replace(/'/g, "\\'")}',
-                            stationType: '${station.stasjonstype?.replace(/'/g, "\\'") || "Standard"}'
-                        })">
-                            <i class="fas fa-info-circle"></i> Detaljer
+                        <button onclick="getDirectionsToLocation(
+                            ${coordinates.latitude}, 
+                            ${coordinates.longitude}, 
+                            'Brannstasjon: ${station.sted?.replace(/'/g, "\\'")}'
+                        )">
+                            <i class="fas fa-route"></i> Få veibeskrivelse
                         </button>
                     </div>
                 </div>

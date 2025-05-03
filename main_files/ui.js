@@ -158,9 +158,8 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
-        // Lag en Google Maps veibeskrivelse-URL
-        const url = `https://www.google.com/maps/dir/?api=1&destination=${state.selectedLocation.lat},${state.selectedLocation.lng}`;
-        window.open(url, '_blank');
+        // Get directions directly in the app
+        getDirectionsToLocation(state.selectedLocation.lat, state.selectedLocation.lng, state.selectedLocation.name || 'Valgt lokasjon');
     });
 
     // Tøm søk
