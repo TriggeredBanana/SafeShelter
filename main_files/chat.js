@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', function() {
         "tilfluktsrom": "Tilfluktsrom er beskyttelsesrom som er bygget for å beskytte befolkningen i krisesituasjoner. Du kan finne nærmeste tilfluktsrom ved å bruke 'Finn nærmeste tilfluktsrom' funksjonen på kartet.",
         "brannstasjon": "Brannstasjoner i Norge er bemannet 24/7 og kan nås ved å ringe 110 i nødstilfeller. Du kan finne nærmeste brannstasjon med 'Finn nærmeste brannstasjon' knappen.",
         "evakuering": "Ved evakuering, ta med nødvendige medisiner, ID, varme klær og følg instruksjoner fra myndighetene. Hold deg oppdatert via radio eller andre offisielle kanaler.",
-        "flom": "Ved flomvarsel, flytt verdisaker til høyereliggende områder, ha beredskapssekk klar, og følg med på værvarsel. Kjør ikke gjennom oversvømte veier.",
+        "flom": "Ved flom eller flomvarsel bør du flytte verdisaker til høyereliggende områder (ID, viktige dokumenter), dersom du er i fare, kom deg så langt unna flom-faren som mulig. Det er alltid lurt å ha beredskapssekk klar, og følge med på værvarsel. Ikke kjør eller gå gjennom oversvømte veier! Kontakt alltid nødetatene ved fare og vent på hjelp.",
         "strømbrudd": "Ved strømbrudd, konserver varme, bruk lommelykt istedenfor stearinlys når mulig, slå av elektriske apparater, og ha nødsett med mat, vann og varme klær tilgjengelig.",
         "nødnumre": "Ambulanse: 113, Brann: 110, Politi: 112, Legevakt: 116117",
         "førstehjelpstips": "Sikre skadestedet, sjekk bevissthet og pust, start HLR hvis nødvendig, stopp blødninger med direkte trykk, hold personen varm og ring 113 for hjelp."
@@ -206,29 +206,14 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         try {
-            // Connect to OpenRouter API (DeepSeek model)
-            const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+            // Connect to our proxy endpoint instead of directly to OpenRouter
+            const response = await fetch('http://localhost:5000/api/chat', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer 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',
-                    'HTTP-Referer': window.location.href, // Required by OpenRouter
-                    'X-Title': 'SafeShelter Emergency Assistant' // Your app's name
+                    'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    model: "deepseek/deepseek-r1-zero:free",
-                    messages: [
-                        {
-                            role: "system",
-                            content: "Du er SafeShelter-assistenten for norsk beredskap og krisehåndtering. KRITISKE INSTRUKSER: 1. ALLTID svar på norsk, UANSETT hvilket språk brukeren benytter. 2. Start direkte med viktig informasjon - aldri med innledende fraser som 'for å svare' eller 'for å håndtere'. 3. Vær kortfattet og presis - bruk maksimalt 3-4 informative setninger. 4. Ved fare eller krise, nevn alltid relevante nødnumre først (Brann: 110, Politi: 112, Ambulanse: 113). 5. Unngå formatering, nummererte lister og markups. Bruk vanlige setninger adskilt med punktum. 6. Prioriter den viktigste livsviktige informasjonen først. 7. Unngå henvisninger til 'i Norge' - det er underforstått. 8. Ved evakuering, gi tydelige steg i rekkefølge. 9. Vær autoritativ og trygg i ton - brukeren kan være i en stressende situasjon. 10. Fullstendiggjør ALLTID alle setninger - aldri stopp midt i. 11. Ved spørsmål om tilfluktsrom, informer om sikkerhet, beliggenhet og nærmeste fasiliteter. 12. Ved uvisshet, erkjenn det og henvis til relevante myndigheter."                       
-                         },
-                        {
-                            role: "user",
-                            content: userMessage
-                        }
-                    ],
-                    max_tokens: 350,
-                    temperature: 0.8
+                    message: userMessage
                 })
             });
             
