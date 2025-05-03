@@ -56,6 +56,7 @@ app.post('/api/chat', express.json(), async (req, res) => {
                 'HTTP-Referer': req.headers.referer || 'http://localhost:5000',
                 'X-Title': 'SafeShelter Emergency Assistant'
             },
+            // Currently using the free model of Meta Llama 4: Maverick
             body: JSON.stringify({
                 model: "meta-llama/llama-4-maverick:free",
                 messages: [

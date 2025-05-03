@@ -808,7 +808,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 height: 100vh;
                 background-color: transparent;
                 z-index: 2000;
-                background: rgba(0, 0, 0, 0.1);
+                background: rgba(0, 0, 0, 0.07);
                 transition: opacity 0.3s ease;
                 pointer-events: auto;
             }

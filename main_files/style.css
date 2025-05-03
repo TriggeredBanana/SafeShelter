@@ -448,7 +448,7 @@
   /* Søkebeholder */
   #search-container {
     position: absolute;
-    top: var(--space-lg);
+    top: 3%;
     left: 43%;
     transform: translateX(-50%);
     z-index: 1002;
@@ -523,7 +523,7 @@
   /* Kartkontroller og vekslinger */
   #map-controls {
     position: absolute;
-    top: var(--space-lg);
+    top: 3%;
     right: var(--space-lg);
     z-index: 999;
     background-color: white;
