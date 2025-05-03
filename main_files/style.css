@@ -815,6 +815,8 @@
   .leaflet-control-zoom {
     border-radius: var(--radius-md) !important;
     overflow: hidden;
+    margin-top: 20px !important;
+    margin-left: 20px !important;
   }
   
   .leaflet-control-zoom a {
