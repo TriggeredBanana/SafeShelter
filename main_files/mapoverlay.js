@@ -209,6 +209,12 @@ function setupEventListeners() {
         findNearestStationBtn.addEventListener('click', findNearestFireStation);
     }
 
+    // etter findNearestFireStation…
+    const findNearestHospitalBtn = document.getElementById('find-nearest-hospital');
+    if (findNearestHospitalBtn) {
+        findNearestHospitalBtn.addEventListener('click', findNearestHospital);
+    }
+
     // Håndter vindustørrelsesendring
     window.addEventListener('resize', () => map.invalidateSize())
 
@@ -422,6 +428,75 @@ function findNearestFireStation() {
     );
 }
 
+async function findNearestHospital() {
+    showNotification("Finner din posisjon...", "info");
+  
+    if (!navigator.geolocation) {
+      showNotification("Geolokalisering støttes ikke", "error");
+      return;
+    }
+  
+    navigator.geolocation.getCurrentPosition(
+      position => {
+        const userLat = position.coords.latitude;
+        const userLng = position.coords.longitude;
+  
+        // Clear old search markers
+        searchMarkers.clearLayers();
+  
+        // Legg til bruker-ikon (samme som i de andre)
+        const userIcon = L.divIcon({
+          html: '<i class="fas fa-user" style="color:#0466c8; font-size:24px;"></i>',
+          iconSize: [24,24],
+          iconAnchor: [12,24]
+        });
+        L.marker([userLat, userLng], { icon: userIcon })
+          .addTo(searchMarkers)
+          .bindPopup('<strong>Din posisjon</strong>')
+          .openPopup();
+  
+        showNotification("Posisjon funnet! Finner nærmeste sykehus…", "success");
+  
+        // Finn nærmeste sykehus
+        let nearest = null;
+        let bestDist = Infinity;
+        window.sykehusLayer.eachLayer(layer => {
+          const lat = layer.getLatLng().lat;
+          const lng = layer.getLatLng().lng;
+          const d = calculateDistance(userLat, userLng, lat, lng);
+          if (d < bestDist) {
+            bestDist = d;
+            nearest = layer;
+          }
+        });
+  
+        if (!nearest) {
+          showNotification("Ingen sykehus funnet", "warning");
+          return;
+        }
+  
+        // Marker avstand/rute (kan gjenbruke getRoadDistanceAndRoute etc.)
+        getRoadDistanceAndRoute(
+          userLat, userLng,
+          nearest.getLatLng().lat, nearest.getLatLng().lng,
+          routeData => {
+            displayRouteAndDistance(
+              userLat, userLng,
+              nearest.getLatLng().lat, nearest.getLatLng().lng,
+              routeData,
+              nearest
+            );
+          }
+        );
+      },
+      err => {
+        console.error(err);
+        showNotification("Kunne ikke hente posisjon", "error");
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
+  }
+  
 
 // Finn nærmeste tilfluktsrom ved å beregne avstander
 function findNearest(userLat, userLng) {

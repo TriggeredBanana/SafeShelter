@@ -71,14 +71,14 @@ async function loadEmergencyData() {
         // ─── 2) Overpass‐query med gruppe for node+way+relation ───────
         // Sykehus‐Overpass i Agder
         const bboxQuery = `
-  [out:json][timeout:25];
-  (
-    node["amenity"="hospital"](57.6,6.6,59.3,9.5);
-    way["amenity"="hospital"](57.6,6.6,59.3,9.5);
-    relation["amenity"="hospital"](57.6,6.6,59.3,9.5);
-  );
-  out center;
-`;
+        [out:json][timeout:25];
+        (
+          node["amenity"="hospital"](57.6,6.6,59.3,9.5);
+          way["amenity"="hospital"](57.6,6.6,59.3,9.5);
+          relation["amenity"="hospital"](57.6,6.6,59.3,9.5);
+        );
+        out center;
+    `;      
 
 
         const overpassUrl =
