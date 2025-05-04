@@ -16,9 +16,17 @@ document.addEventListener('DOMContentLoaded', function () {
 
 // Initialiser kart sentrert på Kristiansand-området
 function initializeMap() {
+    const norwayBounds = L.latLngBounds(
+        [57.5, 4.5],  // Southwest corner
+        [71.5, 31.5]  // Northeast corner
+    );
+    
     map = L.map('map', {
         fadeAnimation: true,
-        zoomAnimation: true
+        zoomAnimation: true,
+        maxBounds: norwayBounds.pad(0.5),
+        minZoom: 5,
+        maxBoundsViscosity: 1.0
     }).setView([58.1599, 8.0182], 13);
 
     window.map = map;
