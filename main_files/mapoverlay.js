@@ -58,11 +58,29 @@ function initializeMap() {
                 html: '<div class="hospital-marker-icon"><i class="fas fa-hospital"></i></div>',
                 iconSize: [30, 30],
                 iconAnchor: [15, 30],
+                popupAnchor: [0, -30],
                 className: ''
             })
         }),
         onEachFeature: (feature, layer) => {
-            layer.bindPopup(`<strong>${feature.properties.name}</strong>`);
+            layer.bindPopup(`
+                <div class="location-popup">
+                    <h4>Sykehus</h4>
+                    <div class="popup-detail">
+                        <i class="fas fa-hospital"></i>
+                        <span>${feature.properties.name}</span>
+                    </div>
+                    <div class="popup-actions">
+                        <button onclick="getDirectionsToLocation(
+                            ${layer.getLatLng().lat}, 
+                            ${layer.getLatLng().lng}, 
+                            'Sykehus: ${feature.properties.name.replace(/'/g, "\\'")}'
+                        )">
+                            <i class="fas fa-route"></i> Få veibeskrivelse
+                        </button>
+                    </div>
+                </div>
+            `);
         }
     }).addTo(map);
 
@@ -207,6 +225,12 @@ function setupEventListeners() {
     const findNearestStationBtn = document.getElementById('find-nearest-station');
     if (findNearestStationBtn) {
         findNearestStationBtn.addEventListener('click', findNearestFireStation);
+    }
+
+    // etter findNearestFireStation…
+    const findNearestHospitalBtn = document.getElementById('find-nearest-hospital');
+    if (findNearestHospitalBtn) {
+        findNearestHospitalBtn.addEventListener('click', findNearestHospital);
     }
 
     // Håndter vindustørrelsesendring
@@ -708,13 +732,13 @@ function createTravelModeSelector(userLat, userLng, destLat, destLng, destName) 
     
     // Add event listeners
     document.getElementById('mode-driving').addEventListener('click', function() {
-        document.querySelectorAll('.mode-button').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.mode-toggle').forEach(btn => btn.classList.remove('active'));
         this.classList.add('active');
         getRouteWithMode(userLat, userLng, destLat, destLng, destName, "driving");
     });
     
     document.getElementById('mode-walking').addEventListener('click', function() {
-        document.querySelectorAll('.mode-button').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.mode-toggle').forEach(btn => btn.classList.remove('active'));
         this.classList.add('active');
         getRouteWithMode(userLat, userLng, destLat, destLng, destName, "walking");
     });
@@ -734,12 +758,27 @@ function getRouteWithMode(startLat, startLng, endLat, endLng, destName, mode) {
         }
     });
     
-    // Show loading state
-    document.getElementById('route-info').innerHTML = `
-        <div class="route-loading">
-            <i class="fas fa-spinner fa-spin"></i> Beregner ${mode === 'driving' ? 'kjøre' : 'gange'}rute...
-        </div>
+    // Get the route info element
+    const routeInfoEl = document.getElementById('route-info');
+    
+    // Create loading overlay instead of replacing content
+    const loadingOverlay = document.createElement('div');
+    loadingOverlay.className = 'route-loading';
+    loadingOverlay.innerHTML = `
+        <i class="fas fa-spinner fa-spin"></i> Beregner ${mode === 'driving' ? 'kjøre' : 'gange'}rute...
     `;
+    
+    // Add loading overlay
+    routeInfoEl.appendChild(loadingOverlay);
+    
+    // Update active styling for mode buttons
+    document.querySelectorAll('.mode-toggle').forEach(btn => {
+        if (btn.id === `mode-${mode}`) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
     
     // Get route data from OSRM
     const profile = mode === 'driving' ? 'driving' : 'foot';
@@ -785,16 +824,32 @@ function getRouteWithMode(startLat, startLng, endLat, endLng, destName, mode) {
                     }
                 }).addTo(searchMarkers);
                 
-                // Update route info
-                document.getElementById('route-info').innerHTML = `
-                    <div class="route-details">
-                        <div class="route-destination"><i class="fas fa-flag-checkered"></i> ${destName}</div>
-                        <div class="route-stats">
-                            <span><i class="fas fa-ruler"></i> Avstand: ${distanceText}</span>
-                            <span><i class="fas fa-clock"></i> Estimert tid: ${durationText}</span>
-                        </div>
+                // Remove any existing loading indicator
+                const existingLoader = document.querySelector('.route-loading');
+                if (existingLoader) {
+                    existingLoader.remove();
+                }
+
+                // Update route info with smooth animation
+                const routeInfoEl = document.getElementById('route-info');
+                const routeDetails = document.createElement('div');
+                routeDetails.className = 'route-details';
+                routeDetails.innerHTML = `
+                    <div class="route-destination">
+                    <i class="fas fa-map-marker-alt"></i> ${destName} </div>
+                    <div class="route-stats">
+                        <span><i class="fas fa-ruler"></i> Avstand: ${distanceText}</span>
+                        <span><i class="fas fa-clock"></i> Estimert tid: ${durationText}</span>
                     </div>
                 `;
+
+                // Remove any existing details before adding new ones
+                const existingDetails = routeInfoEl.querySelector('.route-details');
+                if (existingDetails) {
+                    existingDetails.remove();
+                }
+
+                routeInfoEl.appendChild(routeDetails);
                 
                 // Fit map to show the route
                 map.fitBounds(routeLine.getBounds(), {
