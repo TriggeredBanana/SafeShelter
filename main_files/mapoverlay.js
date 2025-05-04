@@ -514,7 +514,7 @@ function findNearestHospital() {
                 getRouteWithMode(userLat, userLng, hospitalLat, hospitalLng, hospitalName, "driving");
                 
                 // Open the popup for the nearest hospital
-                nearestHospital.openPopup();
+                // nearestHospital.openPopup();
             } else {
                 showNotification("Ingen sykehus funnet i nærheten", "warning");
             }
