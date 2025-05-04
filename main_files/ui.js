@@ -3,7 +3,9 @@
  * Håndterer alle UI-interaksjoner, animasjoner og tilstandshåndtering
  */
 
-document.addEventListener('DOMContentLoaded', function() {
+const API_BASE = 'http://localhost:5000/api';
+
+document.addEventListener('DOMContentLoaded', function () {
     // Initialiser systemtilstand
     let state = {
         sidebarVisible: true,
@@ -95,20 +97,60 @@ document.addEventListener('DOMContentLoaded', function() {
         }, true);
     }
 
+    async function updateWeatherStatus(lat, lon) {
+        const el = document.getElementById('weather-status');
+        if (!el) return;
+        try {
+            const r = await fetch(`${API_BASE}/weather?lat=${lat}&lon=${lon}`);
+            const j = await r.json();
+            const inst = j.properties.timeseries[0].data.instant.details;
+            const t = Math.round(inst.air_temperature);
+            const p = (inst.precipitation_amount || 0).toFixed(1);
+            el.textContent = `${t} °C, ${p} mm`;
+        } catch {
+            el.textContent = 'Ukjent';
+        }
+    }
+
+    async function updateFloodStatus(lat, lon) {
+        const el = document.getElementById('flood-status');
+        if (!el) return;
+        try {
+            const r = await fetch(`${API_BASE}/flood?lat=${lat}&lon=${lon}`);
+            const j = await r.json();
+            el.textContent = j.active ? 'AKTIV' : 'Ingen';
+        } catch {
+            el.textContent = 'Ukjent';
+        }
+    } 
+
+    async function updateAllStatuses() {
+        const center = map.getCenter();
+        const { lat, lng: lon } = center;
+        await Promise.all([
+            updateWeatherStatus(lat, lon),
+            updateFloodStatus(lat, lon)
+        ]);
+    }
+
+    map.whenReady(updateAllStatuses);
+    map.on('moveend', updateAllStatuses);
+    setInterval(updateAllStatuses, 10 * 60 * 1000); // hvert 10. min
+
     // Hendelselyttere
 
     const logoText = document.querySelector('.logo h2');
     if (logoText) {
         logoText.style.cursor = 'pointer';
-        logoText.addEventListener('click', function() {
+        logoText.addEventListener('click', function () {
             window.location.reload();
         });
     }
 
     // Fullskjermveksling
-    fullscreenToggle.addEventListener('click', function() {
+    fullscreenToggle.addEventListener('click', function () {
         state.isFullscreen = !state.isFullscreen;
-        
+
         if (state.isFullscreen) {
             if (document.documentElement.requestFullscreen) {
                 document.documentElement.requestFullscreen();
@@ -137,7 +179,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Info-knapp - starter omvisning
-    infoButton.addEventListener('click', function() {
+    infoButton.addEventListener('click', function () {
         startTour();
     });
 
@@ -185,20 +227,20 @@ document.addEventListener('DOMContentLoaded', function() {
     }); */
 
     // Tøm søk
-    clearSearchBtn.addEventListener('click', function() {
+    clearSearchBtn.addEventListener('click', function () {
         searchInput.value = '';
         searchMarkers.clearLayers();
     });
 
     // Kartstilknapper
     mapStyleButtons.forEach(button => {
-        button.addEventListener('click', function() {
+        button.addEventListener('click', function () {
             // Fjern aktiv klasse fra alle knapper
             mapStyleButtons.forEach(b => b.classList.remove('active'));
-            
+
             // Legg til aktiv klasse på klikket knapp
             button.classList.add('active');
-            
+
             // Endre kartstil ved å bruke funksjonen fra mapoverlay.js
             const style = button.getAttribute('data-style');
             window.changeMapStyle(style);
@@ -215,19 +257,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 <span>${message}</span>
             </div>
         `;
-        
+
         // Legg til i DOM og fjern etter en forsinkelse
         document.body.appendChild(notification);
-        
+
         setTimeout(() => {
             notification.classList.add('slide-out-right');
             setTimeout(() => {
                 notification.remove();
             }, 500);
         }, 4000);
-        
+
         function getIconForType(type) {
-            switch(type) {
+            switch (type) {
                 case 'success': return 'fa-check-circle';
                 case 'warning': return 'fa-exclamation-triangle';
                 case 'error': return 'fa-times-circle';
@@ -242,10 +284,10 @@ document.addEventListener('DOMContentLoaded', function() {
     // Oppdater tilfluktsrom/stasjons-informasjonspanel
     function updateLocationInfo(location) {
         state.selectedLocation = location;
-        
+
         // Lag detaljert HTML
         let detailsHTML = '';
-        
+
         if (location.type === 'shelter') {
             detailsHTML = `
                 <div class="location-details slide-in-right">
@@ -297,7 +339,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
             `;
         }
-        
+
         selectedLocationDetails.innerHTML = detailsHTML;
     }
 
@@ -308,7 +350,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Oppdater statistikk med animasjon
     function updateStatistics(stats, animate = false) {
         state.statistics = { ...state.statistics, ...stats };
-        
+
         if (animate) {
             animateNumber(totalSheltersEl, 0, stats.totalShelters, 1500);
             animateNumber(totalCapacityEl, 0, stats.totalCapacity, 2000);
@@ -322,21 +364,25 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Animer tall som telles opp
     function animateNumber(element, start, end, duration) {
-        let startTime = null;
+        if (!element) {
+            return;
+        }
         
+        let startTime = null;
+
         function animation(currentTime) {
             if (!startTime) startTime = currentTime;
             const elapsedTime = currentTime - startTime;
             const progress = Math.min(elapsedTime / duration, 1);
             const value = Math.floor(progress * (end - start) + start);
-            
+
             element.textContent = value.toLocaleString();
-            
+
             if (progress < 1) {
                 requestAnimationFrame(animation);
             }
         }
-        
+
         requestAnimationFrame(animation);
     }
 
@@ -396,10 +442,20 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function nextTourStep() {
         state.activeTourStep++;
-        
+
         if (state.activeTourStep >= tourSteps.length) {
             endTour();
             return;
+        }
+
+        updateTourStep();
+    }
+
+    function prevTourStep() {
+        state.activeTourStep--;
+        
+        if (state.activeTourStep < 0) {
+            state.activeTourStep = 0;
         }
         
         updateTourStep();
@@ -716,7 +772,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Hjelpefunksjon for å sentrere kart på koordinater
-    window.centerMapOn = function(coordinates) {
+    window.centerMapOn = function (coordinates) {
         map.flyTo(coordinates, map.getZoom(), {
             animate: true,
             duration: 1
@@ -1055,7 +1111,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 100% { transform: scale(1); }
             }
         `;
-        
+
         document.head.appendChild(styles);
     }
 });

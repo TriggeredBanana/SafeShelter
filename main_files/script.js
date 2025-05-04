@@ -8,6 +8,19 @@ document.addEventListener('DOMContentLoaded', function () {
     loadEmergencyData();
 });
 
+let userPosition = null;
+window.fireStationsData = [];
+
+if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+        pos => userPosition = pos.coords,
+        err => console.warn("Geolocation feilet:", err)
+    );
+}
+
+initializeDataLoading();
+loadEmergencyData();
+
 // Initialiser datainnlasting med visuell tilbakemelding
 function initializeDataLoading() {
     if (document.querySelector('.stats-panel')) {
@@ -59,8 +72,16 @@ async function loadEmergencyData() {
             fetchFireStationData()
         ]);
 
-        if (shelters.length) processShelterData(shelters);
-        if (fireStations.length) processFireStationData(fireStations);
+        // Behandle og vis data på kartet
+        if (shelters && shelters.length > 0) {
+            processShelterData(shelters);
+        }
+
+        if (fireStations && fireStations.length > 0) {
+            processFireStationData(fireStations);
+        }
+
+        // Oppdater statistikkpanelet med antall
         updateStatistics(shelters.length, fireStations.length);
 
         document.getElementById('loading-indicator-style')?.remove();
@@ -161,6 +182,7 @@ async function fetchFireStationData() {
         }
 
         const data = await response.json();
+        fireStationsData = data; // Lagre data i global variabel for senere bruk
         console.log(`Hentet ${data.length} brannstasjoner`);
         return data;
     } catch (error) {
@@ -174,6 +196,9 @@ async function fetchFireStationData() {
 
 // Behandle tilfluktsromdata og legg til på kartet
 function processShelterData(shelters) {
+    if (window.shelterLayer) {
+        window.shelterLayer.clearLayers();
+    }
     // Sett opp koordinattransformasjon (UTM sone 32N til WGS84)
     proj4.defs('EPSG:25832', '+proj=utm +zone=32 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs');
 
@@ -238,6 +263,10 @@ function processShelterData(shelters) {
 
 // Behandle brannstasjonsdata og legg til på kartet
 function processFireStationData(fireStations) {
+    if (window.fireStationLayer) {
+        window.fireStationLayer.clearLayers();
+    }
+    
     // Sett opp UTM til WGS84-transformasjon hvis nødvendig
     if (!proj4.defs['EPSG:25832']) {
         proj4.defs('EPSG:25832', '+proj=utm +zone=32 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs');
@@ -532,3 +561,15 @@ function addMarkerStyles() {
     `;
     document.head.appendChild(styleEl);
 }
+
+function haversineDistance([lat1, lon1], [lat2, lon2]) {
+    const toRad = v => v * Math.PI/180;
+    const R = 6371; // jordens radius i km
+    const dLat = toRad(lat2 - lat1),
+          dLon = toRad(lon2 - lon1);
+    const a = Math.sin(dLat/2)**2
+            + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2))
+            * Math.sin(dLon/2)**2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  }
+  
