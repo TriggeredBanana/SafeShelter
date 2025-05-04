@@ -400,6 +400,17 @@
     transform: translateY(-2px);
     box-shadow: var(--shadow-md);
   }
+
+  .action-button.hospital {
+    background-color: var(--success);
+    color: white;
+  }
+
+  .action-button.hospital:hover {
+    background-color: #1f7a6d;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
   
   .toggle-button.fire-active {
     background-color: var(--warning);
