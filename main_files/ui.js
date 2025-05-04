@@ -143,11 +143,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Finn nærmeste tilfluktsrom
     findNearestBtn.addEventListener('click', function() {
-        // Legg til pulseringsanimasjon midlertidig på knappen
-        findNearestBtn.classList.add('pulse-action');
-        setTimeout(() => findNearestBtn.classList.remove('pulse-action'), 1500);
+        findNearestBtn.classList.add('professional-click');
+        setTimeout(() => findNearestBtn.classList.remove('professional-click'), 400);
         
-        // Kall funksjonen fra mapoverlay.js
         window.findNearestShelter();
     });
 
@@ -155,11 +153,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const findNearestStationBtn = document.getElementById('find-nearest-station');
     if (findNearestStationBtn) {
         findNearestStationBtn.addEventListener('click', function() {
-            // Add this animation code:
-            findNearestStationBtn.classList.add('pulse-action');
-            setTimeout(() => findNearestStationBtn.classList.remove('pulse-action'), 1500);
+            findNearestStationBtn.classList.add('professional-click');
+            setTimeout(() => findNearestStationBtn.classList.remove('professional-click'), 400);
             
-            // Existing function call
             window.findNearestFireStation();
         });
     }
@@ -168,11 +164,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const findNearestHospitalBtn = document.getElementById('find-nearest-hospital');
     if (findNearestHospitalBtn) {
         findNearestHospitalBtn.addEventListener('click', function() {
-            // Add this animation code:
-            findNearestHospitalBtn.classList.add('pulse-action');
-            setTimeout(() => findNearestHospitalBtn.classList.remove('pulse-action'), 1500);
+            findNearestHospitalBtn.classList.add('professional-click');
+            setTimeout(() => findNearestHospitalBtn.classList.remove('professional-click'), 400);
             
-            // Existing function call (if any)
             if (typeof window.findNearestHospital === 'function') {
                 window.findNearestHospital();
             }
