@@ -345,19 +345,10 @@ function findNearestShelter() {
             searchMarkers.clearLayers();
 
             // Legg til brukerposisjonsmarkør
-            const userIcon = L.divIcon({
-                html: '<i class="fas fa-user" style="color:#0466c8; font-size:24px;"></i>',
-                iconSize: [24, 24],
-                iconAnchor: [12, 24]
-            });
-
-            const userMarker = L.marker([userLat, userLng], {
-                icon: userIcon
-            })
+            const userMarker = createUserPositionMarker(userLat, userLng)
                 .addTo(searchMarkers)
-                .bindPopup('<strong>Din posisjon</strong>')
                 .openPopup();
-
+            
             showNotification("Posisjon funnet! Finner nærmeste tilfluktsrom...", "suksess");
 
             // Finn nærmeste tilfluktsrom ved å beregne avstander
@@ -406,21 +397,12 @@ function findNearestFireStation() {
             const userLat = position.coords.latitude;
             const userLng = position.coords.longitude;
 
-            // Fjern tidligere søkemarkører
+            // Fjern tidligere markører
             searchMarkers.clearLayers();
 
             // Legg til brukerposisjonsmarkør
-            const userIcon = L.divIcon({
-                html: '<i class="fas fa-user" style="color:#0466c8; font-size:24px;"></i>',
-                iconSize: [24, 24],
-                iconAnchor: [12, 24]
-            });
-
-            const userMarker = L.marker([userLat, userLng], {
-                icon: userIcon
-            })
+            const userMarker = createUserPositionMarker(userLat, userLng)
                 .addTo(searchMarkers)
-                .bindPopup('<strong>Din posisjon</strong>')
                 .openPopup();
 
             showNotification("Posisjon funnet! Finner nærmeste brannstasjon...", "suksess");
@@ -443,7 +425,7 @@ function findNearestFireStation() {
 
 // Finn nærmeste tilfluktsrom ved å beregne avstander
 function findNearest(userLat, userLng) {
-    // Først sjekk om vi har tilfluktsromdata lastet
+    // First check if we have shelter data loaded
     if (!window.shelterLayer || window.shelterLayer.getLayers().length === 0) {
         showNotification("Ingen tilfluktsromdata tilgjengelig", "error");
         return;
@@ -451,46 +433,58 @@ function findNearest(userLat, userLng) {
 
     let nearestShelter = null;
     let shortestDistance = Infinity;
-
-    // Gå gjennom alle tilfluktsrommarkører for å finne den nærmeste
-    window.shelterLayer.eachLayer(function (layer) {
-        // Hent tilfluktsromposisjon fra markøren
+    
+    // Go through all shelter markers to find the nearest one
+    window.shelterLayer.eachLayer(function(layer) {
+        // Get shelter position from the marker
         const shelterLat = layer.getLatLng().lat;
         const shelterLng = layer.getLatLng().lng;
-
-        // Beregning av direkte avstand ved hjelp av "Haversine-formelen"
-        // Vi bruker dette innledningsvis for å finne det nærmeste tilfluktsrommet
+        
+        // Calculate direct distance using the "Haversine formula"
         const directDistance = calculateDistance(userLat, userLng, shelterLat, shelterLng);
-
-        // Oppdater nærmeste tilfluktsrom hvis dette er nærmere
+        
+        // Update nearest shelter if this one is closer
         if (directDistance < shortestDistance) {
             shortestDistance = directDistance;
             nearestShelter = layer;
         }
     });
-
-    // Hvis et nærmeste tilfluktsrom blir funner, fremheves det og vi henter veiavstand
+    
+    // If a nearest shelter is found, highlight it and show travel mode options
     if (nearestShelter) {
         const shelterLat = nearestShelter.getLatLng().lat;
         const shelterLng = nearestShelter.getLatLng().lng;
+        
+        // Show notification about finding nearest shelter
+        showNotification("Nærmeste tilfluktsrom funnet!", "success");
+        
+        // Fjern tidligere markører
+        searchMarkers.clearLayers();
 
-        // Vis en midlertidig lasteindikator
-        showNotification("Beregner rute til tilfluktsrom...", "info");
-
-        // Hent veiavstand og tegn ruten
-        getRoadDistanceAndRoute(
-            userLat, userLng,
-            shelterLat, shelterLng,
-            function (routeData) {
-                // Tegn ruten på kartet og vis avstand
-                displayRouteAndDistance(userLat, userLng, shelterLat, shelterLng, routeData, nearestShelter);
-            }
-        );
+        // Legg til brukerposisjonsmarkør
+        const userMarker = createUserPositionMarker(userLat, userLng)
+            .addTo(searchMarkers)
+            .openPopup();
+        
+        const shelterName = nearestShelter.getPopup() ? 
+            (nearestShelter.getPopup().getContent().match(/<h4>(.*?)<\/h4>/) || ['', 'Tilfluktsrom'])[1] : 
+            'Tilfluktsrom';
+        
+        // Create mode selector for driving/walking
+        createTravelModeSelector(userLat, userLng, shelterLat, shelterLng, shelterName);
+        
+        // Get route for driving first (default)
+        getRouteWithMode(userLat, userLng, shelterLat, shelterLng, shelterName, "driving");
+        
+        // Open the popup for the nearest shelter
+        nearestShelter.openPopup();
+        
+        // Trigger click on the nearest shelter to show details in sidebar
+        nearestShelter.fire('click');
+        
     } else {
         showNotification("Ingen tilfluktsrom funnet i nærheten", "warning");
     }
-
-
 }
 
 function findNearestStation(userLat, userLng) {
@@ -502,8 +496,8 @@ function findNearestStation(userLat, userLng) {
     let nearestStation = null;
     let shortestDistance = Infinity;
 
-    // Gå gjennom alle brannstasjonsmarkører for å finne den nærmeste
-    window.fireStationLayer.eachLayer(function (layer) {
+    // Go through all fire station markers to find the nearest one
+    window.fireStationLayer.eachLayer(function(layer) {
         const stationLat = layer.getLatLng().lat;
         const stationLng = layer.getLatLng().lng;
         const directDistance = calculateDistance(userLat, userLng, stationLat, stationLng);
@@ -518,149 +512,239 @@ function findNearestStation(userLat, userLng) {
         const stationLat = nearestStation.getLatLng().lat;
         const stationLng = nearestStation.getLatLng().lng;
 
-        showNotification("Beregner rute til nærmeste brannstasjon...", "info");
+        // Show notification about finding nearest fire station
+        showNotification("Nærmeste brannstasjon funnet!", "success");
+        
+        // Fjern tidligere markører
+        searchMarkers.clearLayers();
 
-        // Hent veiavstand og tegn ruten
-        getRoadDistanceAndRoute(
-            userLat, userLng,
-            stationLat, stationLng,
-            function (routeData) {
-                displayRouteAndDistance(userLat, userLng, stationLat, stationLng, routeData, nearestStation);
-            }
-        );
+        // Legg til brukerposisjonsmarkør
+        const userMarker = createUserPositionMarker(userLat, userLng)
+            .addTo(searchMarkers)
+            .openPopup();
+                
+        // Extract station name from popup content if available
+        const stationName = nearestStation.getPopup() ? 
+            (nearestStation.getPopup().getContent().match(/<h4>Brannstasjon: (.*?)<\/h4>/) || ['', 'Brannstasjon'])[1] : 
+            'Brannstasjon';
+        
+        // Create mode selector for driving/walking
+        createTravelModeSelector(userLat, userLng, stationLat, stationLng, stationName);
+        
+        // Get route for driving first (default)
+        getRouteWithMode(userLat, userLng, stationLat, stationLng, stationName, "driving");
+        
+        // Open the popup for the nearest station
+        nearestStation.openPopup();
+        
+        // Trigger click on the nearest station to show details in sidebar
+        nearestStation.fire('click');
+        
     } else {
         showNotification("Ingen brannstasjoner funnet i nærheten", "warning");
     }
 }
 
+// Get directions to selected location
+function getDirectionsToLocation(destLat, destLng, destName) {
+    showNotification("Finner din posisjon...", "info");
+    
+    if (!navigator.geolocation) {
+        showNotification("Geolokalisering støttes ikke av din nettleser", "error");
+        return;
+    }
+    
+    navigator.geolocation.getCurrentPosition(
+        function(position) {
+            const userLat = position.coords.latitude;
+            const userLng = position.coords.longitude;
+            
+            // Fjern tidligere markører
+            searchMarkers.clearLayers();
 
-// Hent veiavstand og rute mellom to punkter ved hjelp av OSRM
-function getRoadDistanceAndRoute(startLat, startLng, endLat, endLng, callback) {
-    // Opprett OSRM API URL
-    const url = `https://router.project-osrm.org/route/v1/driving/${startLng},${startLat};${endLng},${endLat}?overview=full&geometries=geojson`;
+            // Legg til brukerposisjonsmarkør
+            const userMarker = createUserPositionMarker(userLat, userLng)
+                .addTo(searchMarkers)
+                .openPopup();
+            
+            showNotification("Beregner rute...", "info");
+            
+            // Create mode selector
+            createTravelModeSelector(userLat, userLng, destLat, destLng, destName);
+            
+            // Get route for driving first (default)
+            getRouteWithMode(userLat, userLng, destLat, destLng, destName, "driving");
+        },
+        function(error) {
+            console.error("Geolokaliseringsfeil:", error);
+            showNotification("Kunne ikke hente posisjon.", "error");
+        },
+        {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0
+        }
+    );
+}
 
-    // Hent rutedata
+// Create travel mode selector UI
+function createTravelModeSelector(userLat, userLng, destLat, destLng, destName) {
+    // Remove existing mode selector if any
+    const existingSelector = document.getElementById('travel-mode-selector');
+    if (existingSelector) {
+        existingSelector.remove();
+    }
+    
+    // Create mode selector container
+    const modeSelector = document.createElement('div');
+    modeSelector.id = 'travel-mode-selector';
+    modeSelector.className = 'travel-mode-selector';
+    modeSelector.innerHTML = `
+        <div class="selector-header">
+            <h4>Veibeskrivelse</h4>
+            <button id="close-directions" class="close-directions" title="Lukk veibeskrivelse">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="mode-buttons">
+            <button id="mode-driving" class="mode-button active">
+                <i class="fas fa-car"></i> Kjøring
+            </button>
+            <button id="mode-walking" class="mode-button">
+                <i class="fas fa-walking"></i> Gange
+            </button>
+        </div>
+        <div id="route-info" class="route-info"></div>
+    `;
+    
+    // Add to map
+    document.querySelector('.map-container').appendChild(modeSelector);
+    
+    // Add event listeners
+    document.getElementById('mode-driving').addEventListener('click', function() {
+        document.querySelectorAll('.mode-button').forEach(btn => btn.classList.remove('active'));
+        this.classList.add('active');
+        getRouteWithMode(userLat, userLng, destLat, destLng, destName, "driving");
+    });
+    
+    document.getElementById('mode-walking').addEventListener('click', function() {
+        document.querySelectorAll('.mode-button').forEach(btn => btn.classList.remove('active'));
+        this.classList.add('active');
+        getRouteWithMode(userLat, userLng, destLat, destLng, destName, "walking");
+    });
+    
+    // Add close button event listener
+    document.getElementById('close-directions').addEventListener('click', function() {
+        closeDirectionsView();
+    });
+}
+
+// Get route with specified travel mode
+function getRouteWithMode(startLat, startLng, endLat, endLng, destName, mode) {
+    // Clear any existing routes
+    searchMarkers.eachLayer(layer => {
+        if (layer instanceof L.Polyline) {
+            searchMarkers.removeLayer(layer);
+        }
+    });
+    
+    // Show loading state
+    document.getElementById('route-info').innerHTML = `
+        <div class="route-loading">
+            <i class="fas fa-spinner fa-spin"></i> Beregner ${mode === 'driving' ? 'kjøre' : 'gange'}rute...
+        </div>
+    `;
+    
+    // Get route data from OSRM
+    const profile = mode === 'driving' ? 'driving' : 'foot';
+    const url = `https://router.project-osrm.org/route/v1/${profile}/${startLng},${startLat};${endLng},${endLat}?overview=full&geometries=geojson`;
+    
     fetch(url)
         .then(response => {
-            if (!response.ok) {
-                throw new Error('Nettverkssvaret var ikke ok');
-            }
+            if (!response.ok) throw new Error('Network response was not ok');
             return response.json();
         })
         .then(data => {
             if (data.code === 'Ok' && data.routes && data.routes.length > 0) {
                 const route = data.routes[0];
-                callback({
-                    // Avstand i kilometer
-                    distance: route.distance / 1000,
-                    // Varighet i minutter
-                    duration: Math.round(route.duration / 60),
-                    // Rutegeometri som GeoJSON
-                    geometry: route.geometry
+                const distanceKm = (route.distance / 1000).toFixed(2);
+                const distanceText = distanceKm > 1 ? `${distanceKm} km` : `${Math.round(route.distance)} m`;
+                
+                // Calculate appropriate duration based on mode
+                let durationMinutes;
+                if (mode === 'driving') {
+                    durationMinutes = Math.round(route.duration / 60);
+                } else {
+                    // Average walking speed is about 5km/h
+                    durationMinutes = Math.round((route.distance / 1000) / 5 * 60);
+                }
+                
+                const hours = Math.floor(durationMinutes / 60);
+                const minutes = durationMinutes % 60;
+                let durationText = '';
+                
+                if (hours > 0) {
+                    durationText = `${hours} t ${minutes} min`;
+                } else {
+                    durationText = `${minutes} min`;
+                }
+                
+                // Draw the route
+                const routeLine = L.geoJSON(route.geometry, {
+                    style: {
+                        color: mode === 'driving' ? '#0466c8' : '#d64045',
+                        weight: 5,
+                        opacity: 0.7,
+                        lineCap: 'round'
+                    }
+                }).addTo(searchMarkers);
+                
+                // Update route info
+                document.getElementById('route-info').innerHTML = `
+                    <div class="route-details">
+                        <div class="route-destination"><i class="fas fa-flag-checkered"></i> ${destName}</div>
+                        <div class="route-stats">
+                            <span><i class="fas fa-ruler"></i> Avstand: ${distanceText}</span>
+                            <span><i class="fas fa-clock"></i> Estimert tid: ${durationText}</span>
+                        </div>
+                    </div>
+                `;
+                
+                // Fit map to show the route
+                map.fitBounds(routeLine.getBounds(), {
+                    padding: [50, 50],
+                    maxZoom: 15
                 });
+                
+                showNotification(`Rute beregnet: ${distanceText}, ca. ${durationText} med ${mode === 'driving' ? 'bil' : 'gange'}`, "success");
             } else {
-                throw new Error('Ingen rute funnet');
+                throw new Error('No route found');
             }
         })
         .catch(error => {
-            console.error('Feil ved henting av veiavstand:', error);
-            showNotification("Kunne ikke beregne veiavstand. Viser direkte avstand i stedet.", "warning");
-
-            // Fall tilbake til direkte avstand
-            const directDistance = calculateDistance(startLat, startLng, endLat, endLng);
-            callback({
-                distance: directDistance,
-                duration: Math.round(directDistance * 3), // Grov estimering
-                geometry: null
-            });
+            console.error('Error fetching route:', error);
+            showNotification("Kunne ikke beregne rute. Prøv en annen transportmetode.", "error");
+            document.getElementById('route-info').innerHTML = `
+                <div class="route-error">
+                    <i class="fas fa-exclamation-triangle"></i> Kunne ikke beregne rute.
+                </div>
+            `;
         });
 }
 
-// Vis rute og avstand på kartet
-function displayRouteAndDistance(userLat, userLng, shelterLat, shelterLng, routeData, nearestShelter) {
-    // Formater avstanden pent
-    const distanceKm = routeData.distance;
-    const distanceText = distanceKm > 1
-        ? `${distanceKm.toFixed(2)} km`
-        : `${Math.round(distanceKm * 1000)} m`;
-
-    // Formater varigheten
-    const durationText = routeData.duration > 60
-        ? `${Math.floor(routeData.duration / 60)} t ${routeData.duration % 60} min`
-        : `${routeData.duration} min`;
-
-    // Hvis vi har rutegeometri, tegn ruten
-    let routeLine;
-    if (routeData.geometry) {
-        // Tegn ruten ved hjelp av den returnerte geometrien
-        routeLine = L.geoJSON(routeData.geometry, {
-            style: {
-                color: '#0466c8',
-                weight: 5,
-                opacity: 0.7,
-                lineCap: 'round'
-            }
-        }).addTo(searchMarkers);
-    } else {
-        // Faller tilbake til en rett linje hvis ingen rutegeometri
-        routeLine = L.polyline([
-            [userLat, userLng],
-            [shelterLat, shelterLng]
-        ], {
-            color: '#0466c8',
-            weight: 4,
-            opacity: 0.7,
-            dashArray: '8, 8',
-            lineCap: 'round'
-        }).addTo(searchMarkers);
+// Close directions view and clean up
+function closeDirectionsView() {
+    // Remove travel mode selector
+    const selector = document.getElementById('travel-mode-selector');
+    if (selector) {
+        selector.remove();
     }
-
-    // Finn et punkt langs ruten for avstandsmarkøren
-    let midpoint;
-
-    if (routeData.geometry && routeData.geometry.coordinates && routeData.geometry.coordinates.length > 0) {
-        // For ruter med geometri, få et punkt omtrent halvveis langs stien
-        const coords = routeData.geometry.coordinates;
-        const midIndex = Math.floor(coords.length / 2);
-        // Merk: GeoJSON-format bruker [lengdegrad, breddegrad] rekkefølge
-        midpoint = [coords[midIndex][1], coords[midIndex][0]];
-    } else {
-        // Fallback til direkte midtpunkt for rette linjer
-        midpoint = [
-            (userLat + shelterLat) / 2,
-            (userLng + shelterLng) / 2
-        ];
-    }
-
-    // Legg til avstands- og tidsmarkør
-    L.marker(midpoint, {
-        icon: L.divIcon({
-            html: `<div class="distance-marker">${distanceText} (${durationText})</div>`,
-            className: '',
-            iconSize: [120, 30]
-        })
-    }).addTo(searchMarkers);
-
-    // Åpne popup for nærmeste tilfluktsrom
-    nearestShelter.openPopup();
-
-    // Juster visningen for å se både bruker og tilfluktsrom
-    const bounds = L.latLngBounds([
-        [userLat, userLng],
-        [shelterLat, shelterLng]
-    ]);
-    map.fitBounds(bounds, {
-        padding: [300, 300],
-        maxZoom: 14,
-        animate: true,
-        duration: 1
-    });
-
-    // Vis suksessmelding
-    showNotification(`Fant nærmeste tilfluktsrom (${distanceText}, omtrent ${durationText} med bil)`, "suksess");
-
-    // Utløs et klikk på det nærmeste tilfluktsrommet for å vise detaljene i sidefeltet
-    nearestShelter.fire('click');
+    
+    // Clear any routes and markers from search layer
+    searchMarkers.clearLayers();
+    
+    // Show success notification
+    showNotification("Veibeskrivelse lukket", "info");
 }
 
 // Beregn avstand mellom to punkter ved hjelp av "Haversine-formelen"
@@ -673,15 +757,30 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
     const dLon = (lon2 - lon1) * Math.PI / 180;
 
     // Haversine-formel
-    const a =
-        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-        Math.sin(dLon / 2) * Math.sin(dLon / 2);
-
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    const distance = R * c; // Avstand i kilometer
-
+    const a = 
+        Math.sin(dLat/2) * Math.sin(dLat/2) +
+        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+        Math.sin(dLon/2) * Math.sin(dLon/2);
+    
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    const distance = R * c;    
     return distance;
+}
+
+// Create a styled user position marker
+function createUserPositionMarker(lat, lng) {
+    const userIcon = L.divIcon({
+        className: 'user-position-marker',
+        html: '<div class="user-position-icon"><i class="fas fa-user"></i></div>',
+        iconSize: [50, 60],
+        iconAnchor: [25, 45], // Position in the middle horizontally and at the point of the arrow
+        popupAnchor: [-7, -50] // Position popup above the icon
+    });
+    
+    return L.marker([lat, lng], {
+        icon: userIcon,
+        zIndexOffset: 1000 // Ensure user marker appears above other markers
+    }).bindPopup('<strong>Din posisjon</strong>');
 }
 
 // Hent posisjonsforslag fra OpenStreetMap
@@ -777,4 +876,6 @@ window.map = map;
 window.searchLocation = searchLocation;
 window.findNearestShelter = findNearestShelter;
 window.findNearestFireStation = findNearestFireStation;
+window.getDirectionsToLocation = getDirectionsToLocation;
+window.closeDirectionsView = closeDirectionsView;
 window.changeMapStyle = changeMapStyle;

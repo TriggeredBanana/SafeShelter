@@ -57,7 +57,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const fullscreenToggle = document.getElementById('fullscreen-toggle');
     const infoButton = document.getElementById('info-button');
     const findNearestBtn = document.getElementById('find-nearest');
-    const directionsBtn = document.getElementById('directions-button');
+    // const directionsBtn = document.getElementById('directions-button');
     const clearSearchBtn = document.getElementById('clear-search');
     const searchInput = document.getElementById('search-input');
     const loadingOverlay = document.getElementById('loading-overlay');
@@ -152,16 +152,15 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Få veibeskrivelser
-    directionsBtn.addEventListener('click', function() {
+    /** directionsBtn.addEventListener('click', function() {
         if (!state.selectedLocation) {
             showNotification("Velg først et tilfluktsrom eller en brannstasjon", "warning");
             return;
         }
         
-        // Lag en Google Maps veibeskrivelse-URL
-        const url = `https://www.google.com/maps/dir/?api=1&destination=${state.selectedLocation.lat},${state.selectedLocation.lng}`;
-        window.open(url, '_blank');
-    });
+        // Get directions directly in the app
+        getDirectionsToLocation(state.selectedLocation.lat, state.selectedLocation.lng, state.selectedLocation.name || 'Valgt lokasjon');
+    }); */
 
     // Tøm søk
     clearSearchBtn.addEventListener('click', function() {
