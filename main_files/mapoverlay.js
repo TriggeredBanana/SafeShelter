@@ -60,11 +60,29 @@ function initializeMap() {
                 html: '<div class="hospital-marker-icon"><i class="fas fa-hospital"></i></div>',
                 iconSize: [30, 30],
                 iconAnchor: [15, 30],
+                popupAnchor: [0, -30],
                 className: ''
             })
         }),
         onEachFeature: (feature, layer) => {
-            layer.bindPopup(`<strong>${feature.properties.name}</strong>`);
+            layer.bindPopup(`
+                <div class="location-popup">
+                    <h4>Sykehus</h4>
+                    <div class="popup-detail">
+                        <i class="fas fa-hospital"></i>
+                        <span>${feature.properties.name}</span>
+                    </div>
+                    <div class="popup-actions">
+                        <button onclick="getDirectionsToLocation(
+                            ${layer.getLatLng().lat}, 
+                            ${layer.getLatLng().lng}, 
+                            'Sykehus: ${feature.properties.name.replace(/'/g, "\\'")}'
+                        )">
+                            <i class="fas fa-route"></i> Få veibeskrivelse
+                        </button>
+                    </div>
+                </div>
+            `);
         }
     }).addTo(map);
 
@@ -430,74 +448,89 @@ function findNearestFireStation() {
     );
 }
 
-async function findNearestHospital() {
+function findNearestHospital() {
     showNotification("Finner din posisjon...", "info");
-  
+
     if (!navigator.geolocation) {
-      showNotification("Geolokalisering støttes ikke", "error");
-      return;
+        showNotification("Geolokalisering støttes ikke av din nettleser", "error");
+        return;
     }
-  
+
     navigator.geolocation.getCurrentPosition(
-      position => {
-        const userLat = position.coords.latitude;
-        const userLng = position.coords.longitude;
-  
-        // Clear old search markers
-        searchMarkers.clearLayers();
-  
-        // Legg til bruker-ikon (samme som i de andre)
-        const userIcon = L.divIcon({
-          html: '<i class="fas fa-user" style="color:#0466c8; font-size:24px;"></i>',
-          iconSize: [24,24],
-          iconAnchor: [12,24]
-        });
-        L.marker([userLat, userLng], { icon: userIcon })
-          .addTo(searchMarkers)
-          .bindPopup('<strong>Din posisjon</strong>')
-          .openPopup();
-  
-        showNotification("Posisjon funnet! Finner nærmeste sykehus…", "success");
-  
-        // Finn nærmeste sykehus
-        let nearest = null;
-        let bestDist = Infinity;
-        window.sykehusLayer.eachLayer(layer => {
-          const lat = layer.getLatLng().lat;
-          const lng = layer.getLatLng().lng;
-          const d = calculateDistance(userLat, userLng, lat, lng);
-          if (d < bestDist) {
-            bestDist = d;
-            nearest = layer;
-          }
-        });
-  
-        if (!nearest) {
-          showNotification("Ingen sykehus funnet", "warning");
-          return;
+        function(position) {
+            const userLat = position.coords.latitude;
+            const userLng = position.coords.longitude;
+
+            // Fjern tidligere markører
+            searchMarkers.clearLayers();
+
+            // Legg til brukerposisjonsmarkør
+            const userMarker = createUserPositionMarker(userLat, userLng)
+                .addTo(searchMarkers)
+                .openPopup();
+            
+            showNotification("Posisjon funnet! Finner nærmeste sykehus...", "success");
+
+            // Finn nærmeste sykehus ved å beregne avstander
+            if (!window.sykehusLayer || window.sykehusLayer.getLayers().length === 0) {
+                showNotification("Ingen sykehusdata tilgjengelig", "error");
+                return;
+            }
+
+            let nearestHospital = null;
+            let shortestDistance = Infinity;
+            
+            // Go through all hospital markers to find the nearest one
+            window.sykehusLayer.eachLayer(function(layer) {
+                const hospitalLat = layer.getLatLng().lat;
+                const hospitalLng = layer.getLatLng().lng;
+                
+                // Calculate direct distance using the Haversine formula
+                const directDistance = calculateDistance(userLat, userLng, hospitalLat, hospitalLng);
+                
+                // Update nearest hospital if this one is closer
+                if (directDistance < shortestDistance) {
+                    shortestDistance = directDistance;
+                    nearestHospital = layer;
+                }
+            });
+            
+            if (nearestHospital) {
+                const hospitalLat = nearestHospital.getLatLng().lat;
+                const hospitalLng = nearestHospital.getLatLng().lng;
+                
+                // Show notification about finding nearest hospital
+                showNotification("Nærmeste sykehus funnet!", "success");
+                
+                // Extract hospital name from popup content if available
+                const hospitalName = nearestHospital.getPopup() ? 
+                    (nearestHospital.getPopup().getContent().match(/<strong>(.*?)<\/strong>/) || ['', 'Sykehus'])[1] : 
+                    'Sykehus';
+                
+                // Create mode selector for driving/walking
+                createTravelModeSelector(userLat, userLng, hospitalLat, hospitalLng, hospitalName);
+                
+                // Get route for driving first (default)
+                getRouteWithMode(userLat, userLng, hospitalLat, hospitalLng, hospitalName, "driving");
+                
+                // Open the popup for the nearest hospital
+                // nearestHospital.openPopup();
+            } else {
+                showNotification("Ingen sykehus funnet i nærheten", "warning");
+            }
+        },
+        function(error) {
+            console.error("Geolokaliseringsfeil:", error);
+            let errorMsg = "Kunne ikke hente din posisjon. Vennligst sjekk at lokasjonstjenester er aktivert.";
+            showNotification(errorMsg, "error");
+        },
+        {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0
         }
-  
-        // Marker avstand/rute (kan gjenbruke getRoadDistanceAndRoute etc.)
-        getRoadDistanceAndRoute(
-          userLat, userLng,
-          nearest.getLatLng().lat, nearest.getLatLng().lng,
-          routeData => {
-            displayRouteAndDistance(
-              userLat, userLng,
-              nearest.getLatLng().lat, nearest.getLatLng().lng,
-              routeData,
-              nearest
-            );
-          }
-        );
-      },
-      err => {
-        console.error(err);
-        showNotification("Kunne ikke hente posisjon", "error");
-      },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
-  }
+}
   
 
 // Finn nærmeste tilfluktsrom ved å beregne avstander
@@ -677,21 +710,23 @@ function createTravelModeSelector(userLat, userLng, destLat, destLng, destName) 
     modeSelector.id = 'travel-mode-selector';
     modeSelector.className = 'travel-mode-selector';
     modeSelector.innerHTML = `
-        <div class="selector-header">
-            <h4>Veibeskrivelse</h4>
-            <button id="close-directions" class="close-directions" title="Lukk veibeskrivelse">
-                <i class="fas fa-times"></i>
-            </button>
+        <div class="modern-directions-layout">
+            <div class="directions-header">
+                <h4>Veibeskrivelse</h4>
+                <div class="mode-toggles">
+                    <button id="mode-driving" class="mode-toggle active">
+                        <i class="fas fa-car"></i>
+                    </button>
+                    <button id="mode-walking" class="mode-toggle">
+                        <i class="fas fa-walking"></i>
+                    </button>
+                </div>
+                <button id="close-directions" class="close-directions" title="Lukk veibeskrivelse">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="route-info" class="route-info"></div>
         </div>
-        <div class="mode-buttons">
-            <button id="mode-driving" class="mode-button active">
-                <i class="fas fa-car"></i> Kjøring
-            </button>
-            <button id="mode-walking" class="mode-button">
-                <i class="fas fa-walking"></i> Gange
-            </button>
-        </div>
-        <div id="route-info" class="route-info"></div>
     `;
     
     // Add to map
@@ -699,13 +734,13 @@ function createTravelModeSelector(userLat, userLng, destLat, destLng, destName) 
     
     // Add event listeners
     document.getElementById('mode-driving').addEventListener('click', function() {
-        document.querySelectorAll('.mode-button').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.mode-toggle').forEach(btn => btn.classList.remove('active'));
         this.classList.add('active');
         getRouteWithMode(userLat, userLng, destLat, destLng, destName, "driving");
     });
     
     document.getElementById('mode-walking').addEventListener('click', function() {
-        document.querySelectorAll('.mode-button').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.mode-toggle').forEach(btn => btn.classList.remove('active'));
         this.classList.add('active');
         getRouteWithMode(userLat, userLng, destLat, destLng, destName, "walking");
     });
@@ -725,12 +760,27 @@ function getRouteWithMode(startLat, startLng, endLat, endLng, destName, mode) {
         }
     });
     
-    // Show loading state
-    document.getElementById('route-info').innerHTML = `
-        <div class="route-loading">
-            <i class="fas fa-spinner fa-spin"></i> Beregner ${mode === 'driving' ? 'kjøre' : 'gange'}rute...
-        </div>
+    // Get the route info element
+    const routeInfoEl = document.getElementById('route-info');
+    
+    // Create loading overlay instead of replacing content
+    const loadingOverlay = document.createElement('div');
+    loadingOverlay.className = 'route-loading';
+    loadingOverlay.innerHTML = `
+        <i class="fas fa-spinner fa-spin"></i> Beregner ${mode === 'driving' ? 'kjøre' : 'gange'}rute...
     `;
+    
+    // Add loading overlay
+    routeInfoEl.appendChild(loadingOverlay);
+    
+    // Update active styling for mode buttons
+    document.querySelectorAll('.mode-toggle').forEach(btn => {
+        if (btn.id === `mode-${mode}`) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
     
     // Get route data from OSRM
     const profile = mode === 'driving' ? 'driving' : 'foot';
@@ -776,16 +826,32 @@ function getRouteWithMode(startLat, startLng, endLat, endLng, destName, mode) {
                     }
                 }).addTo(searchMarkers);
                 
-                // Update route info
-                document.getElementById('route-info').innerHTML = `
-                    <div class="route-details">
-                        <div class="route-destination"><i class="fas fa-flag-checkered"></i> ${destName}</div>
-                        <div class="route-stats">
-                            <span><i class="fas fa-ruler"></i> Avstand: ${distanceText}</span>
-                            <span><i class="fas fa-clock"></i> Estimert tid: ${durationText}</span>
-                        </div>
+                // Remove any existing loading indicator
+                const existingLoader = document.querySelector('.route-loading');
+                if (existingLoader) {
+                    existingLoader.remove();
+                }
+
+                // Update route info with smooth animation
+                const routeInfoEl = document.getElementById('route-info');
+                const routeDetails = document.createElement('div');
+                routeDetails.className = 'route-details';
+                routeDetails.innerHTML = `
+                    <div class="route-destination">
+                    <i class="fas fa-map-marker-alt"></i> ${destName} </div>
+                    <div class="route-stats">
+                        <span><i class="fas fa-ruler"></i> Avstand: ${distanceText}</span>
+                        <span><i class="fas fa-clock"></i> Estimert tid: ${durationText}</span>
                     </div>
                 `;
+
+                // Remove any existing details before adding new ones
+                const existingDetails = routeInfoEl.querySelector('.route-details');
+                if (existingDetails) {
+                    existingDetails.remove();
+                }
+
+                routeInfoEl.appendChild(routeDetails);
                 
                 // Fit map to show the route
                 map.fitBounds(routeLine.getBounds(), {
@@ -952,6 +1018,7 @@ function debounce(func, delay) {
 window.searchLocation = searchLocation;
 window.findNearestShelter = findNearestShelter;
 window.findNearestFireStation = findNearestFireStation;
+window.findNearestHospital = findNearestHospital;
 window.getDirectionsToLocation = getDirectionsToLocation;
 window.closeDirectionsView = closeDirectionsView;
 window.changeMapStyle = changeMapStyle;
