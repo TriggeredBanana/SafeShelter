@@ -422,6 +422,90 @@ function findNearestFireStation() {
     );
 }
 
+function findNearestHospital() {
+    showNotification("Finner din posisjon...", "info");
+
+    if (!navigator.geolocation) {
+        showNotification("Geolokalisering støttes ikke av din nettleser", "error");
+        return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+        function(position) {
+            const userLat = position.coords.latitude;
+            const userLng = position.coords.longitude;
+
+            // Fjern tidligere markører
+            searchMarkers.clearLayers();
+
+            // Legg til brukerposisjonsmarkør
+            const userMarker = createUserPositionMarker(userLat, userLng)
+                .addTo(searchMarkers)
+                .openPopup();
+            
+            showNotification("Posisjon funnet! Finner nærmeste sykehus...", "success");
+
+            // Finn nærmeste sykehus ved å beregne avstander
+            if (!window.sykehusLayer || window.sykehusLayer.getLayers().length === 0) {
+                showNotification("Ingen sykehusdata tilgjengelig", "error");
+                return;
+            }
+
+            let nearestHospital = null;
+            let shortestDistance = Infinity;
+            
+            // Go through all hospital markers to find the nearest one
+            window.sykehusLayer.eachLayer(function(layer) {
+                const hospitalLat = layer.getLatLng().lat;
+                const hospitalLng = layer.getLatLng().lng;
+                
+                // Calculate direct distance using the Haversine formula
+                const directDistance = calculateDistance(userLat, userLng, hospitalLat, hospitalLng);
+                
+                // Update nearest hospital if this one is closer
+                if (directDistance < shortestDistance) {
+                    shortestDistance = directDistance;
+                    nearestHospital = layer;
+                }
+            });
+            
+            if (nearestHospital) {
+                const hospitalLat = nearestHospital.getLatLng().lat;
+                const hospitalLng = nearestHospital.getLatLng().lng;
+                
+                // Show notification about finding nearest hospital
+                showNotification("Nærmeste sykehus funnet!", "success");
+                
+                // Extract hospital name from popup content if available
+                const hospitalName = nearestHospital.getPopup() ? 
+                    (nearestHospital.getPopup().getContent().match(/<strong>(.*?)<\/strong>/) || ['', 'Sykehus'])[1] : 
+                    'Sykehus';
+                
+                // Create mode selector for driving/walking
+                createTravelModeSelector(userLat, userLng, hospitalLat, hospitalLng, hospitalName);
+                
+                // Get route for driving first (default)
+                getRouteWithMode(userLat, userLng, hospitalLat, hospitalLng, hospitalName, "driving");
+                
+                // Open the popup for the nearest hospital
+                nearestHospital.openPopup();
+            } else {
+                showNotification("Ingen sykehus funnet i nærheten", "warning");
+            }
+        },
+        function(error) {
+            console.error("Geolokaliseringsfeil:", error);
+            let errorMsg = "Kunne ikke hente din posisjon. Vennligst sjekk at lokasjonstjenester er aktivert.";
+            showNotification(errorMsg, "error");
+        },
+        {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0
+        }
+    );
+}
+  
 
 // Finn nærmeste tilfluktsrom ved å beregne avstander
 function findNearest(userLat, userLng) {
@@ -600,21 +684,23 @@ function createTravelModeSelector(userLat, userLng, destLat, destLng, destName) 
     modeSelector.id = 'travel-mode-selector';
     modeSelector.className = 'travel-mode-selector';
     modeSelector.innerHTML = `
-        <div class="selector-header">
-            <h4>Veibeskrivelse</h4>
-            <button id="close-directions" class="close-directions" title="Lukk veibeskrivelse">
-                <i class="fas fa-times"></i>
-            </button>
+        <div class="modern-directions-layout">
+            <div class="directions-header">
+                <h4>Veibeskrivelse</h4>
+                <div class="mode-toggles">
+                    <button id="mode-driving" class="mode-toggle active">
+                        <i class="fas fa-car"></i>
+                    </button>
+                    <button id="mode-walking" class="mode-toggle">
+                        <i class="fas fa-walking"></i>
+                    </button>
+                </div>
+                <button id="close-directions" class="close-directions" title="Lukk veibeskrivelse">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="route-info" class="route-info"></div>
         </div>
-        <div class="mode-buttons">
-            <button id="mode-driving" class="mode-button active">
-                <i class="fas fa-car"></i> Kjøring
-            </button>
-            <button id="mode-walking" class="mode-button">
-                <i class="fas fa-walking"></i> Gange
-            </button>
-        </div>
-        <div id="route-info" class="route-info"></div>
     `;
     
     // Add to map
@@ -876,6 +962,7 @@ window.map = map;
 window.searchLocation = searchLocation;
 window.findNearestShelter = findNearestShelter;
 window.findNearestFireStation = findNearestFireStation;
+window.findNearestHospital = findNearestHospital;
 window.getDirectionsToLocation = getDirectionsToLocation;
 window.closeDirectionsView = closeDirectionsView;
 window.changeMapStyle = changeMapStyle;

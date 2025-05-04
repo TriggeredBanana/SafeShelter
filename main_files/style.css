@@ -771,68 +771,76 @@
     left: 50%;
     transform: translateX(-50%);
     background-color: white;
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-lg);
-    padding: var(--space-md);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.08);
+    padding: 16px;
     z-index: 1000;
-    width: 300px;
-    animation: slide-up 0.3s ease-out;
+    width: 320px;
+    animation: slide-up 0.25s ease-out;
+    border: 1px solid var(--gray-200);
   }
 
   @keyframes slide-up {
-    from { transform: translate(-50%, 20px); opacity: 0; }
-    to { transform: translate(-50%, 0); opacity: 1; }
+      from { transform: translate(-50%, 15px); opacity: 0; }
+      to { transform: translate(-50%, 0); opacity: 1; }
   }
 
   .mode-buttons {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--space-sm);
-    margin-bottom: var(--space-sm);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 12px;
   }
 
   .mode-button {
-    padding: var(--space-sm);
-    border: none;
-    background-color: var(--gray-200);
-    border-radius: var(--radius-md);
+    padding: 10px;
+    border: 1px solid var(--gray-300);
+    background-color: white;
+    border-radius: var(--radius-sm);
     cursor: pointer;
-    transition: all var(--transition-fast);
+    transition: all 0.2s ease;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: var(--space-sm);
+    gap: 8px;
     font-weight: 600;
+    color: var(--gray-700);
   }
 
   .mode-button.active {
-    background-color: var(--secondary);
-    color: white;
+      background-color: var(--secondary);
+      color: white;
+      border-color: transparent;
   }
 
   .mode-button:hover:not(.active) {
-    background-color: var(--gray-300);
+      border-color: var(--secondary);
+      color: var(--secondary);
   }
 
   .route-info {
     border-top: 1px solid var(--gray-200);
-    padding-top: var(--space-sm);
+    padding-top: 12px;
     min-height: 80px;
   }
 
   .route-loading {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-sm);
-    color: var(--gray-600);
-    height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      color: var(--gray-600);
+      height: 60px;
+      font-size: 0.95rem;
   }
 
   .route-details {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-xs);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      background-color: var(--gray-50);
+      padding: 12px;
+      border-radius: var(--radius-sm);
   }
 
   .route-destination {
@@ -872,35 +880,37 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: var(--space-md);
-    padding-bottom: var(--space-sm);
+    margin-bottom: 14px;
+    padding-bottom: 10px;
     border-bottom: 1px solid var(--gray-200);
   }
 
   .selector-header h4 {
       margin: 0;
-      font-size: 1.1rem;
+      font-size: 1.05rem;
       color: var(--dark);
+      font-weight: 700;
+      letter-spacing: 0.01em;
   }
 
   .close-directions {
       background: none;
       border: none;
-      color: var(--gray-600);
+      color: var(--gray-500);
       cursor: pointer;
-      font-size: 1.1rem;
-      width: 24px;
-      height: 24px;
+      font-size: 1rem;
+      width: 28px;
+      height: 28px;
       display: flex;
       align-items: center;
       justify-content: center;
-      border-radius: 50%;
-      transition: all var(--transition-fast);
+      border-radius: var(--radius-sm);
+      transition: all 0.2s ease;
   }
 
   .close-directions:hover {
-      background-color: var(--gray-200);
-      color: var(--gray-900);
+      background-color: var(--gray-100);
+      color: var(--primary);
   }
 
   /* Enhance popup button styling */
