@@ -3,7 +3,7 @@
  * Håndterer datahenting, prosessering og visualisering på kartet
  */
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     initializeDataLoading();
     loadEmergencyData();
 });
@@ -21,7 +21,7 @@ function initializeDataLoading() {
             </div>
         `;
     }
-    
+
     // Legg til stiler for innlastingsindikator
     const styleEl = document.createElement('style');
     styleEl.id = 'loading-indicator-style';
@@ -51,52 +51,94 @@ function initializeDataLoading() {
     document.head.appendChild(styleEl);
 }
 
-// Last inn alle beredskapsdata (tilfluktsrom og brannstasjoner)
 async function loadEmergencyData() {
     try {
-        // Last data parallelt for bedre ytelse
+        // ─── 1) Backend-data ─────────────────────────────────────────
         const [shelters, fireStations] = await Promise.all([
             fetchShelterData(),
             fetchFireStationData()
         ]);
-        
-        // Behandle og vis data på kartet
-        if (shelters && shelters.length > 0) {
-            processShelterData(shelters);
-        }
-        
-        if (fireStations && fireStations.length > 0) {
-            processFireStationData(fireStations);
-        }
-        
-        // Oppdater statistikkpanelet med antall
+
+        if (shelters.length) processShelterData(shelters);
+        if (fireStations.length) processFireStationData(fireStations);
         updateStatistics(shelters.length, fireStations.length);
 
-        // Fjern innlastingsstilene
         document.getElementById('loading-indicator-style')?.remove();
-        
-        // Vis vellykket melding
         if (typeof showNotification === 'function') {
             showNotification("Alle nødressurser lastet inn", "success");
         }
-        
+
+        // ─── 2) Overpass‐query med gruppe for node+way+relation ───────
+        // Sykehus‐Overpass i Agder
+        const bboxQuery = `
+  [out:json][timeout:25];
+  (
+    node["amenity"="hospital"](57.6,6.6,59.3,9.5);
+    way["amenity"="hospital"](57.6,6.6,59.3,9.5);
+    relation["amenity"="hospital"](57.6,6.6,59.3,9.5);
+  );
+  out center;
+`;
+
+
+        const overpassUrl =
+            'https://overpass-api.de/api/interpreter?data=' +
+            encodeURIComponent(bboxQuery);
+
+        console.log('Overpass URL:', overpassUrl);
+        const resHosp = await fetch(overpassUrl);
+        console.log('Overpass status:', resHosp.status);
+        if (!resHosp.ok) throw new Error(`Overpass feilet: ${resHosp.status}`);
+
+        const hospText = await resHosp.text();
+        console.log('Overpass svar (før parse):', hospText.slice(0, 200));
+        const hospData = JSON.parse(hospText);
+        console.log('Antall sykehus‐elementer:', hospData.elements.length);
+
+        // ─── 3) Tegn sykehusene ────────────────────────────────────────
+        const features = hospData.elements
+            .filter(el => ["node", "way", "relation"].includes(el.type))
+            .map(el => {
+                const lat = el.lat ?? el.center?.lat;
+                const lon = el.lon ?? el.center?.lon;
+                if (lat == null || lon == null) return null;
+                return {
+                    type: "Feature",
+                    geometry: { type: "Point", coordinates: [lon, lat] },
+                    properties: { name: el.tags?.name || "Uten navn" }
+                };
+            })
+            .filter(Boolean);
+
+        console.log('Antall konverterte GeoJSON-features:', features.length);
+
+        if (!window.sykehusLayer) {
+            console.error('sykehusLayer er ikke definert!');
+            return;
+        }
+        window.sykehusLayer.clearLayers();
+        window.sykehusLayer.addData(features);
+
     } catch (error) {
-        console.error('Feil ved lasting av beredskapsdata:', error);
+        console.error('Feil ved lasting av sykehusdata:', error);
         if (typeof showNotification === 'function') {
-            showNotification("Feil ved lasting av nødressurser. Vennligst prøv igjen senere.", "error");
+            showNotification("Feil ved lasting av sykehus-data", "error");
         }
     }
 }
+
+
+
 
 // Hent tilfluktsromdata fra backend
 async function fetchShelterData() {
     try {
         const response = await fetch("http://localhost:5000/api/tilfluktsrom_agder");
-        
+
         if (!response.ok) {
             throw new Error(`Kunne ikke hente tilfluktsromdata: ${response.status}`);
         }
-        
+
         const data = await response.json();
         console.log(`Hentet ${data.length} tilfluktsrom`);
         return data;
@@ -113,11 +155,11 @@ async function fetchShelterData() {
 async function fetchFireStationData() {
     try {
         const response = await fetch("http://localhost:5000/api/brannstasjoner_agder");
-        
+
         if (!response.ok) {
             throw new Error(`Kunne ikke hente brannstasjonsdata: ${response.status}`);
         }
-        
+
         const data = await response.json();
         console.log(`Hentet ${data.length} brannstasjoner`);
         return data;
@@ -134,20 +176,20 @@ async function fetchFireStationData() {
 function processShelterData(shelters) {
     // Sett opp koordinattransformasjon (UTM sone 32N til WGS84)
     proj4.defs('EPSG:25832', '+proj=utm +zone=32 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs');
-    
+
     let totalCapacity = 0;
-    
+
     // Behandle hvert tilfluktsrom
     shelters.forEach(shelter => {
         // Hent ut koordinater
         const coordinates = extractCoordinates(shelter.geom);
-        
+
         if (coordinates && shelter.adresse) {
             // Legg til tilfluktsromkapasitet til totalen (hvis tilgjengelig)
             if (shelter.plasser && !isNaN(parseInt(shelter.plasser))) {
                 totalCapacity += parseInt(shelter.plasser);
             }
-            
+
             // Lag markør med egendefinert ikon (definert i mapoverlay.js)
             const marker = L.marker([coordinates.latitude, coordinates.longitude], {
                 icon: window.shelterIcon || createDefaultIcon('shelter')
@@ -176,20 +218,20 @@ function processShelterData(shelters) {
                     </div>
                 </div>
             `);
-            
+
             // Legg til sveve-effekt
-            marker.on('mouseover', function() {
+            marker.on('mouseover', function () {
                 this._icon.classList.add('marker-hover');
             });
-            
-            marker.on('mouseout', function() {
+
+            marker.on('mouseout', function () {
                 this._icon.classList.remove('marker-hover');
             });
         }
     });
-    
+
     window.shelterCapacity = totalCapacity;
-    
+
     // Legg til stil for markør-sveve-effekt
     addMarkerStyles();
 }
@@ -200,12 +242,12 @@ function processFireStationData(fireStations) {
     if (!proj4.defs['EPSG:25832']) {
         proj4.defs('EPSG:25832', '+proj=utm +zone=32 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs');
     }
-    
+
     // Behandle hver brannstasjon
     fireStations.forEach(station => {
         // Hent ut koordinater
         const coordinates = extractCoordinatesUTM(station.geom);
-        
+
         if (coordinates && station.sted) {
             // Lag markør med egendefinert ikon
             const marker = L.marker([coordinates.latitude, coordinates.longitude], {
@@ -235,13 +277,13 @@ function processFireStationData(fireStations) {
                     </div>
                 </div>
             `);
-            
+
             // Legg til sveve-effekt
-            marker.on('mouseover', function() {
+            marker.on('mouseover', function () {
                 this._icon.classList.add('marker-hover');
             });
-            
-            marker.on('mouseout', function() {
+
+            marker.on('mouseout', function () {
                 this._icon.classList.remove('marker-hover');
             });
         }
@@ -252,7 +294,7 @@ function processFireStationData(fireStations) {
 function extractCoordinates(geom) {
     try {
         if (!geom) return null;
-        
+
         // Håndter ulike geometriformater
         if (typeof geom === 'string') {
             try {
@@ -262,21 +304,21 @@ function extractCoordinates(geom) {
                 return null;
             }
         }
-        
+
         // Punktgeometri
         if (geom.type === "Point" && Array.isArray(geom.coordinates)) {
             // Sjekk om koordinater trenger transformasjon
             const [x, y] = geom.coordinates;
-            
+
             // Sjekk om koordinater er i UTM (større verdier)
             if (Math.abs(x) > 180 || Math.abs(y) > 90) {
                 return transformUTMToWGS84(x, y);
             }
-            
+
             // Om koordinater ser ut til å være i WGS84 allerede
             return { latitude: y, longitude: x };
         }
-        
+
         console.warn('Geometritype ikke støttet:', geom.type);
         return null;
     } catch (error) {
@@ -291,10 +333,10 @@ function extractCoordinatesUTM(geom) {
         if (!geom || !geom.type || !geom.coordinates || !Array.isArray(geom.coordinates)) {
             return null;
         }
-        
+
         // Hent x og y fra koordinater
         const [x, y] = geom.coordinates;
-        
+
         return transformUTMToWGS84(x, y);
     } catch (error) {
         console.error('Feil ved utvinning av UTM-koordinater:', error);
@@ -307,9 +349,9 @@ function transformUTMToWGS84(x, y) {
     try {
         // Transformer fra UTM til WGS84
         const wgs84 = proj4('EPSG:25832', 'WGS84', [x, y]);
-        
+
         // Returner som breddegrad/lengdegrad-objekt for Leaflet
-        return { 
+        return {
             latitude: wgs84[1],  // Breddegrad er Y-koordinat i WGS84
             longitude: wgs84[0]  // Lengdegrad er X-koordinat i WGS84
         };
@@ -322,17 +364,21 @@ function transformUTMToWGS84(x, y) {
 // Lag standardikon hvis egendefinerte ikoner ikke er tilgjengelige
 function createDefaultIcon(type) {
     let className, color, icon;
-    
+
     if (type === 'shelter') {
         className = 'shelter-marker-icon';
-        color = '#e63946'; // var(--primary)
+        color = '#e63946';
         icon = 'fa-home';
+    } else if (type === 'hospital') {
+        className = 'hospital-marker-icon';
+        color = '#2a9d8f'; // trygg grønn
+        icon = 'fa-hospital';
     } else {
         className = 'fire-marker-icon';
-        color = '#ff9f1c'; // var(--warning)
+        color = '#ff9f1c';
         icon = 'fa-fire';
     }
-    
+
     return L.divIcon({
         html: `<div class="${className}"><i class="fas ${icon}"></i></div>`,
         iconSize: [30, 30],
@@ -349,7 +395,7 @@ function updateStatistics(shelterCount, fireStationCount) {
     const totalSheltersEl = document.getElementById('total-shelters');
     const totalCapacityEl = document.getElementById('total-capacity');
     const fireStationsEl = document.getElementById('fire-stations');
-    
+
     // Hvis statistikkpanelet finnes, oppdater det
     if (statsPanel) {
         statsPanel.innerHTML = `
@@ -373,7 +419,7 @@ function updateStatistics(shelterCount, fireStationCount) {
         if (totalCapacityEl) totalCapacityEl.textContent = window.shelterCapacity || 0;
         if (fireStationsEl) fireStationsEl.textContent = fireStationCount;
     }
-    
+
     // Hvis UI.js har animert tellerfunksjon, bruk den
     if (typeof window.animateNumber === 'function') {
         if (totalSheltersEl) window.animateNumber(totalSheltersEl, 0, shelterCount, 1500);
@@ -383,7 +429,7 @@ function updateStatistics(shelterCount, fireStationCount) {
 }
 
 // Håndter valg av plassering fra kartet
-window.selectLocation = function(location) {
+window.selectLocation = function (location) {
     // Lagre den valgte plasseringen i en global variabel som backup
     window.selectedLocation = location;
 
@@ -392,13 +438,13 @@ window.selectLocation = function(location) {
         window.updateLocationInfo(location);
     } else {
         console.log('Valgt plassering:', location);
-        
+
         // Vis plasseringsinformasjon i sidefeltet hvis det finnes en beholder for det
         const detailsContainer = document.getElementById('selected-location-details');
-        
+
         if (detailsContainer) {
             let detailsHTML = '';
-            
+
             if (location.type === 'shelter') {
                 detailsHTML = `
                     <div class="location-details">
@@ -416,11 +462,11 @@ window.selectLocation = function(location) {
                     </div>
                 `;
             }
-            
+
             detailsContainer.innerHTML = detailsHTML;
         }
     }
-    
+
     // Sentrer kartet på den valgte plasseringen
     if (window.map) {
         window.map.flyTo([location.lat, location.lng], 16, {
@@ -434,7 +480,7 @@ window.selectLocation = function(location) {
 function addMarkerStyles() {
     // Sjekk om stilene allerede eksisterer
     if (document.getElementById('marker-styles')) return;
-    
+
     const styleEl = document.createElement('style');
     styleEl.id = 'marker-styles';
     styleEl.textContent = `

@@ -9,7 +9,7 @@ let searchMarkers;
 let floodZoneLayer; // Legger til variabel for flomsoner
 
 // Initialiser når DOM er lastet
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     initializeMap();
     setupEventListeners();
 });
@@ -20,60 +20,75 @@ function initializeMap() {
         fadeAnimation: true,
         zoomAnimation: true
     }).setView([58.1599, 8.0182], 13);
-    
+
     // Oppretter utvalg av kart
     const streetsLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
-    
+
     const satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
         attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
     });
-    
+
     const terrainLayer = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
         attribution: 'Map data: &copy; OpenStreetMap contributors, SRTM | Map style: &copy; OpenTopoMap'
     });
-    
+
     // Lagre basislag for stilbytting
     window.baseLayers = {
         streets: streetsLayer,
         satellite: satelliteLayer,
         terrain: terrainLayer
     };
-    
+
     // Legg til laggrupper for markører
     window.shelterLayer = L.markerClusterGroup({
         showCoverageOnHover: false,
         maxClusterRadius: 50
     }).addTo(map);
-    
+
     window.fireStationLayer = L.markerClusterGroup({
         showCoverageOnHover: false,
         maxClusterRadius: 60
     }).addTo(map);
-    
+
+    window.sykehusLayer = L.geoJSON(null, {
+        pointToLayer: (feature, latlng) => L.marker(latlng, {
+            icon: L.divIcon({
+                html: '<div class="hospital-marker-icon"><i class="fas fa-hospital"></i></div>',
+                iconSize: [30, 30],
+                iconAnchor: [15, 30],
+                className: ''
+            })
+        }),
+        onEachFeature: (feature, layer) => {
+            layer.bindPopup(`<strong>${feature.properties.name}</strong>`);
+        }
+    }).addTo(map);
+
+
     // Oppretter flomsonelag fra NVE WMS-tjeneste
-        const floodZoneLayer = L.tileLayer.wms("https://nve.geodataonline.no/arcgis/services/FlomAktsomhet/MapServer/WmsServer", {
+    const floodZoneLayer = L.tileLayer.wms("https://nve.geodataonline.no/arcgis/services/FlomAktsomhet/MapServer/WmsServer", {
         layers: "Flom_aktsomhetsomrade",
         styles: "",
         format: "image/png",
         transparent: true,
         crs: L.CRS.EPSG3857, // Leaflet bruker EPSG:3857
         attribution: "Kartdata: © NVE"
-        });
-    
+    });
+
     // Sett floodZoneLayer globalt tilgjengelig
     window.floodZoneLayer = floodZoneLayer;
-    
+
     // Lag for søkeresultater
     searchMarkers = L.layerGroup().addTo(map);
-    
+
     // Skala-kontroll
     L.control.scale({
         imperial: false,
         position: 'bottomleft'
     }).addTo(map);
-    
+
     // Opprett egendefinerte ikoner
     window.shelterIcon = L.divIcon({
         html: '<div class="shelter-marker-icon"><i class="fas fa-home"></i></div>',
@@ -82,7 +97,7 @@ function initializeMap() {
         popupAnchor: [0, -30],
         className: ''
     });
-    
+
     window.fireStationIcon = L.divIcon({
         html: '<div class="fire-marker-icon"><i class="fas fa-fire"></i></div>',
         iconSize: [30, 30],
@@ -90,9 +105,9 @@ function initializeMap() {
         popupAnchor: [0, -30],
         className: ''
     });
-    
+
     showWelcomePulse();
-    
+
     setTimeout(() => {
         const loadingOverlay = document.getElementById('loading-overlay');
         loadingOverlay.style.opacity = '0';
@@ -105,7 +120,7 @@ function initializeMap() {
 // Toggle funksjonalitet for kart og stiler
 function setupEventListeners() {
 
-    document.getElementById('toggle-shelters').addEventListener('click', function() {
+    document.getElementById('toggle-shelters').addEventListener('click', function () {
         this.classList.toggle('active');
         if (this.classList.contains('active')) {
             map.addLayer(window.shelterLayer);
@@ -113,8 +128,8 @@ function setupEventListeners() {
             map.removeLayer(window.shelterLayer);
         }
     });
-    
-    document.getElementById('toggle-firestations').addEventListener('click', function() {
+
+    document.getElementById('toggle-firestations').addEventListener('click', function () {
         this.classList.toggle('fire-active');
         if (this.classList.contains('fire-active')) {
             map.addLayer(window.fireStationLayer);
@@ -122,9 +137,19 @@ function setupEventListeners() {
             map.removeLayer(window.fireStationLayer);
         }
     });
-    
+
+    document.getElementById("toggle-hospitals")
+        .addEventListener("click", function () {
+            this.classList.toggle("hospital-active");
+            if (this.classList.contains("hospital-active")) {
+                map.addLayer(window.sykehusLayer);
+            } else {
+                map.removeLayer(window.sykehusLayer);
+            }
+        });
+
     // Implementerer toggle-funksjonalitet for flomsoner
-    document.getElementById('toggle-flood-zones').addEventListener('click', function() {
+    document.getElementById('toggle-flood-zones').addEventListener('click', function () {
         this.classList.toggle('flood-active');
         if (this.classList.contains('flood-active')) {
             if (window.floodZoneLayer) {
@@ -136,13 +161,13 @@ function setupEventListeners() {
             }
         }
     });
-    
+
     // Kartstilvelger
     document.querySelectorAll('.map-style').forEach(button => {
-        button.addEventListener('click', function() {
+        button.addEventListener('click', function () {
             const selectedStyle = this.getAttribute('data-style');
             changeMapStyle(selectedStyle);
-            
+
             // Oppdater aktiv knapp
             document.querySelectorAll('.map-style').forEach(b => {
                 b.classList.remove('active');
@@ -150,28 +175,28 @@ function setupEventListeners() {
             this.classList.add('active');
         });
     });
-    
+
     // Søkefunksjonalitet
     const searchInput = document.getElementById('search-input');
     const clearSearch = document.getElementById('clear-search');
-    
+
     searchInput.addEventListener('input', debounce(async () => {
         if (searchInput.value.length >= 3) {
             const suggestions = await fetchLocationSuggestions(searchInput.value);
             displaySearchSuggestions(suggestions);
         }
     }, 300));
-    
+
     searchInput.addEventListener('keypress', e => {
         if (e.key === 'Enter') searchLocation(searchInput.value);
     });
-    
+
     clearSearch.addEventListener('click', () => {
         searchInput.value = '';
         searchMarkers.clearLayers();
         document.getElementById('search-suggestions').style.display = 'none';
     });
-    
+
     // Finn nærmeste tilfluktsrom-knapp
     const findNearestBtn = document.getElementById('find-nearest');
     if (findNearestBtn) {
@@ -183,7 +208,7 @@ function setupEventListeners() {
     if (findNearestStationBtn) {
         findNearestStationBtn.addEventListener('click', findNearestFireStation);
     }
-    
+
     // Håndter vindustørrelsesendring
     window.addEventListener('resize', () => map.invalidateSize())
 
@@ -192,16 +217,16 @@ function setupEventListeners() {
 // Endre kartstil
 function changeMapStyle(style) {
     // Fjern først alle basislag ved å spore hvilket som er aktivt
-    map.eachLayer(function(layer) {
+    map.eachLayer(function (layer) {
         // Sjekk om dette er et flisslag (basiskart)
         if (layer._url && layer._url.includes('tile')) {
             map.removeLayer(layer);
         }
     });
-    
+
     // Legg til det valgte laget som en ny instans
     let newBaseLayer;
-    
+
     switch (style) {
         case 'satellite':
             newBaseLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
@@ -220,14 +245,14 @@ function changeMapStyle(style) {
             });
             break;
     }
-    
+
     // Legg til det nye basislaget og sørg for at det er nederst
     newBaseLayer.addTo(map);
     newBaseLayer.bringToBack();
-    
+
     // Oppdater vår referanse til dette stilens lag
     window.baseLayers[style] = newBaseLayer;
-    
+
     // Vis varsling
     showNotification(`Kartstil endret til ${style}`);
 }
@@ -286,36 +311,36 @@ function showWelcomePulse() {
         }
     `;
     document.head.appendChild(pulseStyle);
-    
+
     const pulseIcon = L.divIcon({
         html: '<div class="map-pulse"></div>',
         className: '',
         iconSize: [70, 70]
     });
-    
+
     const center = map.getCenter();
     const pulseMarker = L.marker([center.lat, center.lng], {
         icon: pulseIcon,
         zIndexOffset: -1000
     }).addTo(map);
-    
+
     setTimeout(() => map.removeLayer(pulseMarker), 2500);
 }
 
 // Finn nærmeste tilfluktsrom ved hjelp av nettleser-geolokalisering
 function findNearestShelter() {
     showNotification("Finner din posisjon...", "info");
-    
+
     if (!navigator.geolocation) {
         showNotification("Geolokalisering støttes ikke av din nettleser", "error");
         return;
     }
-    
+
     navigator.geolocation.getCurrentPosition(
-        function(position) {
+        function (position) {
             const userLat = position.coords.latitude;
             const userLng = position.coords.longitude;
-            
+
             // Fjern tidligere markører
             searchMarkers.clearLayers();
 
@@ -325,16 +350,16 @@ function findNearestShelter() {
                 .openPopup();
             
             showNotification("Posisjon funnet! Finner nærmeste tilfluktsrom...", "suksess");
-            
+
             // Finn nærmeste tilfluktsrom ved å beregne avstander
             findNearest(userLat, userLng);
         },
         // Feil - callback
-        function(error) {
+        function (error) {
             console.error("Geolokaliseringsfeil:", error);
             let errorMsg;
-            
-            switch(error.code) {
+
+            switch (error.code) {
                 case error.PERMISSION_DENIED:
                     errorMsg = "Posisjonstilgang nektet. Vennligst aktiver posisjonstjenester.";
                     break;
@@ -347,7 +372,7 @@ function findNearestShelter() {
                 default:
                     errorMsg = "En ukjent feil oppstod under henting av posisjon.";
             }
-            
+
             showNotification(errorMsg, "error");
         },
 
@@ -368,7 +393,7 @@ function findNearestFireStation() {
     }
 
     navigator.geolocation.getCurrentPosition(
-        function(position) {
+        function (position) {
             const userLat = position.coords.latitude;
             const userLng = position.coords.longitude;
 
@@ -385,7 +410,7 @@ function findNearestFireStation() {
             // Finn nærmeste brannstasjon
             findNearestStation(userLat, userLng);
         },
-        function(error) {
+        function (error) {
             console.error("Geolokaliseringsfeil:", error);
             showNotification("Kunne ikke hente posisjon.", "error");
         },
@@ -405,7 +430,7 @@ function findNearest(userLat, userLng) {
         showNotification("Ingen tilfluktsromdata tilgjengelig", "error");
         return;
     }
-    
+
     let nearestShelter = null;
     let shortestDistance = Infinity;
     
@@ -726,11 +751,11 @@ function closeDirectionsView() {
 function calculateDistance(lat1, lon1, lat2, lon2) {
     // Jordens radius i kilometer
     const R = 6371;
-    
+
     // Konverter grader til radianer
     const dLat = (lat2 - lat1) * Math.PI / 180;
     const dLon = (lon2 - lon1) * Math.PI / 180;
-    
+
     // Haversine-formel
     const a = 
         Math.sin(dLat/2) * Math.sin(dLat/2) +
@@ -774,26 +799,26 @@ async function fetchLocationSuggestions(query) {
 function displaySearchSuggestions(results) {
     const container = document.getElementById('search-suggestions');
     container.innerHTML = '';
-    
+
     if (results.length === 0) {
         container.style.display = 'none';
         return;
     }
-    
+
     results.forEach(result => {
         const item = document.createElement('li');
         item.className = 'search-suggestion-item';
         item.textContent = result.display_name;
-        
+
         item.addEventListener('click', () => {
             document.getElementById('search-input').value = result.display_name;
             container.style.display = 'none';
             searchLocation(result.display_name);
         });
-        
+
         container.appendChild(item);
     });
-    
+
     container.style.display = 'block';
 }
 
@@ -802,29 +827,29 @@ async function searchLocation(query) {
     try {
         const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`);
         if (!response.ok) throw new Error(`HTTP-feil: ${response.status}`);
-        
+
         const data = await response.json();
-        
+
         if (data.length > 0) {
             const result = data[0];
             const lat = parseFloat(result.lat);
             const lon = parseFloat(result.lon);
-            
+
             // Fjern tidligere søkemarkører
             searchMarkers.clearLayers();
-            
+
             // Legg til markør for søkeresultat
             const marker = L.marker([lat, lon])
                 .addTo(searchMarkers)
                 .bindPopup(`<strong>${result.display_name}</strong>`)
                 .openPopup();
-            
+
             // Flytt kartet til søkeresultat
             map.flyTo([lat, lon], 14, {
                 animate: true,
                 duration: 1
             });
-            
+
             showNotification("Posisjon funnet!", "suksess");
         } else {
             showNotification("Ingen resultater funnet for søket ditt", "warning");
@@ -838,7 +863,7 @@ async function searchLocation(query) {
 // Hjelpefunksjon for debouncing
 function debounce(func, delay) {
     let timeout;
-    return function() {
+    return function () {
         const context = this;
         const args = arguments;
         clearTimeout(timeout);
