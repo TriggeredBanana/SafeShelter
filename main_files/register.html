@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#d64045">
+    <title>SafeShelter - Registrer for varsler</title>
+    <link rel="stylesheet" href="register.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link rel="stylesheet" href="chat.css" />
+</head>
+<body>
+    <header class="main-header">
+        <div class="header-content">
+            <div class="logo">
+                <a href="index.html" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: var(--space-sm);">
+                    <i class="fas fa-shield-alt"></i>
+                    <h1>SafeShelter</h1>
+                </a>
+            </div>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="index.html">Kart</a></li>
+                    <li><a href="feedback.html">Rapporter Sikkerhetsproblem</a></li>
+                    <li><a href="activeReports.html">Aktive Innmeldinger</a></li>
+                    <li><a href="register.html" class="active">Registrer for varsler</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="register-container">
+        <div class="page-intro">
+            <h2>Registrer for beredskapsvarsler</h2>
+            <p>Få umiddelbare varsler om nødsituasjoner, naturkatastrofer og sikkerhetstrusler i ditt nærområde eller der du befinner deg.</p>
+        </div>
+
+        <!-- Registration Form Section -->
+        <section class="register-section">
+            <div class="section-header">
+                <h3><i class="fas fa-bell"></i> Registrer deg for varsler</h3>
+            </div>
+
+            <!-- Stepped Registration Form -->
+            <div class="register-progress">
+                <div class="progress-step active" data-step="1">
+                    <div class="step-number">1</div>
+                    <span class="step-label">Kontaktinformasjon</span>
+                </div>
+                <div class="progress-bar"></div>
+                <div class="progress-step" data-step="2">
+                    <div class="step-number">2</div>
+                    <span class="step-label">Lokasjon</span>
+                </div>
+                <div class="progress-bar"></div>
+                <div class="progress-step" data-step="3">
+                    <div class="step-number">3</div>
+                    <span class="step-label">Varslingsinnstillinger</span>
+                </div>
+            </div>
+
+            <form id="registration-form" class="registration-form">
+                <!-- Step 1: Contact Information -->
+                <div class="form-step active" id="step-1">
+                    <div class="form-group">
+                        <label for="fullname">Fullt navn</label>
+                        <input type="text" id="fullname" placeholder="Skriv inn ditt fulle navn" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="phone">Mobiltelefon</label>
+                        <div class="input-field">
+                            <input type="tel" id="phone" placeholder="Skriv inn ditt telefonnummer">
+                        </div>
+                        <div class="form-hint">Du vil motta SMS-varsler på dette nummeret.</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email">E-post</label>
+                        <div class="input-field">
+                            <input type="email" id="email" placeholder="Skriv inn din e-postadresse">
+                        </div>
+                        <div class="form-hint">Du vil motta e-postvarsler på denne e-postadressen.</div>
+                    </div>
+                    
+                    <div class="contact-validation-message" id="contact-validation-message">
+                        Vennligst registrer enten telefonnummer eller e-post (eller begge) for å få varsler fra SafeShelter.
+                    </div>
+                    
+                    <div class="form-actions right-aligned">
+                        <button type="button" class="btn-primary next-step">Neste</button>
+                    </div>
+                </div>
+                
+                <!-- Step 2: Location Preferences -->
+                <div class="form-step" id="step-2">
+                    <div class="form-group">
+                        <label>Velg hvordan du vil motta lokasjonsvarsler</label>
+                        <div class="option-cards location-options">
+                            <div class="option-card" data-option="home-address">
+                                <div class="option-icon">
+                                    <i class="fas fa-home"></i>
+                                </div>
+                                <div class="option-content">
+                                    <h4>Hjemmeadresse</h4>
+                                    <p>Motta varsler basert på din hjemmeadresse</p>
+                                </div>
+                                <div class="option-check"></div>
+                            </div>
+                            
+                            <div class="option-card" data-option="area">
+                                <div class="option-icon">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                </div>
+                                <div class="option-content">
+                                    <h4>Geografisk område</h4>
+                                    <p>Motta varsler for et større område eller region</p>
+                                </div>
+                                <div class="option-check"></div>
+                            </div>
+                            
+                            <div class="option-card" data-option="gps">
+                                <div class="option-icon">
+                                    <i class="fas fa-location-crosshairs"></i>
+                                </div>
+                                <div class="option-content">
+                                    <h4>Sanntidslokasjon (GPS)</h4>
+                                    <p>Motta varsler basert på hvor du befinner deg</p>
+                                </div>
+                                <div class="option-check"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Home Address Form (initially hidden) -->
+                    <div class="location-form" id="home-address-form">
+                        <div class="form-group">
+                            <label for="street">Gateadresse</label>
+                            <input type="text" id="street" placeholder="F.eks. Kongensgate 10">
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="postal-code">Postnummer</label>
+                                <input type="text" id="postal-code" placeholder="F.eks. 4630">
+                            </div>
+                            <div class="form-group">
+                                <label for="city">By</label>
+                                <input type="text" id="city" placeholder="F.eks. Kristiansand">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Geographic Area Form (initially hidden) -->
+                    <div class="location-form" id="area-form">
+                        <div class="form-group">
+                            <label for="county">Fylke</label>
+                            <select id="county">
+                                <option value="" disabled selected>Velg fylke</option>
+                                <option value="agder">Agder</option>
+                                <option value="innlandet">Innlandet</option>
+                                <option value="more-romsdal">Møre og Romsdal</option>
+                                <option value="nordland">Nordland</option>
+                                <option value="oslo">Oslo</option>
+                                <option value="rogaland">Rogaland</option>
+                                <option value="vestfold-telemark">Vestfold og Telemark</option>
+                                <option value="troms-finnmark">Troms og Finnmark</option>
+                                <option value="trondelag">Trøndelag</option>
+                                <option value="vestland">Vestland</option>
+                                <option value="viken">Viken</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="municipality">Kommune</label>
+                            <select id="municipality" disabled>
+                                <option value="" disabled selected>Velg kommune</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- GPS Tracking Form (initially hidden) -->
+                    <div class="location-form" id="gps-form">
+                        <div class="gps-info-box">
+                            <div class="gps-icon">
+                                <i class="fas fa-satellite-dish"></i>
+                            </div>
+                            <div class="gps-text">
+                                <h4>Sanntidssporing</h4>
+                                <p>Ved å aktivere dette alternativet vil appen spore din posisjon i sanntid og sende deg varsler basert på hvor du befinner deg. Dette er spesielt nyttig når du er på tur i naturen eller når du reiser.</p>
+                                <div class="privacy-note">
+                                    <i class="fas fa-shield-alt"></i>
+                                    <span>SafeShelter vil kun bruke din posisjon for å sende relevante varsler og vil aldri dele din lokasjon med tredjeparter.</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group switch-group">
+                            <label for="gps-toggle">Aktiver sanntidssporing</label>
+                            <label class="switch">
+                                <input type="checkbox" id="gps-toggle">
+                                <span class="slider round"></span>
+                            </label>
+                        </div>
+                        <div class="form-group switch-group">
+                            <label for="gps-background-toggle">Tillat sporing i bakgrunnen</label>
+                            <label class="switch">
+                                <input type="checkbox" id="gps-background-toggle">
+                                <span class="slider round"></span>
+                            </label>
+                            <div class="form-hint">Dette lar appen spore posisjonen din selv når du ikke aktivt bruker den.</div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="btn-secondary prev-step">Tilbake</button>
+                        <button type="button" class="btn-primary next-step">Neste</button>
+                    </div>
+                </div>
+                
+                <!-- Step 3: Notification Settings -->
+                <div class="form-step" id="step-3">
+                    <div class="form-group">
+                        <label>Varslingskategorier</label>
+                        <div class="notification-cards">
+                            <div class="notification-card">
+                                <div class="card-header">
+                                    <div class="notification-icon danger">
+                                        <i class="fas fa-fire"></i>
+                                    </div>
+                                    <h4>Brann</h4>
+                                    <label class="switch">
+                                        <input type="checkbox" name="notification-fire" checked>
+                                        <span class="slider round"></span>
+                                    </label>
+                                </div>
+                                <div class="card-content">
+                                    <p>Skogbranner, husbranner og andre brannrelaterte hendelser</p>
+                                </div>
+                            </div>
+                            
+                            <div class="notification-card">
+                                <div class="card-header">
+                                    <div class="notification-icon warning">
+                                        <i class="fas fa-water"></i>
+                                    </div>
+                                    <h4>Flom</h4>
+                                    <label class="switch">
+                                        <input type="checkbox" name="notification-flood" checked>
+                                        <span class="slider round"></span>
+                                    </label>
+                                </div>
+                                <div class="card-content">
+                                    <p>Flomvarsler, oversvømte områder og vannstandsendringer</p>
+                                </div>
+                            </div>
+                            
+                            <div class="notification-card">
+                                <div class="card-header">
+                                    <div class="notification-icon warning">
+                                        <i class="fas fa-cloud-bolt"></i>
+                                    </div>
+                                    <h4>Ekstremvær</h4>
+                                    <label class="switch">
+                                        <input type="checkbox" name="notification-weather" checked>
+                                        <span class="slider round"></span>
+                                    </label>
+                                </div>
+                                <div class="card-content">
+                                    <p>Sterk vind, kraftig regn, snøstorm og andre ekstreme værforhold</p>
+                                </div>
+                            </div>
+                            
+                            <div class="notification-card">
+                                <div class="card-header">
+                                    <div class="notification-icon primary">
+                                        <i class="fas fa-mountain"></i>
+                                    </div>
+                                    <h4>Ras & Skred</h4>
+                                    <label class="switch">
+                                        <input type="checkbox" name="notification-landslide" checked>
+                                        <span class="slider round"></span>
+                                    </label>
+                                </div>
+                                <div class="card-content">
+                                    <p>Jordras, snøskred og steinsprang</p>
+                                </div>
+                            </div>
+                            
+                            <div class="notification-card">
+                                <div class="card-header">
+                                    <div class="notification-icon success">
+                                        <i class="fas fa-road"></i>
+                                    </div>
+                                    <h4>Trafikk</h4>
+                                    <label class="switch">
+                                        <input type="checkbox" name="notification-traffic">
+                                        <span class="slider round"></span>
+                                    </label>
+                                </div>
+                                <div class="card-content">
+                                    <p>Stengte veier, trafikkuhell og andre trafikale hendelser</p>
+                                </div>
+                            </div>
+                            
+                            <div class="notification-card">
+                                <div class="card-header">
+                                    <div class="notification-icon secondary">
+                                        <i class="fas fa-bullhorn"></i>
+                                    </div>
+                                    <h4>Andre varsler</h4>
+                                    <label class="switch">
+                                        <input type="checkbox" name="notification-other" checked>
+                                        <span class="slider round"></span>
+                                    </label>
+                                </div>
+                                <div class="card-content">
+                                    <p>Generelle beredskapsøvelser, viktige samfunnsmeldinger</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Varslingsmetoder</label>
+                        <div class="notification-methods">
+                            <div class="method-card">
+                                <div class="method-icon">
+                                    <i class="fas fa-mobile-screen"></i>
+                                </div>
+                                <div class="method-details">
+                                    <h4>Push-varsler</h4>
+                                    <div class="method-description">Direktevarsler på mobil/nettbrett</div>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" name="method-push" checked>
+                                    <span class="slider round"></span>
+                                </label>
+                            </div>
+                            
+                            <div class="method-card">
+                                <div class="method-icon">
+                                    <i class="fas fa-sms"></i>
+                                </div>
+                                <div class="method-details">
+                                    <h4>SMS</h4>
+                                    <div class="method-description">Tekstmeldinger til mobiltelefon</div>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" name="method-sms" checked>
+                                    <span class="slider round"></span>
+                                </label>
+                            </div>
+                            
+                            <div class="method-card">
+                                <div class="method-icon">
+                                    <i class="fas fa-envelope"></i>
+                                </div>
+                                <div class="method-details">
+                                    <h4>E-post</h4>
+                                    <div class="method-description">Detaljerte varsler via e-post</div>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" name="method-email">
+                                    <span class="slider round"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group privacy-agreement">
+                        <label class="checkbox-container">
+                            <input type="checkbox" id="privacy-consent" required>
+                            <span class="checkmark"></span>
+                            <span>Jeg godtar <a href="#" class="privacy-link">personvernerklæringen</a> og samtykker til behandling av mine personopplysninger</span>
+                        </label>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="btn-secondary prev-step">Tilbake</button>
+                        <button type="submit" class="btn-primary">Fullfør registrering</button>
+                    </div>
+                </div>
+            </form>
+        </section>
+
+        <div class="info-section">
+            <div class="info-card">
+                <div class="info-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <h4>Alltid oppdatert</h4>
+                <p>Få umiddelbare varsler om nødsituasjoner og naturkatastrofer direkte på din mobiltelefon eller e-post.</p>
+            </div>
+            <div class="info-card">
+                <div class="info-icon">
+                    <i class="fas fa-map-location-dot"></i>
+                </div>
+                <h4>Stedbaserte varsler</h4>
+                <p>Motta kun varsler som er relevante for din lokasjon, enten det er hjemme eller på tur.</p>
+            </div>
+            <div class="info-card">
+                <div class="info-icon">
+                    <i class="fas fa-sliders"></i>
+                </div>
+                <h4>Tilpassede innstillinger</h4>
+                <p>Velg selv hvilke typer varsler du ønsker å motta og hvordan du vil bli varslet.</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Registration Success Modal -->
+    <div id="success-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header success">
+                <i class="fas fa-check-circle"></i>
+                <h4>Registrering fullført!</h4>
+            </div>
+            <div class="modal-body">
+                <p>Takk for at du registrerte deg for SafeShelter varsler. Du vil nå motta oppdateringer om relevante hendelser i ditt område.</p>
+                <div class="confirmation-details">
+                    <div class="detail-item">
+                        <i class="fas fa-envelope"></i>
+                        <span id="confirm-email">eksempel@mail.no</span>
+                    </div>
+                    <div class="detail-item">
+                        <i class="fas fa-phone"></i>
+                        <span id="confirm-phone">+47 123 45 678</span>
+                    </div>
+                </div>
+                <p>Du kan når som helst endre dine varslingspreferanser ved å logge inn på din profil.</p>
+            </div>
+            <div class="modal-footer">
+                <button id="go-to-home" class="btn-primary">
+                    <i class="fas fa-home"></i> Gå til forsiden
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Emergency Assistant Chat -->
+    <div id="emergency-chat-container" class="emergency-chat-container">
+        <button id="chat-toggle-btn" class="chat-toggle-btn">
+            <i class="fas fa-comment-dots"></i>
+            <span>SafeShelter Assistent</span>
+        </button>
+        
+        <div id="chat-panel" class="chat-panel hidden">
+            <div class="chat-header">
+                <h3><i class="fas fa-robot"></i> SafeShelter Assistent</h3>
+                <button id="chat-close-btn" class="chat-close-btn"><i class="fas fa-times"></i></button>
+            </div>
+            <div id="chat-messages" class="chat-messages">
+                <div class="message bot-message">
+                    <div class="bot-icon"><i class="fas fa-robot"></i></div>
+                    <div class="message-content">
+                        <p>Hei! Jeg er SafeShelter-assistenten. Jeg kan gi deg informasjon om beredskap, nødsituasjoner og sikkerhetstiltak. Hva trenger du hjelp med?</p>
+                    </div>
+                </div>
+            </div>
+            <div class="chat-input-container">
+                <input type="text" id="chat-input" placeholder="Still et spørsmål..." />
+                <button id="chat-send-btn"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="main-footer">
+        <div class="footer-content">
+            <p>&copy; 2025 SafeShelter - Et verktøy for kriseberedskap</p>
+            <div class="emergency-contacts">
+                <span><strong>Nødnumre:</strong></span>
+                <span><i class="fas fa-ambulance"></i> Ambulanse: 113</span>
+                <span><i class="fas fa-fire"></i> Brann: 110</span>
+                <span><i class="fas fa-shield-alt"></i> Politi: 112</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="register.js"></script>
+    <script src="chat.js"></script>
+</body>
+</html>
