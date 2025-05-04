@@ -40,9 +40,9 @@ document.addEventListener('DOMContentLoaded', function() {
             highlight: "#map-controls"
         },
         {
-            title: "Tilfluktsrominformasjon",
-            text: "Velg et tilfluktsrom eller en brannstasjon på kartet for å se detaljert informasjon i dette panelet.",
-            highlight: "#shelter-info"
+            title: "Beredskapsstatus",
+            text: "Her kan du se gjeldende status for nødtjenester, værforhold og potensielle farer som kan påvirke sikkerhetssituasjonen.",
+            highlight: ".status-panel"
         },
         {
             title: "Nødhandlinger",
@@ -150,6 +150,34 @@ document.addEventListener('DOMContentLoaded', function() {
         // Kall funksjonen fra mapoverlay.js
         window.findNearestShelter();
     });
+
+    // Finn nærmeste brannstasjon
+    const findNearestStationBtn = document.getElementById('find-nearest-station');
+    if (findNearestStationBtn) {
+        findNearestStationBtn.addEventListener('click', function() {
+            // Add this animation code:
+            findNearestStationBtn.classList.add('pulse-action');
+            setTimeout(() => findNearestStationBtn.classList.remove('pulse-action'), 1500);
+            
+            // Existing function call
+            window.findNearestFireStation();
+        });
+    }
+
+    // Finn nærmeste sykehus
+    const findNearestHospitalBtn = document.getElementById('find-nearest-hospital');
+    if (findNearestHospitalBtn) {
+        findNearestHospitalBtn.addEventListener('click', function() {
+            // Add this animation code:
+            findNearestHospitalBtn.classList.add('pulse-action');
+            setTimeout(() => findNearestHospitalBtn.classList.remove('pulse-action'), 1500);
+            
+            // Existing function call (if any)
+            if (typeof window.findNearestHospital === 'function') {
+                window.findNearestHospital();
+            }
+        });
+    }
 
     // Få veibeskrivelser
     /** directionsBtn.addEventListener('click', function() {

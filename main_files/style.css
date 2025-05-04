@@ -325,6 +325,7 @@
     padding: var(--space-md);
     box-shadow: var(--shadow-sm);
     margin-bottom: var(--space-lg);
+    margin-top: -10px;
   }
   
   .stat-card {
