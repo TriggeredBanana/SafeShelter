@@ -1,21 +1,27 @@
 <!DOCTYPE html>
 <html lang="no">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SafeShelter - Beredskapssystem</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Open+Sans:wght@400;600&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+    <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
 </head>
+
 <body>
     <header class="main-header">
         <div class="header-content">
             <div class="logo">
-                <a href="index.html" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: var(--space-sm);">
+                <a href="index.html"
+                    style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: var(--space-sm);">
                     <i id="logo-shield" class="fas fa-shield-alt"></i>
                     <h1>SafeShelter</h1>
                 </a>
@@ -56,7 +62,7 @@
                     <p>Velg et tilfluktsrom eller en brannstasjon på kartet for å se detaljer.</p>
                     <div id="selected-location-details"></div>
                 </div>
-                
+
                 <div class="stats-panel">
                     <h3>Tilfluktsromoversikt</h3>
                     <div class="stat-card">
@@ -72,7 +78,7 @@
                         <div class="stat-label">Brannstasjoner</div>
                     </div>
                 </div>
-                
+
                 <div class="action-buttons">
                     <button id="find-nearest" class="action-button primary">
                         <i class="fas fa-home" aria-hidden="true"></i>
@@ -88,7 +94,7 @@
                     </button>
                 </div>
             </div>
-            
+
             <div class="sidebar-footer">
                 <button id="fullscreen-toggle" class="icon-button">
                     <i class="fas fa-expand"></i>
@@ -126,13 +132,17 @@
                             <i class="fas fa-fire"></i>
                             <span>Brannstasjoner</span>
                         </button>
+                        <button id="toggle-hospitals" class="toggle-button">
+                            <i class="fas fa-hospital"></i>
+                            <span>Sykehus</span>
+                        </button>
                         <button id="toggle-flood-zones" class="toggle-button">
                             <i class="fas fa-water"></i>
                             <span>Flomsoner</span>
                         </button>
                     </div>
                 </div>
-                
+
                 <div class="control-section">
                     <h4>Kartstil</h4>
                     <div class="map-style-selector">
@@ -162,7 +172,7 @@
 
             <!-- Main map container -->
             <div id="map"></div>
-            
+
             <!-- Last inn overlay -->
             <div id="loading-overlay">
                 <div class="spinner"></div>
@@ -182,4 +192,5 @@
     <script src="script.js"></script>
     <script src="ui.js"></script>
 </body>
+
 </html>

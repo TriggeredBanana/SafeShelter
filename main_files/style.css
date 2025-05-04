@@ -405,6 +405,12 @@
     background-color: var(--warning);
     color: white;
   }
+
+  .toggle-button.hospital-active {
+    background-color: var(--success);
+    color: white;
+  }
+  
   
   .toggle-button.flood-active {
     background-color: rgba(128, 0, 128, 0.8);
@@ -575,7 +581,7 @@
     color: white;
   }
   
-  .toggle-button:hover:not(.active):not(.fire-active):not(.flood-active) {
+  .toggle-button:hover:not(.active):not(.fire-active):not(.flood-active):not(.toggle-button.hospital-active) {
     background-color: var(--gray-300);
   }
   
@@ -856,3 +862,25 @@
   .pulse-marker {
     animation: pulse 1.5s infinite;
   }
+
+  .hospital-marker-icon {
+    background-color: var(--success); /* trygg grønn */
+    color: white;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    box-shadow: var(--shadow-md);
+  }
+  
+.hospital-marker-icon:hover {
+  background-color: var(--success) !important;
+}
+
+.toggle-button.hospital-active:hover {
+  background-color: var(--success);
+  color: white;
+}
