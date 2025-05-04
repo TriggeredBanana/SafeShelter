@@ -7,7 +7,9 @@
     <title>SafeShelter - Beredskapssystem</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Open+Sans:wght@400;600&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
@@ -42,15 +44,19 @@
                     <div class="status-indicators">
                         <div class="status-item status-ok">
                             <i class="fas fa-fire-extinguisher"></i>
-                            <span>Brannvesen: Tilgjengelig</span>
+                            <span>Brannvesen:</span>
+                            <span id="nearest-firestation">
+                                <span id="fire-status">Tilgjengelig</span>
                         </div>
                         <div class="status-item status-ok">
                             <i class="fas fa-bolt"></i>
-                            <span>Værstatus: God</span>
+                            <span>Værstatus:</span>
+                            <span id="weather-status">Laster...</span>
                         </div>
                         <div class="status-item status-ok">
                             <i class="fas fa-droplet"></i>
-                            <span>Flomvarsel: Ingen</span>
+                            <span>Flomvarsel:</span>
+                            <span id="flood-status">Laster...</span>
                         </div>
                     </div>
                 </div>

@@ -21,6 +21,8 @@ function initializeMap() {
         zoomAnimation: true
     }).setView([58.1599, 8.0182], 13);
 
+    window.map = map;
+    
     // Oppretter utvalg av kart
     const streetsLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OpenStreetMap contributors'
@@ -1013,7 +1015,6 @@ function debounce(func, delay) {
 }
 
 // Gjør kart og funksjoner tilgjengelig globalt
-window.map = map;
 window.searchLocation = searchLocation;
 window.findNearestShelter = findNearestShelter;
 window.findNearestFireStation = findNearestFireStation;
