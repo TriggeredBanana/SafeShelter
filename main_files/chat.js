@@ -174,6 +174,7 @@ document.addEventListener('DOMContentLoaded', function() {
         typingIndicator.id = 'typing-indicator';
         
         typingIndicator.innerHTML = `
+            <div class="bot-icon"><i class="fas fa-robot"></i></div>
             <div class="message-content">
                 <div class="typing-indicator">
                     <span class="typing-dot"></span>
