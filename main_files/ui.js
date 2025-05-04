@@ -40,9 +40,9 @@ document.addEventListener('DOMContentLoaded', function() {
             highlight: "#map-controls"
         },
         {
-            title: "Tilfluktsrominformasjon",
-            text: "Velg et tilfluktsrom eller en brannstasjon på kartet for å se detaljert informasjon i dette panelet.",
-            highlight: "#shelter-info"
+            title: "Beredskapsstatus",
+            text: "Her kan du se gjeldende status for nødtjenester, værforhold og potensielle farer som kan påvirke sikkerhetssituasjonen.",
+            highlight: ".status-panel"
         },
         {
             title: "Nødhandlinger",
@@ -143,13 +143,35 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Finn nærmeste tilfluktsrom
     findNearestBtn.addEventListener('click', function() {
-        // Legg til pulseringsanimasjon midlertidig på knappen
-        findNearestBtn.classList.add('pulse-action');
-        setTimeout(() => findNearestBtn.classList.remove('pulse-action'), 1500);
+        findNearestBtn.classList.add('professional-click');
+        setTimeout(() => findNearestBtn.classList.remove('professional-click'), 400);
         
-        // Kall funksjonen fra mapoverlay.js
         window.findNearestShelter();
     });
+
+    // Finn nærmeste brannstasjon
+    const findNearestStationBtn = document.getElementById('find-nearest-station');
+    if (findNearestStationBtn) {
+        findNearestStationBtn.addEventListener('click', function() {
+            findNearestStationBtn.classList.add('professional-click');
+            setTimeout(() => findNearestStationBtn.classList.remove('professional-click'), 400);
+            
+            window.findNearestFireStation();
+        });
+    }
+
+    // Finn nærmeste sykehus
+    const findNearestHospitalBtn = document.getElementById('find-nearest-hospital');
+    if (findNearestHospitalBtn) {
+        findNearestHospitalBtn.addEventListener('click', function() {
+            findNearestHospitalBtn.classList.add('professional-click');
+            setTimeout(() => findNearestHospitalBtn.classList.remove('professional-click'), 400);
+            
+            if (typeof window.findNearestHospital === 'function') {
+                window.findNearestHospital();
+            }
+        });
+    }
 
     // Få veibeskrivelser
     /** directionsBtn.addEventListener('click', function() {

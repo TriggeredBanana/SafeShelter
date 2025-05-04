@@ -325,6 +325,7 @@
     padding: var(--space-md);
     box-shadow: var(--shadow-sm);
     margin-bottom: var(--space-lg);
+    margin-top: -10px;
   }
   
   .stat-card {
@@ -428,7 +429,27 @@
     color: white;
   }
   
+  .professional-click {
+    animation: button-click 0.4s ease forwards;
+  }
 
+  @keyframes button-click {
+      0% {
+          transform: scale(1);
+          box-shadow: var(--shadow-md);
+      }
+      30% {
+          transform: scale(0.97);
+          box-shadow: var(--shadow-sm);
+      }
+      70% {
+          transform: scale(0.99);
+      }
+      100% {
+          transform: scale(1);
+          box-shadow: var(--shadow-md);
+      }
+  }
   
   .icon-button {
     width: 40px;
