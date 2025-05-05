@@ -1198,6 +1198,139 @@
   .leaflet-bar {
     box-shadow: var(--shadow-md) !important;
   }
+
+  .leaflet-control-compass {
+    width: 80px;
+    height: 80px;
+    background-color: white;
+    border-radius: var(--radius-full);
+    border: 2px solid rgba(0, 0, 0, 0.2);
+    box-shadow: 0 3px 8px rgba(0,0,0,0.4);
+    cursor: pointer;
+    text-align: center;
+    margin-bottom: 16px !important;
+    position: relative;
+    overflow: hidden;
+    z-index: 999;
+    transition: transform 0.2s ease;
+  }
+
+  .leaflet-control-compass:hover {
+    background-color: #f4f4f4;
+    transform: scale(1.05);
+  }
+
+  .compass-rose {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    transform-origin: center;
+    transition: transform 0.3s ease;
+  }
+
+  .compass-arrow {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+  }
+
+  /* North direction needle */
+  .compass-needle {
+    position: absolute;
+    width: 4px;
+    height: 26px;
+    background: var(--primary);
+    top: 4px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  /* South direction needle */
+  .compass-needle::after {
+    content: '';
+    position: absolute;
+    width: 4px;
+    height: 26px;
+    background: var(--gray-500);
+    top: 26px;
+    left: 0;
+  }
+
+  /* Direction labels */
+  .compass-direction {
+    position: absolute;
+    font-size: 9px;
+    font-weight: bold;
+    color: var(--dark);
+  }
+
+  .compass-north {
+    top: 3px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: var(--primary);
+  }
+
+  .compass-east {
+    top: 50%;
+    right: 3px;
+    transform: translateY(-50%);
+  }
+
+  .compass-south {
+    bottom: 3px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .compass-west {
+    top: 50%;
+    left: 3px;
+    transform: translateY(-50%);
+  }
+
+  .compass-ne {
+    top: 12px;
+    right: 12px;
+    font-size: 8px;
+  }
+
+  .compass-nw {
+    top: 12px;
+    left: 12px;
+    font-size: 8px;
+  }
+
+  .compass-se {
+    bottom: 12px;
+    right: 12px;
+    font-size: 8px;
+  }
+
+  .compass-sw {
+    bottom: 12px;
+    left: 12px;
+    font-size: 8px;
+  }
+
+  /* Compass center dot */
+  .compass-center {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: var(--secondary);
+    border-radius: 50%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 0 2px white;
+  }
   
   /* Animasjoner */
   .fade-in {
