@@ -65,10 +65,10 @@
             <form id="registration-form" class="registration-form">
                 <!-- Step 1: Contact Information -->
                 <div class="form-step active" id="step-1">
-                    <div class="form-group">
+                    <!-- <div class="form-group">
                         <label for="fullname">Fullt navn</label>
                         <input type="text" id="fullname" placeholder="Skriv inn ditt fulle navn" required>
-                    </div>
+                    </div> -->
                     
                     <div class="form-group">
                         <label for="phone">Mobiltelefon</label>
@@ -197,6 +197,7 @@
                         </div>
                         <div class="form-group switch-group">
                             <label for="gps-toggle">Aktiver sanntidssporing</label>
+                            <div class="form-hint">Dette lar appen spore posisjonen din, men bare når du aktivt bruker den.</div>
                             <label class="switch">
                                 <input type="checkbox" id="gps-toggle">
                                 <span class="slider round"></span>
@@ -204,15 +205,15 @@
                         </div>
                         <div class="form-group switch-group">
                             <label for="gps-background-toggle">Tillat sporing i bakgrunnen</label>
+                            <div class="form-hint">Dette lar appen spore posisjonen din selv når du ikke aktivt bruker den.</div>
                             <label class="switch">
                                 <input type="checkbox" id="gps-background-toggle">
                                 <span class="slider round"></span>
                             </label>
-                            <div class="form-hint">Dette lar appen spore posisjonen din selv når du ikke aktivt bruker den.</div>
                         </div>
                     </div>
                     
-                    <div class="form-actions">
+                    <div class="form-actions right-aligned">
                         <button type="button" class="btn-secondary prev-step">Tilbake</button>
                         <button type="button" class="btn-primary next-step">Neste</button>
                     </div>
@@ -258,7 +259,7 @@
                             <div class="notification-card">
                                 <div class="card-header">
                                     <div class="notification-icon warning">
-                                        <i class="fas fa-cloud-bolt"></i>
+                                        <i class="fas fa-bolt"></i>
                                     </div>
                                     <h4>Ekstremvær</h4>
                                     <label class="switch">
@@ -340,7 +341,7 @@
                             
                             <div class="method-card">
                                 <div class="method-icon">
-                                    <i class="fas fa-sms"></i>
+                                    <i class="fas fa-comment"></i>
                                 </div>
                                 <div class="method-details">
                                     <h4>SMS</h4>
@@ -376,7 +377,7 @@
                         </label>
                     </div>
                     
-                    <div class="form-actions">
+                    <div class="form-actions right-aligned">
                         <button type="button" class="btn-secondary prev-step">Tilbake</button>
                         <button type="submit" class="btn-primary">Fullfør registrering</button>
                     </div>

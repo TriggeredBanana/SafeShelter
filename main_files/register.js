@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const successModal = document.getElementById('success-modal');
     
     // Form input elements
-    const fullNameInput = document.getElementById('fullname');
+    // const fullNameInput = document.getElementById('fullname');
     const phoneInput = document.getElementById('phone');
     const emailInput = document.getElementById('email');
     const privacyConsent = document.getElementById('privacy-consent');
@@ -131,10 +131,10 @@ document.addEventListener('DOMContentLoaded', function() {
     // Validate contact information step
     function validateContactStep() {
         // Name is required
-        if (fullNameInput.value.trim() === '') {
+        /** if (fullNameInput.value.trim() === '') {
             showValidationError(fullNameInput, 'Vennligst fyll inn ditt navn');
             return false;
-        }
+        } */
         
         // Either phone or email should be provided
         if (phoneInput.value.trim() === '' && emailInput.value.trim() === '') {
@@ -165,7 +165,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         // Clear any existing validation errors
-        clearValidationError(fullNameInput);
+        // clearValidationError(fullNameInput);
         clearValidationError(phoneInput);
         clearValidationError(emailInput);
         
@@ -461,7 +461,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Make privacy consent link open in a new tab
         document.querySelector('.privacy-link')?.addEventListener('click', function(e) {
             e.preventDefault();
-            window.open('https://www.datatilsynet.no/personvern-pa-ulike-omrader/internett-og-apper/personvernerklaering/', '_blank');
+            window.open('https://www.datatilsynet.no/rettigheter-og-plikter/den-registrertes-rettigheter/', '_blank');
         });
     }
     
@@ -506,7 +506,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function collectFormData() {
         const formData = {
             personalInfo: {
-                name: fullNameInput.value.trim(),
+                // name: fullNameInput.value.trim(),
                 phone: phoneInput.value.trim(),
                 email: emailInput.value.trim()
             },
@@ -593,13 +593,13 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             {
                 icon: 'fa-water',
-                type: 'primary',
+                type: 'secondary',
                 title: 'Flom',
                 description: 'Oversvømmelser, høy vannstand og flomvarsel for elver og vassdrag.'
             },
             {
-                icon: 'fa-cloud-bolt',
-                type: 'warning',
+                icon: 'fas fa-bolt',
+                type: 'primary',
                 title: 'Ekstremvær',
                 description: 'Kraftig vind, storm, orkan, kraftig regn og andre ekstreme værsituasjoner.'
             },
@@ -639,9 +639,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     <p>${type.description}</p>
                 `;
                 
+                // Make card clickable with selected state
+                card.style.cursor = 'pointer';
+                card.dataset.selected = 'false';
+                
                 // Add toggle functionality
                 card.addEventListener('click', function() {
                     this.classList.toggle('selected');
+                    this.dataset.selected = this.classList.contains('selected') ? 'true' : 'false';
                 });
             }
         });
@@ -654,7 +659,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Notification methods data
         const methods = [
             {
-                icon: 'fa-mobile-screen',
+                icon: 'fa-comment',
                 title: 'SMS',
                 description: 'Motta varsler via tekstmelding'
             },
@@ -685,9 +690,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                 `;
                 
+                // Make card clickable with selected state
+                card.style.cursor = 'pointer';
+                card.dataset.selected = 'false';
+                
                 // Add toggle functionality
                 card.addEventListener('click', function() {
                     this.classList.toggle('selected');
+                    this.dataset.selected = this.classList.contains('selected') ? 'true' : 'false';
                 });
             }
         });
