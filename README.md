@@ -24,6 +24,7 @@
 - [Installasjon og Oppsett](#installasjon-og-oppsett)
 - [Tekniske detaljer](#tekniske-detaljer)
 - [Fremtidige Forbedringer](#fremtidige-forbedringer)
+- [En Rask Oversikt Over Applikasjonen](#en-rask-oversikt-over-applikasjonen)
 
 <br></br>
 
