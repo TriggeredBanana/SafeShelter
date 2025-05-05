@@ -109,10 +109,22 @@ Backend-en er implementert ved hjelp av Supabase som database, som gir enkel til
 
 ### **Viktige API-endepunkter:**
 
-| Endepunkt                   | Metode | Beskrivelse                           |
-| --------------------------- | ------ | ------------------------------------- |
-| `/api/tilfluktsrom_agder`   | GET    | Henter tilfluktsromdata fra Supabase  |
-| `/api/brannstasjoner_agder` | GET    | Henter brannstasjonsdata fra Supabase |
+| Endepunkt                   | Metode | Beskrivelse                                          |
+| --------------------------- | ------ | -----------------------------------------------------|
+| `/api/tilfluktsrom_agder`   | GET    | Henter tilfluktsromdata fra Supabase                 |
+| `/api/brannstasjoner_agder` | GET    | Henter brannstasjonsdata fra Supabase                |
+| `/api/weather`              | GET    | Henter værdata fra MET API (Meteorologisk institutt) |
+| `/api/flood`                | GET    | Sjekker flomrisiko på en spesifikk lokasjon          |
+| `/api/chat`                 | POST   | Sender brukerforespørsel til OpenRouter AI API       |
+
+
+### **Eksterne API-tjenester som brukes:**
+
+1. **OpenRouter API** - Brukes for AI-assistentfunksjonaliteten i chat.js
+2. **MET API** (Meteorologisk institutt) - For værdata og -varsler
+3. **NVE WMS** (Norges vassdrags- og energidirektorat) - For flomsonekartlag
+4. **OSRM API** (Open Source Routing Machine) - For ruteberegning
+5. **Overpass API** (OpenStreetMap) - For å hente sykehusdata
 
 <br></br>
 
@@ -181,7 +193,7 @@ Frontend bruker Leaflet.js for interaktive kartvisualiseringer og HTML/CSS/JavaS
 - Resultater vises på kartet med tydelige markører
 - Koordinattransformasjon fra ulike projeksjoner til WGS84
 
-### **6. Informasjonsmarkører**
+### **6. Informasjonspanel**
 - Detaljert informasjon om valgt tilfluktsrom, brannstasjon eller sykehus
 - Kapasitetsdata og addresse for tilfluktsrom
 - Avdelingsinformasjon for brannstasjoner
@@ -252,12 +264,19 @@ Frontend bruker Leaflet.js for interaktive kartvisualiseringer og HTML/CSS/JavaS
    Node.js version 14.x eller nyere
    ```
 
-2. **Installer avhengigheter:**
+2. **Klon repositoriet:**
+    ```bash
+    git clone https://github.com/TriggeredBanana/gruppe6.git
+
+    cd safeshelter
+    ```
+
+3. **Installer avhengigheter:**
    ```bash
    npm install
    ```
 
-3. **Konfigurer miljøvariabler:**
+4. **Konfigurer miljøvariabler:**
    Opprett en .env-fil i rotmappen med følgende innhold:
    ```
    SUPABASE_URL= "https://din-supabase-url.supabase.co"
@@ -265,14 +284,14 @@ Frontend bruker Leaflet.js for interaktive kartvisualiseringer og HTML/CSS/JavaS
    OPENROUTER_API_KEY = "api-key-from-openrouter"
    ```
 
-4. **Start serveren:**
+5. **Start serveren:**
    ```bash
    node server.js
-   or
+   # or
    npm start
    ```
 
-5. **Åpne applikasjonen:**
+6. **Åpne applikasjonen:**
    Åpne index.html i en nettleser eller bruk en lokal server som Live Server i VS Code.
 
 <br></br>
@@ -301,6 +320,12 @@ Frontend bruker Leaflet.js for interaktive kartvisualiseringer og HTML/CSS/JavaS
 - Oppdaterer sanntidsestimater ved endringer i transportmetode
 - Fallback til luftlinjeavstand hvis OSRM ikke er tilgjengelig
 
+### Feilhåndtering og reserveløsninger:
+- Geolokaliseringsfeil håndteres med brukervennlige meldinger som forklarer det spesifikke problemet
+- Overgang til lokal beredskapsinformasjon når API er utilgjengelig
+- Smidig håndtering av datafeil med informative meldinger til brukeren
+- Progressiv forbedring som sikrer at kjernefunksjonalitet fungerer selv når avanserte funksjoner ikke er tilgjengelige
+
 
 
 <br></br>
@@ -321,8 +346,8 @@ Frontend bruker Leaflet.js for interaktive kartvisualiseringer og HTML/CSS/JavaS
 
 ## **En Rask Oversikt Over Applikasjonen**
 
-#### **Hovedgrensesnitt for SafeShelter** ####
-Applikasjonen tilbyr et intuitivt grensesnitt med informasjon om tilfluktsrom, brannstasjoner og utsatte flomsoner. Sidepanelet viser statusindikator, detaljert informasjon om tilfluktsrom, og nøkkelstatistikk. Det interaktive kartet viser plasseringen av tilfluktsrom (røde markører) og brannstasjoner (oransje markører), med lett tilgang til funksjoner for å finne nærmeste tilfluktsrom og/eller brannstasjon, samt en mer detaljert veibeskrivelse av valgt destinasjon på kartet gjennom Google Maps.
+#### **Hovedgrensesnitt for SafeShelter**
+Applikasjonen tilbyr et intuitivt grensesnitt med informasjon om tilfluktsrom, brannstasjoner, sykehus og utsatte flomsoner. Sidepanelet viser beredskapsstatus, nøkkelstatistikk om tilfluktsrom og hurtigknapper for å finne nærmeste tilfluktsrom, brannstasjon eller sykehus basert på brukerens posisjon. Det interaktive kartet viser plasseringen av tilfluktsrom (røde markører), brannstasjoner (oransje markører) og sykehus (grønne markører).
 <details>
   <summary>📍 Klikk for å vise hovedgrensesnittet</summary>
 
@@ -331,9 +356,9 @@ Applikasjonen tilbyr et intuitivt grensesnitt med informasjon om tilfluktsrom, b
 </details>
 <br></br>
 
-**Omvisningsfunksjon**
+#### **Omvisningsfunksjon**
 
-Gjennom omvisningsfunksjonen kan nye brukere få en guidet omvisning av applikasjonens funksjoner. Omvisningen fremhever nøkkelelementer med en pulserende gul ramme, og gir trinnvis instruksjon om hvordan systemet brukes effektivt i nødsituasjoner. Brukere kan navigere gjennom hvert trinn eller hoppe over omvisningen helt.
+Gjennom omvisningsfunksjonen kan nye brukere få en guidet omvisning av applikasjonens funksjoner. Omvisningen fremhever nøkkelelementer med en pulserende gul ramme, og gir trinnvis instruksjon om hvordan systemet brukes effektivt i nødsituasjoner. Brukere kan navigere gjennom hvert trinn eller hoppe over omvisningen helt. Omvisningen viser blant annet hvor brukeren kan trykke for å aktivere og deaktivere ulike kart-lag, samt bruke filtrering for å finne eller fjerne det de vil.
 <details>
   <summary>📍 Klikk for å vise omvisningen</summary>
 
@@ -343,22 +368,31 @@ Gjennom omvisningsfunksjonen kan nye brukere få en guidet omvisning av applikas
 </details>
 <br></br>
 
-**Informasjonspanel for tilfluktsrom og brannstasjoner**
+#### **Informasjonspanel for tilfluktsrom, brannstasjoner og sykehus**
 
-Når en brannstasjon velges på kartet, vises detaljert informasjon i sidepanelet. Dette inkluderer stasjonens avdeling, stasjonstype, og kontaktinformasjon for nødstilfeller.
+Når en brannstasjon velges på kartet, vises detaljert informasjon i en pop-up over markøren. Dette inkluderer stasjonens avdeling og stasjonstype. Brukeren kan enkelt og greit få veibeskrivelse til valgt brannstasjon fra samme pop-up.
 <details>
   <summary>📍 Klikk for å vise brannstasjonens informasjonsvisning</summary>
 
   ![Layer Toggles & Safety Information](images/layer-toggles-safety-info.png)
   
 </details>
-
-Velger man et tilfluktsrom vises kritisk informasjon som plassering, total kapasitet og tilgangsinstruksjoner. Sikkerhetsmerknadene gir ytterligere veiledning for nødsituasjoner.
+<br></br>
+Velger man et tilfluktsrom vises kritisk informasjon som plassering, total kapasitet og tilgangsinstruksjoner (dersom noen er angitt av myndighetene). Brukeren kan enkelt og greit få veibeskrivelse til valgt tilfluktsrom fra samme pop-up.
 
 <details>
   <summary>📍 Klikk for å vise tilfluktsromsinformasjon</summary>
 
   ![Layer Toggles & Safety Information 2](images/layer-toggles-safety-info-2.png)
+
+</details>
+<br></br>
+Velger man et sykehus vises navnet på sykehuset. Brukeren kan enkelt og greit få veibeskrivelse til valgt sykehus fra samme pop-up.
+
+<details>
+  <summary>📍 Klikk for å vise tilfluktsromsinformasjon</summary>
+
+  ![Layer Toggles & Safety Information 2](images/layer-toggles-safety-info-3.png)
 
 </details>
 <br></br>
@@ -385,7 +419,7 @@ Satellittkartet gir detaljerte luftbilder, nyttig for å identifisere landemerke
   ![Different Map Types](images/map-type-satellite.png)
 
 </details>
-
+<br></br>
 Terrengvisningen fremhever topografiske elementer, som kan være særlig verdifullt ved vurdering av flomrisiko eller planlegging av evakueringsruter i fjellrike områder.
 
 <details>
@@ -396,15 +430,16 @@ Terrengvisningen fremhever topografiske elementer, som kan være særlig verdifu
 </details>
 <br></br>
 
-#### **Finn nærmeste tilfluktsrom eller brannstasjon**
+#### **Finn nærmeste tilfluktsrom, brannstasjon eller sykehus**
 
-Brukere kan bruke ruteguide "Finn Nærmeste Tilfluktsrom" eller "Finn Nærmeste Brannstasjon" for å finne nærmeste tilfluktsrom eller brannstasjon ved bruk av GPS. SafeShelter tar i bruk din nåværende posisjon, identifiserer det nærmeste beredskapsfasilitet før den beregner den optimale ruten. Systemet viser avstand og estimert reisetid for å hjelpe deg å nå tryggheten raskt.
+Brukere kan bruke "Finn Nærmeste Tilfluktsrom", "Finn Nærmeste Brannstasjon" eller "Finn Nærmeste Sykehus" for å finne nærmeste rute ved bruk av GPS. SafeShelter tar i bruk din nåværende posisjon, identifiserer det nærmeste beredskapsfasilitet og beregner den optimale ruten basert på valgt transportmåte. Systemet viser avstand og estimert reisetid for å hjelpe deg å nå tryggheten raskest mulig.
 
 <details>
   <summary>📍 Klikk for å vise GPS-funksjonen for tilfluktsrom</summary>
 
   ![Automatically Find Nearest Shelter Using GPS](images/nearest-shelter-gps.png)
   ![Automatically Find Nearest Station Using GPS](images/nearest-station-gps.png)
+  ![Automatically Find Nearest Station Using GPS](images/nearest-hospital-gps.png)
 
 </details>
 <br></br>
@@ -419,6 +454,61 @@ Brukere kan visualisere flomutsatte områder gjennom et dedikert flomsonelag, so
   ![Flood Zones on Streets Map](images/flood-zones-streets.png)
   ![Flood Zones on Satellite Map](images/flood-zones-satellite.png)
   ![Flood Zones on Terrain Map](images/flood-zones-terrain.png)
+
+</details>
+<br></br>
+
+
+#### **AI Beredskapsassistent**
+
+SafeShelter inkluderer en intelligent chatbot-assistent som tilbyr umiddelbar hjelp om beredskap og nødsituasjoner. Assistenten svarer alltid på norsk, gir konkrete råd om evakueringsrutiner, førstehjelp og sikkerhetstiltak, og prioriterer alltid å vise relevante nødnumre i krisesituasjoner. Brukere kan når som helst åpne chatvinduet fra enhver side i applikasjonen.
+
+<details>
+  <summary>📍 Klikk for å vise AI assistenten</summary>
+
+  ![Chatbot Interface](images/chatbot-1.png)
+  ![Chatbot Emergency Response](images/chatbot-2.png)
+
+</details>
+<br></br>
+
+#### **Sikkerhetsrapportering**
+
+Rapporteringsfunksjonen lar brukere melde inn sikkerhetsproblemer og faresituasjoner, som blokkerte veier, flomhendelser, strømbrudd eller andre farer. Rapporter kan kategoriseres etter type og alvorlighetsgrad, inkludere bilder og geografisk lokalisering. Enkle skjema med visuell tilbakemelding gjør prosessen brukervennlig selv i stressende situasjoner.
+
+<details>
+  <summary>📍 Klikk for å vise rapporteringsfunksjonen</summary>
+
+  ![Safety Reporting Interface](images/feedback.png)
+
+</details>
+<br></br>
+
+#### **Innmeldingsoversikt for sikkerhetssituasjoner**
+
+Innmeldingsoversikten visualiserer alle aktive sikkerhetsrapporter både på kart og i listeform, med mulighet for filtrering basert på type hendelse, alvorlighetsgrad og geografisk nærhet. Brukere kan raskt se detaljert informasjon om hver hendelse, inkludert beskrivelse, tidspunkt og lokasjon, og navigere direkte til stedet på kartet. Systemet gjør det også mulig å finne rapporter i nærheten av brukerens posisjon for umiddelbar situasjonsbevissthet.
+
+<details>
+  <summary>📍 Klikk for å vise innmeldingsoversikten</summary>
+
+  ![Active Reports Interface](images/activeReports.png)
+
+</details>
+<br></br>
+
+#### **Registrering for varsler**
+
+Registreringsprosessen lar brukere sette opp personlige varslinger om sikkerhetshendelser. Brukere kan velge mellom flere varslingsmetoder (SMS, e-post, push-notifikasjoner), spesifisere hvilke typer hendelser de vil varsles om, og velge mellom ulike lokaliseringsmetoder (hjemmeadresse, geografisk område, eller GPS-basert). Den trinnvise prosessen gjør det enkelt å tilpasse varslene til personlige behov, samtidig som personvernhensyn ivaretas gjennom tydelige samtykkeinnstillinger.
+
+<details>
+  <summary>📍 Klikk for å vise registreringsprosessen for varsler</summary>
+
+  ![Register Step 1](images/register-for-notifications-1.png)
+  ![Register Step 2](images/register-for-notifications-2.png)
+  ![Register Step 3](images/register-for-notifications-3.png)
+  ![Register Step 4](images/register-for-notifications-4.png)
+  ![Register Step 4](images/register-for-notifications-5.png)
+  ![Register Step 4](images/register-for-notifications-6.png)
 
 </details>
 <br></br>
