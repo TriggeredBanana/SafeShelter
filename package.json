@@ -2,8 +2,9 @@
   "name": "gruppe6",
   "version": "1.0.0",
   "description": "\"An interactive map project for researching the availability safety shelters in case a a fire or flood\"",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
+    "start": "node server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

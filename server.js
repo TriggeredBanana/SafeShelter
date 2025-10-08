@@ -6,7 +6,11 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const PORT = 5000;
+// Serve static files from main_files directory
+app.use(express.static('main_files'));
+
+// Use Render's PORT environment variable or default to 5000 for local development
+const PORT = process.env.PORT || 5000;
 
 app.get('/api/tilfluktsrom_agder', async (req, res) => {
     try {
