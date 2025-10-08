@@ -154,7 +154,7 @@ async function loadEmergencyData() {
 // Hent tilfluktsromdata fra backend
 async function fetchShelterData() {
     try {
-        const response = await fetch("http://localhost:5000/api/tilfluktsrom_agder");
+        const response = await fetch("/api/tilfluktsrom_agder");
 
         if (!response.ok) {
             throw new Error(`Kunne ikke hente tilfluktsromdata: ${response.status}`);
@@ -175,7 +175,7 @@ async function fetchShelterData() {
 // Hent brannstasjonsdata fra backend
 async function fetchFireStationData() {
     try {
-        const response = await fetch("http://localhost:5000/api/brannstasjoner_agder");
+        const response = await fetch("/api/brannstasjoner_agder");
 
         if (!response.ok) {
             throw new Error(`Kunne ikke hente brannstasjonsdata: ${response.status}`);
