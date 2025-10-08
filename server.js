@@ -1,12 +1,27 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-const PORT = 5000;
+// Serve static files from main_files directory with proper MIME types
+app.use(express.static('main_files', {
+    setHeaders: (res, filePath) => {
+        if (filePath.endsWith('.js')) {
+            res.setHeader('Content-Type', 'application/javascript');
+        } else if (filePath.endsWith('.css')) {
+            res.setHeader('Content-Type', 'text/css');
+        } else if (filePath.endsWith('.html')) {
+            res.setHeader('Content-Type', 'text/html');
+        }
+    }
+}));
+
+// Use Render's PORT environment variable or default to 5000 for local development
+const PORT = process.env.PORT || 5000;
 
 app.get('/api/tilfluktsrom_agder', async (req, res) => {
     try {
@@ -53,7 +68,7 @@ app.post('/api/chat', express.json(), async (req, res) => {
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
-                'HTTP-Referer': req.headers.referer || 'http://localhost:5000',
+                'HTTP-Referer': req.headers.referer || req.headers.origin || `https://${req.headers.host}`,
                 'X-Title': 'SafeShelter Emergency Assistant'
             },
             // Currently using the free model of Meta Llama 4: Maverick
