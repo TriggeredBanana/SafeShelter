@@ -2,6 +2,8 @@
 ## LIVE DEMO:
 ▶️ https://safeshelter-iilu.onrender.com/index.html
 
+(Kan ta noen sekunder å laste inn demo grunnet "gratis" brukere hos Render går i dvalemodus dersom applikasjon ikke blir brukt på en stund)
+
 <br></br>
 ## Bidragsytere:
 - Sigurd Munk Brekke - sigurdmb@uia.no
