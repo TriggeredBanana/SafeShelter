@@ -1,12 +1,9 @@
-# SafeShelter - Gruppe 6
+# SafeShelter
 
-## Gruppemedlemmer:
+## Bidragsytere:
 - Sigurd Munk Brekke - sigurdmb@uia.no
 - Daniel Davik Møgster - danieldm@uia.no
-- Ole Bjørk Olsen - olebo@uia.no
 - Emil Stokken Kaasa - emilsk@uia.no
-- Sigurd Bøthun Mæland - sigurd.b.maland@uia.no
-- Henrik Sæverud Lorentzen - henriksl@uia.no
 <br></br>
 
 ## Prosjektbeskrivelse
