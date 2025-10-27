@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', function () {
     console.log('Mobile UI: DOMContentLoaded event fired');
     console.log('Mobile UI: Window width =', window.innerWidth);
     
-    // Check if we're on a mobile device
+    // Check for mobile device
     const isMobile = window.innerWidth <= 768;
     console.log('Mobile UI: Is mobile?', isMobile);
 
@@ -131,47 +131,54 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Mobile search functionality
+    // Mobile search functionality with debounce
+    let searchTimeout;
     if (mobileSearchInput) {
         mobileSearchInput.addEventListener('input', function () {
             const query = this.value.trim();
+
+            // Clear previous timeout
+            clearTimeout(searchTimeout);
 
             if (query.length < 2) {
                 mobileSearchSuggestions.innerHTML = '';
                 return;
             }
 
-            // Use Nominatim for geocoding search
-            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=no&limit=5`)
-                .then(response => response.json())
-                .then(data => {
-                    mobileSearchSuggestions.innerHTML = '';
+            // Debounce search requests by 300ms
+            searchTimeout = setTimeout(() => {
+                // Use Nominatim for geocoding search
+                fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=no&limit=5`)
+                    .then(response => response.json())
+                    .then(data => {
+                        mobileSearchSuggestions.innerHTML = '';
 
-                    if (data.length === 0) {
-                        mobileSearchSuggestions.innerHTML = '<li class="mobile-search-suggestion-item">Ingen resultater funnet</li>';
-                        return;
-                    }
+                        if (data.length === 0) {
+                            mobileSearchSuggestions.innerHTML = '<li class="mobile-search-suggestion-item">Ingen resultater funnet</li>';
+                            return;
+                        }
 
-                    data.forEach(item => {
-                        const li = document.createElement('li');
-                        li.className = 'mobile-search-suggestion-item';
-                        li.textContent = item.display_name;
-                        li.addEventListener('click', function () {
-                            // Fly to location on map
-                            if (window.map) {
-                                window.map.flyTo([item.lat, item.lon], 14);
-                            }
-                            // Close search popup
-                            mobileSearchPopup.classList.add('hidden');
-                            mobileSearchInput.value = '';
-                            mobileSearchSuggestions.innerHTML = '';
+                        data.forEach(item => {
+                            const li = document.createElement('li');
+                            li.className = 'mobile-search-suggestion-item';
+                            li.textContent = item.display_name;
+                            li.addEventListener('click', function () {
+                                // Fly to location on map
+                                if (window.map) {
+                                    window.map.flyTo([item.lat, item.lon], 14);
+                                }
+                                // Close search popup
+                                mobileSearchPopup.classList.add('hidden');
+                                mobileSearchInput.value = '';
+                                mobileSearchSuggestions.innerHTML = '';
+                            });
+                            mobileSearchSuggestions.appendChild(li);
                         });
-                        mobileSearchSuggestions.appendChild(li);
+                    })
+                    .catch(error => {
+                        console.error('Search error:', error);
                     });
-                })
-                .catch(error => {
-                    console.error('Search error:', error);
-                });
+            }, 300);
         });
     }
 
