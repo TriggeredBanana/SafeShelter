@@ -35,7 +35,7 @@
 
 .chat-panel {
     position: absolute;
-    bottom: 50px;
+    bottom: 60px;
     right: 0;
     width: 350px;
     height: 500px;
@@ -307,11 +307,16 @@
 
 /* For mobile devices */
 @media (max-width: 600px) {
+    .emergency-chat-container {
+        right: 20px;
+        bottom: 20px;
+    }
+
     .chat-panel {
         width: 90vw;
         height: 70vh;
-        bottom: 80px;
-        right: 5vw;
+        bottom: 70px;
+        right: 0;
     }
     
     .chat-toggle-btn {
