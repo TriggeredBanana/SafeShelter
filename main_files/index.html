@@ -117,8 +117,18 @@
             </div>
         </div>
 
-        <!-- "Main map" container -->
+        <!-- Main map container -->
         <div class="map-container">
+            <!-- Mobile search button (only visible on mobile) -->
+            <button id="mobile-search-btn" class="mobile-search-btn">
+                <i class="fas fa-search"></i>
+            </button>
+
+            <!-- Mobile layers/filters button (only visible on mobile) -->
+            <button id="mobile-layers-btn" class="mobile-layers-btn">
+                <i class="fas fa-bars"></i>
+            </button>
+
             <!-- Smart søk med autocomplete -->
             <div id="search-container">
                 <div class="search-input-wrapper">
@@ -129,6 +139,94 @@
                     </button>
                 </div>
                 <ul id="search-suggestions"></ul>
+            </div>
+
+            <!-- Mobile search popup overlay -->
+            <div id="mobile-search-popup" class="mobile-search-popup hidden">
+                <div class="mobile-search-content">
+                    <div class="search-input-wrapper">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" id="mobile-search-input" placeholder="Søk etter adresse, by, eller land">
+                    </div>
+                    <ul id="mobile-search-suggestions"></ul>
+                </div>
+            </div>
+
+            <!-- Mobile layers popup overlay -->
+            <div id="mobile-layers-popup" class="mobile-layers-popup hidden">
+                <div class="mobile-popup-header">
+                    <h3>Lag og Handlinger</h3>
+                    <button id="mobile-layers-close" class="mobile-popup-close">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="mobile-layers-content">
+                    <!-- Beredskapsstatus as icon indicators -->
+                    <div class="mobile-status-section">
+                        <h4>Beredskapsstatus</h4>
+                        <div class="mobile-status-indicators">
+                            <div class="mobile-status-item status-ok" id="mobile-fire-status">
+                                <i class="fas fa-fire-extinguisher"></i>
+                            </div>
+                            <div class="mobile-status-item status-ok" id="mobile-weather-status">
+                                <i class="fas fa-bolt"></i>
+                            </div>
+                            <div class="mobile-status-item status-ok" id="mobile-flood-status">
+                                <i class="fas fa-droplet"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Finn nærmeste buttons -->
+                    <div class="mobile-actions-section">
+                        <h4>Finn Nærmeste</h4>
+                        <button id="mobile-find-shelter" class="mobile-action-button primary">
+                            <i class="fas fa-home"></i>
+                            Tilfluktsrom
+                        </button>
+                        <button id="mobile-find-station" class="mobile-action-button fire-station">
+                            <i class="fas fa-fire"></i>
+                            Brannstasjon
+                        </button>
+                        <button id="mobile-find-hospital" class="mobile-action-button hospital">
+                            <i class="fas fa-hospital"></i>
+                            Sykehus
+                        </button>
+                    </div>
+
+                    <!-- Layer toggles -->
+                    <div class="mobile-layers-section">
+                        <h4>Kartlag</h4>
+                        <div class="mobile-toggle-group">
+                            <button id="mobile-toggle-shelters" class="mobile-toggle-button active">
+                                <i class="fas fa-house"></i>
+                                <span>Tilfluktsrom</span>
+                            </button>
+                            <button id="mobile-toggle-firestations" class="mobile-toggle-button fire-active">
+                                <i class="fas fa-fire"></i>
+                                <span>Brannstasjoner</span>
+                            </button>
+                            <button id="mobile-toggle-hospitals" class="mobile-toggle-button hospital-active">
+                                <i class="fas fa-hospital"></i>
+                                <span>Sykehus</span>
+                            </button>
+                            <button id="mobile-toggle-flood-zones" class="mobile-toggle-button">
+                                <i class="fas fa-water"></i>
+                                <span>Flomsoner</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Map style selector -->
+                    <div class="mobile-mapstyle-section">
+                        <h4>Kartstil</h4>
+                        <div class="mobile-map-style-selector">
+                            <button class="mobile-map-style active" data-style="streets">Gater</button>
+                            <button class="mobile-map-style" data-style="satellite">Satellitt</button>
+                            <button class="mobile-map-style" data-style="terrain">Terreng</button>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Kart kontroller og "toggles" -->
@@ -231,6 +329,7 @@
     <script src="ui.js"></script>
     <script src="chat.js"></script>
     <script src="compass.js"></script>
+    <script src="mobile.js"></script>
 
     <script>
         // Mobile menu toggle

@@ -167,7 +167,7 @@
 }
 
 /* Stagger the animation for each nav item */
-.main-nav li:nth-child(1) { animation-delay: 0.0.5s; }
+.main-nav li:nth-child(1) { animation-delay: 0.05s; }
 .main-nav li:nth-child(2) { animation-delay: 0.1s; }
 .main-nav li:nth-child(3) { animation-delay: 0.15s; }
 .main-nav li:nth-child(4) { animation-delay: 0.2s; }
@@ -1153,38 +1153,6 @@
     }
   }
   
-  @media (max-width: 768px) {
-    .app-container {
-      flex-direction: column;
-    }
-    
-    .sidebar {
-      width: 100%;
-      height: auto;
-      max-height: 50vh;
-    }
-    
-    .sidebar.collapsed {
-      transform: translateY(calc(-100% + 60px));
-    }
-    
-    #search-container {
-      top: 70px;
-    }
-    
-    #map-controls {
-      bottom: var(--space-lg);
-      top: auto;
-      left: var(--space-lg);
-      right: auto;
-    }
-    
-    .map-legend {
-      left: var(--space-lg);
-      right: auto;
-    }
-  }
-  
   /* Leaflet egendefinerte stiler */
   .leaflet-popup-content-wrapper {
     border-radius: var(--radius-md);
@@ -1346,6 +1314,19 @@
     box-shadow: 0 0 0 2px white;
   }
   
+  /* Hide mobile-specific elements on desktop (screens wider than 768px) */
+  @media (min-width: 769px) {
+    .mobile-search-btn,
+    .mobile-layers-btn,
+    .mobile-search-popup,
+    .mobile-layers-popup,
+    .mobile-layers-backdrop {
+      display: none !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+    }
+  }
+
   /* Animasjoner */
   .fade-in {
     animation: fadeIn 0.5s ease-in;
@@ -1536,10 +1517,409 @@
 }
 
 @media (max-width: 768px) {
-  #search-container {
-    margin-top: -4.2em !important;
+  /* Hide sidebar completely on mobile */
+  .sidebar {
+    display: none !important;
   }
 
+  /* Hide desktop search container on mobile */
+  #search-container {
+    display: none !important;
+  }
+
+  /* Hide desktop map controls on mobile */
+  #map-controls {
+    display: none !important;
+  }
+
+  /* SHOW mobile buttons on mobile - IMPORTANT! */
+  .mobile-search-btn,
+  .mobile-layers-btn {
+    display: flex !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
+
+  .mobile-search-popup,
+  .mobile-layers-popup {
+    display: block !important;
+  }
+
+  /* Mobile search button - appears below zoom controls */
+  .mobile-search-btn {
+    position: absolute;
+    top: 150px;
+    left: 20px;
+    z-index: 1500 !important;
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-md);
+    background-color: white;
+    border: 2px solid rgba(0, 0, 0, 0.2);
+    box-shadow: var(--shadow-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    pointer-events: auto !important;
+  }
+
+  .mobile-search-btn:hover,
+  .mobile-search-btn:active {
+    background-color: var(--gray-100);
+    transform: scale(1.05);
+  }
+
+  .mobile-search-btn i {
+    font-size: 1.2rem;
+    color: var(--gray-700);
+    pointer-events: none;
+  }
+
+  /* Mobile layers button - appears at top right */
+  .mobile-layers-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 1500 !important;
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-md);
+    background-color: white;
+    border: 2px solid rgba(0, 0, 0, 0.2);
+    box-shadow: var(--shadow-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    pointer-events: auto !important;
+  }
+
+  .mobile-layers-btn:hover,
+  .mobile-layers-btn:active {
+    background-color: var(--gray-100);
+    transform: scale(1.05);
+  }
+
+  .mobile-layers-btn i {
+    font-size: 1.2rem;
+    color: var(--gray-700);
+    pointer-events: none;
+  }
+
+  /* Mobile search popup overlay */
+  .mobile-search-popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 2500;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 60px;
+    transition: opacity var(--transition-normal);
+  }
+
+  .mobile-search-popup.hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .mobile-search-popup:not(.hidden) {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .mobile-search-popup .mobile-search-content {
+    background-color: white;
+    border-radius: var(--radius-lg);
+    width: 90%;
+    max-width: 500px;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow-lg);
+    animation: slideDown 0.3s ease-out;
+  }
+
+  .mobile-popup-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-md);
+    border-bottom: 1px solid var(--gray-200);
+    background-color: var(--primary);
+    color: white;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  }
+
+  .mobile-popup-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+  }
+
+  .mobile-popup-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity var(--transition-fast);
+  }
+
+  .mobile-popup-close:hover {
+    opacity: 0.8;
+  }
+
+  .mobile-search-content {
+    padding: var(--space-md);
+  }
+
+  .mobile-search-content .search-input-wrapper {
+    position: relative;
+    width: 100%;
+    margin-bottom: var(--space-md);
+  }
+
+  .mobile-search-content #mobile-search-input {
+    width: 100%;
+    padding: var(--space-md) var(--space-md) var(--space-md) 3rem;
+    border: 1px solid var(--gray-300);
+    border-radius: var(--radius-full);
+    font-size: 1rem;
+  }
+
+  .mobile-search-content .search-icon {
+    position: absolute;
+    left: var(--space-md);
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--gray-500);
+  }
+
+  #mobile-search-suggestions {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .mobile-search-suggestion-item {
+    padding: var(--space-md);
+    border-bottom: 1px solid var(--gray-200);
+    cursor: pointer;
+  }
+
+  .mobile-search-suggestion-item:hover {
+    background-color: var(--gray-100);
+  }
+
+  /* Mobile layers popup overlay */
+  .mobile-layers-popup {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 85%;
+    max-width: 400px;
+    height: 100vh;
+    background-color: white;
+    z-index: 2500;
+    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.2);
+    transition: right var(--transition-normal);
+    overflow-y: auto;
+    display: block;
+  }
+
+  .mobile-layers-popup:not(.hidden) {
+    right: 0;
+  }
+
+  .mobile-layers-popup.hidden {
+    right: -100%;
+  }
+
+  .mobile-layers-content {
+    padding: var(--space-md);
+  }
+
+  .mobile-status-section,
+  .mobile-actions-section,
+  .mobile-layers-section,
+  .mobile-mapstyle-section {
+    margin-bottom: var(--space-lg);
+  }
+
+  .mobile-status-section h4,
+  .mobile-actions-section h4,
+  .mobile-layers-section h4,
+  .mobile-mapstyle-section h4 {
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    color: var(--gray-600);
+    margin-bottom: var(--space-sm);
+    letter-spacing: 0.5px;
+  }
+
+  /* Mobile status indicators as small colored squares */
+  .mobile-status-indicators {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-sm);
+  }
+
+  .mobile-status-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: var(--radius-md);
+    font-size: 1.5rem;
+    transition: all var(--transition-fast);
+  }
+
+  .mobile-status-item.status-ok {
+    background-color: var(--success);
+    color: white;
+  }
+
+  .mobile-status-item.status-warning {
+    background-color: var(--warning);
+    color: white;
+  }
+
+  .mobile-status-item.status-alert {
+    background-color: var(--danger);
+    color: white;
+  }
+
+  /* Mobile action buttons */
+  .mobile-action-button {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: var(--space-md);
+    padding: var(--space-md);
+    border-radius: var(--radius-md);
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    font-size: 1rem;
+    width: 100%;
+    margin-bottom: var(--space-sm);
+  }
+
+  .mobile-action-button.primary {
+    background-color: var(--primary);
+    color: white;
+  }
+
+  .mobile-action-button.primary:hover {
+    background-color: var(--primary-dark);
+  }
+
+  .mobile-action-button.fire-station {
+    background-color: var(--warning);
+    color: white;
+  }
+
+  .mobile-action-button.fire-station:hover {
+    background-color: #d1851b;
+  }
+
+  .mobile-action-button.hospital {
+    background-color: var(--success);
+    color: white;
+  }
+
+  .mobile-action-button.hospital:hover {
+    background-color: #1f7a6d;
+  }
+
+  /* Mobile toggle buttons */
+  .mobile-toggle-group {
+    display: grid;
+    gap: var(--space-xs);
+  }
+
+  .mobile-toggle-button {
+    display: flex;
+    align-items: center;
+    padding: var(--space-md);
+    background-color: var(--gray-200);
+    border: none;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    font-size: 1rem;
+    gap: var(--space-sm);
+  }
+
+  .mobile-toggle-button.active {
+    background-color: var(--primary);
+    color: white;
+  }
+
+  .mobile-toggle-button.fire-active {
+    background-color: var(--warning);
+    color: white;
+  }
+
+  .mobile-toggle-button.hospital-active {
+    background-color: var(--success);
+    color: white;
+  }
+
+  .mobile-toggle-button.flood-active {
+    background-color: rgba(128, 0, 128, 0.8);
+    color: white;
+  }
+
+  /* Mobile map style selector */
+  .mobile-map-style-selector {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-xs);
+  }
+
+  .mobile-map-style {
+    padding: var(--space-md);
+    border: 1px solid var(--gray-300);
+    border-radius: var(--radius-sm);
+    background: white;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all var(--transition-fast);
+  }
+
+  .mobile-map-style.active {
+    background-color: var(--secondary);
+    color: white;
+    border-color: var(--secondary);
+  }
+
+  @keyframes slideDown {
+    from {
+      transform: translateY(-20px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  /* Header adjustments */
   .main-header {
     padding: var(--space-xs) var(--space-sm);
   }
@@ -1592,5 +1972,16 @@
 
   .app-container, main.feedback-container, main.reports-container {
     height: calc(100vh - 60px);
+  }
+
+  /* Adjust zoom controls position */
+  .leaflet-control-zoom {
+    margin-top: 20px !important;
+    margin-left: 20px !important;
+  }
+
+  /* Adjust compass position */
+  .leaflet-control-compass {
+    margin-left: 20px !important;
   }
 }
