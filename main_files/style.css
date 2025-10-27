@@ -1559,11 +1559,11 @@
   /* Mobile search button - appears below zoom controls */
   .mobile-search-btn {
     position: absolute;
-    top: 150px;
+    top: 100px;
     left: 20px;
     z-index: 1500 !important;
-    width: 44px;
-    height: 44px;
+    width: 40px;
+    height: 40px;
     border-radius: var(--radius-md);
     background-color: white;
     border: 2px solid rgba(0, 0, 0, 0.2);
@@ -1655,6 +1655,7 @@
     overflow-y: auto;
     box-shadow: var(--shadow-lg);
     animation: slideDown 0.3s ease-out;
+    margin: 0 auto;
   }
 
   .mobile-popup-header {
