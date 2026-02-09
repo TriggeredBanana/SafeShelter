@@ -73,7 +73,7 @@ app.post('/api/chat', express.json(), async (req, res) => {
             },
             // Currently using the free model of Meta Llama 4: Maverick
             body: JSON.stringify({
-                model: "meta-llama/llama-4-maverick:free",
+                model: "openai/gpt-oss-120b:free",
                 messages: [
                     {
                         role: "system",
