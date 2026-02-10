@@ -4,6 +4,9 @@
 
 (Kan ta noen sekunder å laste inn demo grunnet "gratis" brukere hos Render går i dvalemodus dersom applikasjon ikke blir brukt på en stund)
 
+## VIDEO DEMO (YouTube):
+[![Video Demo](https://img.youtube.com/vi/j_XpqJ1WP8I/maxresdefault.jpg)](https://youtu.be/j_XpqJ1WP8I)
+
 <br></br>
 ## Bidragsytere:
 - Sigurd Munk Brekke - sigurdmb@uia.no
