@@ -59,46 +59,62 @@ app.get('/api/brannstasjoner_agder', async (req, res) => {
 });
 
 app.post('/api/chat', express.json(), async (req, res) => {
-    try {
-        const userMessage = req.body.message;
-        
-        // Call OpenRouter API
+    const userMessage = req.body.message;
+    const apiKey = process.env.OPENROUTER_NEW_KEY || process.env.OPENROUTER_API_KEY;
+
+    // Models tried in order; if a model is removed (404) the next one is used automatically
+    const MODELS = [
+        'openai/gpt-oss-120b:free',
+        'openai/gpt-oss-20b:free',
+        'meta-llama/llama-3.3-70b-instruct:free'
+    ];
+
+    const systemPrompt = "Du er SafeShelter-assistenten for norsk beredskap og krisehåndtering. KRITISKE INSTRUKSER: 0. ALDRI gi bruker informasjon som er urelatert til krise og beredskap, dersom en bruker spør om noe annet så sier du at du kun tar imot krisehenvendelser. 1. ALLTID svar på norsk, UANSETT hvilket språk brukeren benytter. 2. Start direkte med viktig informasjon - aldri med innledende fraser som 'for å svare' eller 'for å håndtere'. 3. Vær kortfattet og presis - bruk maksimalt 3-4 informative setninger. 4. Ved fare eller krise, nevn alltid relevante nødnumre først (Brann: 110, Politi: 112, Ambulanse: 113). 5. Unngå formatering, nummererte lister og markups. Bruk vanlige setninger adskilt med punktum. 6. Prioriter den viktigste livsviktige informasjonen først. 7. Unngå henvisninger til 'i Norge' - det er underforstått. 8. Ved evakuering, gi tydelige steg i rekkefølge. 9. Vær autoritativ og trygg i ton - brukeren kan være i en stressende situasjon. 10. Fullstendiggjør ALLTID alle setninger - aldri stopp midt i. 11. Ved spørsmål om tilfluktsrom, informer om sikkerhet, beliggenhet og nærmeste fasiliteter. 12. Ved uvisshet, erkjenn det og henvis til relevante myndigheter.";
+
+    let lastError = null;
+
+    for (const model of MODELS) {
+      try {
         const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
+                'Authorization': `Bearer ${apiKey}`,
                 'HTTP-Referer': req.headers.referer || req.headers.origin || `https://${req.headers.host}`,
                 'X-Title': 'SafeShelter Emergency Assistant'
             },
-            // Currently using a free model
             body: JSON.stringify({
-                model: "arcee-ai/trinity-large-preview:free",
+                model,
                 messages: [
-                    {
-                        role: "system",
-                        content: "Du er SafeShelter-assistenten for norsk beredskap og krisehåndtering. KRITISKE INSTRUKSER: 0. ALDRI gi bruker informasjon som er urelatert til krise og beredskap, dersom en bruker spør om noe annet så sier du at du kun tar imot krisehenvendelser. 1. ALLTID svar på norsk, UANSETT hvilket språk brukeren benytter. 2. Start direkte med viktig informasjon - aldri med innledende fraser som 'for å svare' eller 'for å håndtere'. 3. Vær kortfattet og presis - bruk maksimalt 3-4 informative setninger. 4. Ved fare eller krise, nevn alltid relevante nødnumre først (Brann: 110, Politi: 112, Ambulanse: 113). 5. Unngå formatering, nummererte lister og markups. Bruk vanlige setninger adskilt med punktum. 6. Prioriter den viktigste livsviktige informasjonen først. 7. Unngå henvisninger til 'i Norge' - det er underforstått. 8. Ved evakuering, gi tydelige steg i rekkefølge. 9. Vær autoritativ og trygg i ton - brukeren kan være i en stressende situasjon. 10. Fullstendiggjør ALLTID alle setninger - aldri stopp midt i. 11. Ved spørsmål om tilfluktsrom, informer om sikkerhet, beliggenhet og nærmeste fasiliteter. 12. Ved uvisshet, erkjenn det og henvis til relevante myndigheter."                       
-                    },
-                    {
-                        role: "user",
-                        content: userMessage
-                    }
+                    { role: 'system', content: systemPrompt },
+                    { role: 'user', content: userMessage }
                 ],
                 max_tokens: 350,
                 temperature: 0.8
             })
         });
-        
+
+        // Model was removed from OpenRouter — skip to the next one
+        if (response.status === 404) {
+            console.warn(`Model ${model} not found (404), trying next model...`);
+            lastError = new Error(`Model not found: ${model}`);
+            continue;
+        }
+
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
-        
+
         const data = await response.json();
-        res.json(data);
-    } catch (error) {
-        console.error('Error calling OpenRouter API:', error);
-        res.status(500).json({ error: error.message });
+        return res.json(data);
+      } catch (error) {
+        console.error(`Error with model ${model}:`, error.message);
+        lastError = error;
+      }
     }
+
+    console.error('All OpenRouter models failed. Last error:', lastError?.message);
+    res.status(500).json({ error: lastError?.message || 'All AI models currently unavailable' });
 });
 // 1) Vær (MET LocationForecast v2)
 app.get('/api/weather', async (req, res) => {
