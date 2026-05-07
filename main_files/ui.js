@@ -3,7 +3,7 @@
  * Håndterer alle UI-interaksjoner, animasjoner og tilstandshåndtering
  */
 
-const API_BASE = '/api';
+// API_BASE is defined globally in mapoverlay.js (loaded first)
 
 document.addEventListener('DOMContentLoaded', function () {
     // Initialiser systemtilstand

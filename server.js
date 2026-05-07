@@ -139,15 +139,16 @@ app.get('/api/weather', async (req, res) => {
     }
   });
 
-// 2) Flomvarsel (NVE WMS GetFeatureInfo)
+// 2) Flomvarsel NVE Flomsoner2
 app.get('/api/flood', async (req, res) => {
     const { lat, lon } = req.query;
     if (!lat || !lon) {
       return res.status(400).json({ error: 'Mangler lat eller lon' });
     }
   
+    // Layer 5 = Flomsone_100arsflom
     const url =
-      `https://nve.geodataonline.no/arcgis/rest/services/FlomAktsomhet/MapServer/0/query` +
+      `https://gis3.nve.no/arcgis/rest/services/wmts/Flomsoner2/MapServer/5/query` +
       `?geometry=${lon},${lat}` +
       `&geometryType=esriGeometryPoint` +
       `&inSR=4326&outFields=*&outSR=4326&f=json`;
@@ -166,5 +167,51 @@ app.get('/api/flood', async (req, res) => {
     }
   });
 
+// 3) NVE flomsone-fliser — proxy for ArcGIS export (erstatter den tidligere nve.geodataonline.no WMS)
+app.get('/api/flood-tiles/:z/:x/:y.png', async (req, res) => {
+    const { z, x, y } = req.params;
+    const zi = parseInt(z), xi = parseInt(x), yi = parseInt(y);
 
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+    // Convert tile coords (z/x/y) to EPSG:3857 bbox
+    function tileToMercator(z, x, y) {
+        const size = 20037508.342789244 * 2;
+        const tileSize = size / Math.pow(2, z);
+        return [
+            -20037508.342789244 + x * tileSize,
+            20037508.342789244 - (y + 1) * tileSize,
+            -20037508.342789244 + (x + 1) * tileSize,
+            20037508.342789244 - y * tileSize
+        ];
+    }
+
+    const [xmin, ymin, xmax, ymax] = tileToMercator(zi, xi, yi);
+    // Viser lagene 4–10 (50 år - 1000 år flomsoner)
+    const url =
+        `https://gis3.nve.no/arcgis/rest/services/wmts/Flomsoner2/MapServer/export` +
+        `?bbox=${xmin},${ymin},${xmax},${ymax}` +
+        `&bboxSR=3857&layers=show:4,5,6,7,8,9,10&size=256,256&imageSR=3857&format=png32&transparent=true&f=image`;
+
+    try {
+        const r = await fetch(url);
+        if (!r.ok) throw new Error(`NVE tile HTTP ${r.status}`);
+        const buf = await r.arrayBuffer();
+        res.setHeader('Content-Type', 'image/png');
+        res.setHeader('Cache-Control', 'public, max-age=3600');
+        res.send(Buffer.from(buf));
+    } catch (err) {
+        console.error('Flood tile error:', err.message);
+        res.status(502).end();
+    }
+});
+
+
+const server = app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+server.on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+        console.error(`\nPort ${PORT} is already in use.\nKill the existing process first:\n  Get-Process node | Stop-Process\nthen run 'npm start' again.\n`);
+    } else {
+        console.error('Server error:', err.message);
+    }
+    process.exit(1);
+});
