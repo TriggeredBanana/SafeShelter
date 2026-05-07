@@ -218,7 +218,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         try {
             // Connect to our proxy endpoint instead of directly to OpenRouter
-            const response = await fetch('/api/chat', {
+            const response = await fetch(`${API_BASE}/chat`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

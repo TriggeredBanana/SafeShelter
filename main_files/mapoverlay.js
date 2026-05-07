@@ -8,6 +8,9 @@ let map;
 let searchMarkers;
 let floodZoneLayer; // Legger til variabel for flomsoner
 
+// Shared API base: works whether page is served by Express (port 5000) or Live Server (port 5500)
+const API_BASE = (location.port === '5000' || location.port === '') ? '/api' : 'http://localhost:5000/api';
+
 // Initialiser når DOM er lastet
 document.addEventListener('DOMContentLoaded', function () {
     initializeMap();
@@ -95,14 +98,12 @@ function initializeMap() {
     }).addTo(map);
 
 
-    // Oppretter flomsonelag fra NVE WMS-tjeneste
-    const floodZoneLayer = L.tileLayer.wms("https://nve.geodataonline.no/arcgis/services/FlomAktsomhet/MapServer/WmsServer", {
-        layers: "Flom_aktsomhetsomrade",
-        styles: "",
-        format: "image/png",
-        transparent: true,
-        crs: L.CRS.EPSG3857, // Leaflet bruker EPSG:3857
-        attribution: "Kartdata: © NVE"
+    // Flomsonelag via server-proxy (NVE gis3.nve.no Flomsoner2)
+    const floodTileBase = API_BASE.replace('/api', '');
+    const floodZoneLayer = L.tileLayer(floodTileBase + '/api/flood-tiles/{z}/{x}/{y}.png', {
+        opacity: 0.6,
+        attribution: "Flomsoner: © NVE",
+        maxZoom: 18
     });
 
     // Sett floodZoneLayer globalt tilgjengelig
